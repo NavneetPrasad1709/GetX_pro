@@ -65,7 +65,7 @@ export const mobileNav: MobileNavItem[] = [
   { title: "Home", href: "/", icon: "home" },
   { title: "Browse", href: "/games", icon: "search" },
   { title: "Sell", href: "/become-seller", icon: "sell" },
-  { title: "Orders", href: "/dashboard/orders", icon: "orders" },
+  { title: "Orders", href: "/orders", icon: "orders" },
   { title: "Account", href: "/dashboard", icon: "account" },
 ];
 

@@ -118,7 +118,7 @@ async function main() {
     // l1 ACCOUNT ₹1000 MANUAL high-trust ; l2 ITEM ₹500 INSTANT low-trust
     // l3 CURRENCY ₹2000 INSTANT high-trust ; l4 BOOSTING ₹1500 MANUAL low-trust
     const l1 = await mk({ slug: `qa07-l1-${stamp}`, sellerId: high.id, kind: "ACCOUNT", priceMinor: 100000, delivery: "MANUAL", stock: 1, status: "ACTIVE" });
-    const l2 = await mk({ slug: `qa07-l2-${stamp}`, sellerId: low.id, kind: "ITEM", priceMinor: 50000, delivery: "INSTANT", stock: 5, status: "ACTIVE" });
+    await mk({ slug: `qa07-l2-${stamp}`, sellerId: low.id, kind: "ITEM", priceMinor: 50000, delivery: "INSTANT", stock: 5, status: "ACTIVE" });
     await mk({ slug: `qa07-l3-${stamp}`, sellerId: high.id, kind: "CURRENCY", priceMinor: 200000, delivery: "INSTANT", stock: 100, status: "ACTIVE" });
     await mk({ slug: `qa07-l4-${stamp}`, sellerId: low.id, kind: "BOOSTING", priceMinor: 150000, delivery: "MANUAL", stock: 2, status: "ACTIVE" });
     // non-public statuses — must NEVER appear

@@ -56,9 +56,14 @@ export default async function DashboardPage() {
             Welcome back{user.name ? `, ${user.name}` : ""}.
           </p>
         </div>
-        <Badge variant="outline" className="font-mono uppercase">
-          {user.role}
-        </Badge>
+        <div className="flex items-center gap-2.5">
+          <Button variant="outline" size="sm" render={<Link href="/orders" />}>
+            Your orders
+          </Button>
+          <Badge variant="outline" className="font-mono uppercase">
+            {user.role}
+          </Badge>
+        </div>
       </div>
 
       {!user.emailVerified && (

@@ -13,6 +13,7 @@
  * known at checkout once a gateway is chosen (Step 09); the buy box shows it as
  * a separate "added at checkout" line.
  */
+import type { CategoryKind } from "@prisma/client";
 import { siteConfig } from "@/config/site";
 
 export type BuyerFeeBreakdown = {
@@ -57,4 +58,19 @@ export function computeBuyerFee(
     totalMinor: subtotalMinor + platformFeeMinor,
     platformFeePercent: buyerPlatformFeePercent,
   };
+}
+
+/**
+ * Seller commission on an order subtotal, per category kind (docs/FEES.md).
+ * Deducted from the SELLER at payout — never shown to or charged to the buyer.
+ * Round-half-up, integer minor units. The result is SNAPSHOTTED on the order at
+ * creation time (Order.sellerFeeMinor) so a later config change never alters an
+ * existing order's economics.
+ */
+export function computeSellerCommissionMinor(
+  subtotalMinor: number,
+  kind: CategoryKind,
+): number {
+  const percent = siteConfig.fees.sellerCommissionPercent[kind];
+  return percentOfMinorHalfUp(subtotalMinor, percent);
 }

@@ -309,7 +309,8 @@ model Order {
   qty             Int              @default(1)
   unitPriceMinor  Int
   feeMinor        Int              @default(0) // buyer platform fee (minor units)
-  totalMinor      Int // amount the buyer pays (minor units)
+  sellerFeeMinor  Int              @default(0) // seller commission SNAPSHOT (deducted at payout; never shown to buyer)
+  totalMinor      Int // amount the buyer pays = subtotal + buyer platform fee (escrowed; excludes gateway processing)
   currency        String           @default("INR")
   status          OrderStatus      @default(DRAFT)
   paymentProvider PaymentProvider?

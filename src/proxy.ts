@@ -28,6 +28,8 @@ export async function proxy(req: NextRequest) {
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/become-seller") ||
     pathname.startsWith("/seller") ||
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/orders") ||
     pathname.startsWith("/admin");
 
   // Not logged in → send to login, remember where they were going.
@@ -58,6 +60,8 @@ export const proxyConfig = {
     "/dashboard/:path*",
     "/become-seller",
     "/seller/:path*",
+    "/checkout",
+    "/orders/:path*",
     "/admin/:path*",
     "/login",
     "/register",
