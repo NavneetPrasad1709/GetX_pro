@@ -1,0 +1,241 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ===========================================================================
+   GETX design tokens → Tailwind v4 theme mapping
+   Brand v10 (docs/design-preview-v10.html — FINAL): one accent (blue),
+   Poppins display, dark surfaces, big spacing.
+   Dark-first: values live in :root AND .dark (the app is always dark).
+   =========================================================================== */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-heading: var(--font-display);
+
+  /* brand (v10: single blue accent + supporting tones) */
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-strong-hover: var(--primary-strong-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-star: var(--star);
+  --color-faint: var(--faint);
+  --color-bg-2: var(--bg-2);
+
+  /* semantic (shadcn) */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* radius scale — v10 uses 14px (cards) and 10px (buttons/nav) */
+  --radius-sm: calc(var(--radius) - 0.25rem); /* 10px */
+  --radius-md: calc(var(--radius) - 0.125rem); /* 12px */
+  --radius-lg: var(--radius); /* 14px */
+  --radius-xl: calc(var(--radius) + 0.25rem); /* 18px */
+  --radius-2xl: calc(var(--radius) + 0.5rem); /* 22px */
+  --radius-3xl: calc(var(--radius) + 0.875rem);
+  --radius-4xl: calc(var(--radius) + 1.25rem);
+}
+
+/* --- GETX v10 dark palette (single source; mirrored to .dark for safety) -- */
+:root,
+.dark {
+  --radius: 0.875rem; /* 14px */
+
+  /* surfaces (v10: bg / bg-2 / surface / surface-2) */
+  --background: #0a0b0d;
+  --bg-2: #0e0f12;
+  --foreground: #f3f4f6;
+  --card: #14161b;
+  --card-foreground: #f3f4f6;
+  --popover: #14161b;
+  --popover-foreground: #f3f4f6;
+  --secondary: #1b1e25;
+  --secondary-foreground: #f3f4f6;
+  --muted: #1b1e25;
+  --muted-foreground: #9ca1ab;
+  --accent: #1b1e25;
+  --accent-foreground: #f3f4f6;
+  /* #8a8f9a (was v10's #6a6f7a): owner-approved 2026-06-07 — the original
+     failed WCAG AA at 12-13px (3.65:1 on card, 3.96:1 on bg); this passes
+     (5.6:1 / 6.1:1) while staying clearly dimmer than --muted-foreground. */
+  --faint: #8a8f9a;
+
+  /* brand — ONE blue accent (v10) + supporting tones.
+     Two shades of the one blue (owner-approved 2026-06-07):
+     · --primary (#4d7cfe): accents — text, icons, rings, tints. As TEXT on
+       our dark surfaces it passes WCAG AA (4.8-5.3:1); as a fill behind
+       white text it would NOT (3.73:1) — that's what -strong is for.
+     · --primary-strong (#4169e8): SOLID fills behind white text (CTAs,
+       buttons, active pagination). White on it = 4.76:1 ✓. Its hover
+       darkens (#3a5fd9, 5.5:1 ✓) instead of lightening. */
+  --primary: #4d7cfe;
+  --primary-foreground: #ffffff;
+  --primary-hover: #5e89ff;
+  --primary-strong: #4169e8;
+  --primary-strong-hover: #3a5fd9;
+  --success: #45b483;
+  --warning: #f0b429;
+  --star: #f0b429;
+
+  --destructive: #ff5a76;
+
+  /* lines + focus */
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.16);
+  --ring: #4d7cfe;
+
+  /* charts (CEO dashboard later) */
+  --chart-1: #4d7cfe;
+  --chart-2: #45b483;
+  --chart-3: #f0b429;
+  --chart-4: #5e89ff;
+  --chart-5: #ff5a76;
+
+  /* sidebar (admin/dashboard) */
+  --sidebar: #0e0f12;
+  --sidebar-foreground: #f3f4f6;
+  --sidebar-primary: #4d7cfe;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1b1e25;
+  --sidebar-accent-foreground: #f3f4f6;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #4d7cfe;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    @apply font-heading font-bold;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  /* brand selection + thin dark scrollbar */
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 16%, transparent)
+      transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--foreground) 14%, transparent);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklch, var(--foreground) 24%, transparent);
+    background-clip: padding-box;
+  }
+}
+
+/* --- reusable brand utilities --------------------------------------------- */
+@layer utilities {
+  /* frosted glass pill/panel (v10 hbadge / glass-pill surface) */
+  .glass {
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.015)
+    );
+    border: 1px solid var(--border);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  /* blue CTA glow (v10 .btn-sell shadow) */
+  .accent-glow {
+    box-shadow: 0 6px 18px -6px
+      color-mix(in srgb, var(--primary) 60%, transparent);
+  }
+  /* hide scrollbar for horizontal rails */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* live dot pulse (v10 gx-pulse) */
+  @keyframes gx-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 55%, transparent);
+    }
+    70% {
+      box-shadow: 0 0 0 7px transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+  .animate-live-dot {
+    animation: gx-pulse 2s infinite;
+  }
+  /* respect reduced-motion globally for our custom animations */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

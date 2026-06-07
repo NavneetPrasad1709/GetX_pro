@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GETX — Home (Design Preview v10)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       GETX — Full Home  ·  v10 (cinematic footer)
+       one accent (blue) · Poppins · big spacing · real logo
+       ============================================================ */
+    :root{
+      --bg:#0a0b0d; --bg-2:#0e0f12; --surface:#14161b; --surface-2:#1b1e25;
+      --border:rgba(255,255,255,.08); --border-2:rgba(255,255,255,.16);
+      --fg:#f3f4f6; --muted:#9ca1ab; --faint:#6a6f7a;
+      --accent:#4d7cfe; --accent-hover:#5e89ff; --accent-soft:rgba(77,124,254,.12); --accent-border:rgba(77,124,254,.4);
+      --green:#45b483; --star:#f0b429; --heart:#ff5a76;
+      --radius:14px; --radius-sm:10px;
+      --fd:"Poppins",system-ui,sans-serif; --fb:"Inter",system-ui,sans-serif; --fm:"JetBrains Mono",ui-monospace,monospace;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:var(--fb);color:var(--fg);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+    h1,h2,h3,h4{font-family:var(--fd);margin:0;line-height:1.2;letter-spacing:-.02em;font-weight:700}
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    button{font-family:inherit;cursor:pointer}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+    .wrap{width:100%;max-width:1120px;margin-inline:auto;padding-inline:22px}
+    .muted{color:var(--muted)} .mono{font-family:var(--fm)}
+    .kicker{font-family:var(--fd);font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.14em;text-transform:uppercase}
+
+    /* preview chrome */
+    .previewbar{background:#060708;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);position:sticky;top:0;z-index:60}
+    .previewbar .wrap{display:flex;align-items:center;justify-content:space-between;height:36px}
+    .previewbar b{color:var(--fg)}
+
+    /* trust ribbon */
+    .trustribbon{background:var(--bg-2);border-bottom:1px solid var(--border)}
+    .trustribbon .wrap{display:flex;gap:30px;align-items:center;justify-content:center;height:40px;overflow-x:auto}
+    .trustribbon .wrap::-webkit-scrollbar{display:none}
+    .ti{display:inline-flex;align-items:center;gap:8px;font-family:var(--fd);font-size:13px;font-weight:500;color:var(--muted);white-space:nowrap}
+    .ti svg{width:16px;height:16px;color:var(--accent)} .ti svg.grn{color:var(--green)}
+    .ti b{color:var(--fg);font-weight:600}
+
+    /* header */
+    .header{position:sticky;top:36px;z-index:50;background:rgba(10,11,13,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .header .wrap{display:flex;align-items:center;gap:26px;height:66px}
+    .logo-img{height:27px;width:auto;display:block}
+    .nav{display:flex;align-items:center;gap:6px}
+    .nav a{padding:9px 13px;border-radius:var(--radius-sm);font-family:var(--fd);font-size:14.5px;font-weight:500;color:var(--muted);transition:.14s}
+    .nav a:hover,.nav a.active{color:var(--fg)}
+    .header-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+    @media(max-width:900px){.nav{display:none}}
+
+    /* buttons */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--fd);font-weight:600;font-size:14.5px;border-radius:var(--radius-sm);padding:11px 18px;border:1px solid transparent;transition:.14s;white-space:nowrap}
+    .btn svg{width:17px;height:17px}
+    .btn-primary{background:var(--accent);color:#fff} .btn-primary:hover{background:var(--accent-hover)}
+    .btn-ghost{background:transparent;color:var(--muted)} .btn-ghost:hover{color:var(--fg)}
+    .btn-outline{background:transparent;border-color:var(--border-2);color:var(--fg)} .btn-outline:hover{background:var(--surface-2)}
+    .btn-sell{background:var(--accent);color:#fff;font-weight:700;box-shadow:0 6px 18px -6px rgba(77,124,254,.6)}
+    .btn-sell:hover{background:var(--accent-hover);transform:translateY(-1px)}
+    .btn-lg{padding:14px 26px;font-size:16px}
+
+    /* HERO */
+    .hero{position:relative;overflow:hidden;text-align:center;padding:74px 0 60px}
+    .hero-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .hero-aurora{position:absolute;left:50%;top:-14%;height:66vh;width:78vw;transform:translateX(-50%);border-radius:50%;filter:blur(88px);
+      background:radial-gradient(circle at 50% 42%,rgba(77,124,254,.28),rgba(69,180,131,.11) 46%,transparent 70%)}
+    .hero-grid{position:absolute;inset:0;background-size:54px 54px;
+      background-image:linear-gradient(to right,rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.03) 1px,transparent 1px);
+      -webkit-mask-image:radial-gradient(ellipse 72% 62% at 50% 22%,#000,transparent 76%);mask-image:radial-gradient(ellipse 72% 62% at 50% 22%,#000,transparent 76%)}
+    .hero .wrap{position:relative;z-index:1}
+    .hero h1 .hl{background:linear-gradient(90deg,var(--accent),var(--green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .hero .pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--fd);font-size:13px;font-weight:600;color:var(--fg);background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:999px;padding:7px 15px}
+    .hero .pill svg{width:16px;height:16px;color:var(--accent)}
+    .hero h1{font-size:clamp(33px,5.4vw,54px);font-weight:800;margin-top:22px;letter-spacing:-.03em;max-width:17ch;margin-inline:auto}
+    .hero p.lead{font-size:clamp(15px,1.8vw,18px);color:var(--muted);margin:16px auto 0;max-width:46ch}
+    .searchbar{display:flex;align-items:center;gap:6px;margin:32px auto 0;max-width:640px;background:var(--surface);border:1px solid var(--border-2);border-radius:14px;padding:8px}
+    .searchbar:focus-within{border-color:var(--accent)}
+    .game-select{display:inline-flex;align-items:center;gap:8px;font-family:var(--fd);font-weight:600;font-size:14.5px;color:var(--fg);background:transparent;border:0;padding:11px 14px;border-radius:10px;white-space:nowrap;transition:.14s}
+    .game-select:hover{background:var(--surface-2)} .game-select svg.chev{width:15px;height:15px;opacity:.55}
+    .searchbar .vr{width:1px;align-self:stretch;background:var(--border);margin:4px 2px}
+    .searchbar input{all:unset;flex:1;color:var(--fg);font-size:15px;padding:0 8px;min-width:0}
+    .searchbar input::placeholder{color:var(--faint)}
+    @media(max-width:520px){.game-select span.lbl{display:none}.game-select{padding:11px 10px}}
+    /* hero: live + rating pill */
+    .hero-live{display:inline-flex;align-items:center;gap:9px;font-family:var(--fd);font-size:12.5px;font-weight:500;color:var(--muted);
+      background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:999px;padding:6px 15px;backdrop-filter:blur(10px)}
+    .hero-live .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:gx-pulse 2s infinite}
+    @keyframes gx-pulse{0%{box-shadow:0 0 0 0 rgba(69,180,131,.55)}70%{box-shadow:0 0 0 7px rgba(69,180,131,0)}100%{box-shadow:0 0 0 0 rgba(69,180,131,0)}}
+    .hero-live .sep{width:1px;height:12px;background:var(--border)}
+    .hero-live .rt{color:var(--star)} .hero-live b{color:var(--fg);font-weight:700}
+
+    /* hero: glass trust badges */
+    .hero-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:24px}
+    .hbadge{display:inline-flex;align-items:center;gap:8px;font-family:var(--fd);font-size:13px;font-weight:600;color:var(--fg);
+      background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--border);border-radius:999px;padding:9px 15px;
+      backdrop-filter:blur(10px);transition:border-color .15s,transform .15s}
+    .hbadge:hover{border-color:var(--accent-border);transform:translateY(-1px)}
+    .hbadge svg{width:16px;height:16px;color:var(--accent)} .hbadge.grn svg{color:var(--green)}
+
+    /* hero: social proof — avatar stack + counts */
+    .hero-proof{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:28px;flex-wrap:wrap}
+    .avatars{display:flex}
+    .avatars span{width:36px;height:36px;border-radius:50%;border:2px solid var(--bg);margin-left:-11px;display:grid;place-items:center;
+      font-family:var(--fd);font-weight:700;font-size:13px;color:#fff}
+    .avatars span:first-child{margin-left:0}
+    .proof-txt{font-family:var(--fd);font-size:13.5px;line-height:1.5;color:var(--muted);text-align:left}
+    .proof-txt b{color:var(--fg);font-weight:600}
+    .proof-txt .stars{color:var(--star);letter-spacing:1.5px;margin-right:5px}
+
+    /* sections */
+    section.band{padding:62px 0;border-top:1px solid var(--border)}
+    .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px}
+    .sec-head h2{font-size:clamp(22px,3vw,30px);font-weight:700;margin-top:8px}
+    .sec-head p{color:var(--muted);font-size:14.5px;margin:6px 0 0}
+    .sec-head.center{flex-direction:column;align-items:center;text-align:center}
+    .link-arrow{color:var(--muted);font-family:var(--fd);font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:.14s}
+    .link-arrow:hover{color:var(--fg)} .link-arrow svg{width:16px;height:16px}
+
+    /* browse by game */
+    .games{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+    @media(max-width:940px){.games{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:520px){.games{grid-template-columns:repeat(2,1fr)}}
+    .gcover{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface);transition:.15s;display:block}
+    .gcover:hover{transform:translateY(-3px);border-color:var(--border-2)}
+    .gc-art{aspect-ratio:3/4;position:relative;overflow:hidden;background:var(--surface-2)}
+    .gc-art img{width:100%;height:100%;object-fit:cover}
+    .gc-mono{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--fd);font-weight:700;font-size:30px;color:var(--faint);letter-spacing:-.02em}
+    .gc-over{position:absolute;inset:0;background:linear-gradient(180deg,transparent 48%,rgba(8,9,11,.9))}
+    .gc-name{position:absolute;left:13px;right:13px;bottom:11px;font-family:var(--fd);font-weight:600;font-size:15px;color:#fff}
+    .gc-foot{padding:11px 13px;font-size:13px;color:var(--faint)}
+
+    /* how it works — 3 steps */
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    @media(max-width:760px){.steps{grid-template-columns:1fr}}
+    .step{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;position:relative}
+    .step .ic{width:50px;height:50px;border-radius:13px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:16px}
+    .step .ic svg{width:24px;height:24px}
+    .step .n{font-family:var(--fm);font-size:12px;color:var(--faint)}
+    .step h3{font-family:var(--fd);font-size:18px;font-weight:600;margin-top:4px}
+    .step p{color:var(--muted);font-size:14px;margin-top:8px}
+
+    /* why GETX — feature cards */
+    .features{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    @media(max-width:900px){.features{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.features{grid-template-columns:1fr}}
+    .feature{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
+    .feature .ic{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:14px}
+    .feature .ic svg{width:23px;height:23px}
+    .feature h3{font-family:var(--fd);font-size:16px;font-weight:600}
+    .feature p{color:var(--muted);font-size:13.5px;margin-top:7px;line-height:1.5}
+
+    /* seller CTA band */
+    .sellcta{border:1px solid var(--accent-border);background:linear-gradient(180deg,rgba(77,124,254,.10),rgba(77,124,254,.04));border-radius:20px;padding:40px;display:flex;align-items:center;justify-content:space-between;gap:30px;flex-wrap:wrap}
+    .sellcta h2{font-size:clamp(22px,3vw,30px);max-width:18ch}
+    .sellcta p{color:var(--muted);font-size:15px;margin-top:10px;max-width:46ch}
+    .sellcta .perks{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .sellcta .perks span{display:inline-flex;align-items:center;gap:6px;font-family:var(--fd);font-size:12.5px;font-weight:500;color:var(--fg);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:6px 12px}
+    .sellcta .perks svg{width:14px;height:14px;color:var(--accent)}
+    .sellcta .cta-side{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+
+    /* reviews */
+    .reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    @media(max-width:760px){.reviews{grid-template-columns:1fr}}
+    .review{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+    .review .stars{display:inline-flex;gap:2px;color:var(--star);margin-bottom:12px}
+    .review .stars svg{width:16px;height:16px}
+    .review p{font-size:14.5px;color:var(--fg);line-height:1.6}
+    .review .who{display:flex;align-items:center;gap:10px;margin-top:16px}
+    .review .av{width:34px;height:34px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);display:grid;place-items:center;font-family:var(--fd);font-weight:700;font-size:13px;color:var(--muted)}
+    .review .nm{font-family:var(--fd);font-weight:600;font-size:13.5px}
+    .review .mt{font-size:12px;color:var(--faint)}
+
+    /* ============================================================
+       APP-LIKE MOBILE + TABLET POLISH
+       small screens should feel like a native app: clean top bar,
+       tight rhythm, a swipeable game rail, and compact tap-cards.
+       ============================================================ */
+    /* app CHROME (phones + tablets ≤900): clean top bar, no desktop trust
+       ribbon, single-line preview strip — pairs with the fixed bottom nav */
+    @media(max-width:900px){
+      .trustribbon{display:none}
+      .previewbar .wrap{height:34px}
+      .previewbar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .previewbar .mono{display:none}
+      .header{top:34px}
+      .header .wrap{height:58px;gap:14px}
+      .logo-img{height:24px}
+    }
+
+    @media(max-width:760px){
+      /* tighter vertical rhythm — less "long webpage", more "app screen" */
+      .hero{padding:30px 0 28px}
+      section.band{padding:34px 0}
+      .sec-head{margin-bottom:16px}
+      .hero h1{margin-top:16px}
+      .hero p.lead{margin-top:12px}
+      .hero-live{font-size:11.5px;padding:6px 12px}
+
+      /* search → one app-style pill: visible game chip + icon-only action */
+      .searchbar{margin-top:22px;padding:6px;gap:6px;border-radius:14px}
+      .searchbar .vr{display:none}
+      .game-select{background:var(--surface-2);padding:10px 12px;border-radius:10px}
+      .game-select span.lbl{display:inline}
+      .searchbar input{font-size:15px;padding:0 4px}
+      .searchbar .btn-primary{font-size:0;padding:11px 14px;border-radius:10px}
+
+      /* hero trust badges + social proof: smaller, tidy */
+      .hero-badges{gap:8px;margin-top:18px}
+      .hbadge{font-size:12px;padding:8px 12px;gap:6px}
+      .hbadge svg{width:15px;height:15px}
+      .hero-proof{margin-top:20px;gap:11px}
+      .avatars span{width:32px;height:32px;margin-left:-10px;font-size:12px}
+      .proof-txt{font-size:12px}
+
+      /* swipeable game rail (snap-scroll with a peek of the next card) */
+      .games{display:flex;grid-template-columns:none;gap:12px;overflow-x:auto;
+        scroll-snap-type:x mandatory;margin-inline:-22px;padding:2px 22px 8px;-webkit-overflow-scrolling:touch}
+      .games::-webkit-scrollbar{display:none}
+      .gcover{flex:0 0 62%;scroll-snap-align:start}
+
+      /* compact tap-cards */
+      .steps{gap:12px}
+      .step{padding:18px}
+      .step .ic{width:42px;height:42px;border-radius:11px;margin-bottom:12px}
+      .features{grid-template-columns:1fr 1fr;gap:12px}
+      .feature{padding:16px}
+      .feature .ic{width:40px;height:40px;margin-bottom:10px}
+      .feature h3{font-size:14.5px}
+      .feature p{font-size:12.5px;margin-top:5px}
+      .reviews{gap:12px}
+      .review{padding:18px}
+
+      /* section heading + "see all" link stack cleanly */
+      .sec-head .link-arrow{align-self:flex-start}
+
+      /* seller CTA becomes a full-width stacked card */
+      .sellcta{flex-direction:column;align-items:flex-start;gap:16px}
+      .sellcta .cta-side{width:100%}
+      .sellcta .cta-side .btn{width:100%}
+    }
+
+    /* very small phones: 1-col features so text never cramps, bigger card peek */
+    @media(max-width:430px){
+      .features{grid-template-columns:1fr}
+      .gcover{flex-basis:72%}
+      .hero h1{font-size:clamp(28px,8vw,40px)}
+    }
+
+    /* tablet: roomy app grid, no fixed bottom nav crowding */
+    @media(min-width:761px) and (max-width:1024px){
+      section.band{padding:48px 0}
+      .games{grid-template-columns:repeat(3,1fr)}
+      .features{grid-template-columns:repeat(2,1fr)}
+      .steps{grid-template-columns:repeat(3,1fr)}
+    }
+
+    /* ============================================================
+       CINEMATIC FOOTER (v10) — curtain reveal + giant text + glass pills
+       theme-adaptive: uses GETX tokens, no external CSS framework
+       ============================================================ */
+    /* The reveal wrapper sits in normal flow and takes 100vh of space.
+       Its clip-path masks the fixed footer so it is "revealed" as you scroll. */
+    .cine-reveal{position:relative;height:100vh;width:100%;clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+    .cine-footer{position:fixed;bottom:0;left:0;display:flex;height:100vh;width:100%;flex-direction:column;justify-content:space-between;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--fd)}
+
+    /* ambient aurora + grid */
+    .cine-aurora{position:absolute;left:50%;top:50%;height:60vh;width:80vw;transform:translate(-50%,-50%);border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;
+      background:radial-gradient(circle at 50% 50%,rgba(77,124,254,.20) 0%,rgba(69,180,131,.12) 42%,transparent 70%);
+      animation:cine-breathe 8s ease-in-out infinite alternate}
+    @keyframes cine-breathe{0%{transform:translate(-50%,-50%) scale(1);opacity:.55}100%{transform:translate(-50%,-50%) scale(1.12);opacity:1}}
+    .cine-grid{position:absolute;inset:0;z-index:0;pointer-events:none;background-size:60px 60px;
+      background-image:linear-gradient(to right,rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.035) 1px,transparent 1px);
+      -webkit-mask-image:linear-gradient(to bottom,transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 30%,#000 70%,transparent)}
+
+    /* giant background wordmark */
+    .cine-giant{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;z-index:0;pointer-events:none;user-select:none;
+      font-family:var(--fd);font-size:30vw;line-height:.8;font-weight:800;letter-spacing:-.05em;
+      color:rgba(255,255,255,.055);-webkit-text-stroke:1px rgba(255,255,255,.06);
+      -webkit-mask-image:radial-gradient(125% 135% at 50% 40%,#000 32%,transparent 72%);mask-image:radial-gradient(125% 135% at 50% 40%,#000 32%,transparent 72%)}
+
+    /* diagonal marquee */
+    .cine-marquee{position:absolute;top:46px;left:0;width:100%;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(10,11,13,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:14px 0;z-index:10;transform:rotate(-2deg) scale(1.08);box-shadow:0 20px 50px -20px rgba(0,0,0,.7)}
+    .cine-marquee-track{display:flex;width:max-content;animation:cine-scroll 40s linear infinite;font-family:var(--fd);font-size:12.5px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
+    @keyframes cine-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    .cine-marquee-item{display:flex;align-items:center;gap:46px;padding:0 23px}
+    .cine-marquee-item .sx{color:var(--accent)} .cine-marquee-item .sx.alt{color:var(--green)}
+
+    /* center content */
+    .cine-main{position:relative;z-index:10;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;margin-top:40px;width:100%;max-width:1000px;margin-inline:auto;text-align:center}
+    .cine-kicker{font-family:var(--fd);font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.16em;text-transform:uppercase;margin-bottom:18px}
+    .cine-heading{font-family:var(--fd);font-size:clamp(38px,7vw,72px);font-weight:800;letter-spacing:-.03em;margin-bottom:14px;
+      background:linear-gradient(180deg,var(--fg) 0%,rgba(243,244,246,.45) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 22px rgba(255,255,255,.12))}
+    .cine-sub{color:var(--muted);font-size:clamp(15px,1.8vw,18px);max-width:48ch;margin:0 auto 28px}
+
+    /* magnetic glass pills */
+    .cine-pills{display:flex;flex-direction:column;align-items:center;gap:20px;width:100%}
+    .cine-pill-row{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;width:100%}
+    .glass-pill{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:11px;border-radius:999px;font-family:var(--fd);font-weight:600;text-align:center;color:var(--fg);
+      background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);
+      box-shadow:0 10px 30px -10px rgba(0,0,0,.6),inset 0 1px 1px rgba(255,255,255,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      transition:background .3s,border-color .3s,box-shadow .3s,color .3s;will-change:transform}
+    .glass-pill:hover{background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border-color:rgba(77,124,254,.45);box-shadow:0 22px 44px -12px rgba(0,0,0,.7),inset 0 1px 1px rgba(255,255,255,.16)}
+    .glass-pill.lg{padding:18px 34px;font-size:15px}
+    .glass-pill.primary{background:linear-gradient(145deg,rgba(94,137,255,.95),rgba(77,124,254,.7));border-color:rgba(94,137,255,.55);color:#fff;box-shadow:0 14px 34px -10px rgba(77,124,254,.6),inset 0 1px 1px rgba(255,255,255,.25)}
+    .glass-pill.primary:hover{background:linear-gradient(145deg,#6e95ff,#5181ff);border-color:rgba(94,137,255,.7)}
+    .glass-pill.sm{padding:11px 22px;font-size:13.5px;color:var(--muted)}
+    .glass-pill.sm:hover{color:var(--fg)}
+    .glass-pill svg{width:20px;height:20px}
+    .glass-pill.sm svg{width:16px;height:16px}
+
+    /* bottom bar */
+    .cine-bottom{position:relative;z-index:20;width:100%;padding:0 22px 26px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px}
+    .cine-copy{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);order:2}
+    .cine-badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:11px 20px;order:1;background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--border)}
+    .cine-badge span{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .cine-badge .brand{color:var(--fg);font-weight:800;letter-spacing:0;text-transform:none;margin-left:2px}
+    .cine-heart{color:var(--heart);font-size:14px;display:inline-block;animation:cine-beat 2s cubic-bezier(.25,1,.5,1) infinite}
+    @keyframes cine-beat{0%,100%{transform:scale(1)}15%,45%{transform:scale(1.25)}30%{transform:scale(1)}}
+    .cine-top{order:3;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:var(--muted);
+      background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);will-change:transform;transition:color .3s,border-color .3s}
+    .cine-top:hover{color:var(--fg);border-color:rgba(77,124,254,.45)}
+    .cine-top svg{width:20px;height:20px;transition:transform .3s}
+    .cine-top:hover svg{transform:translateY(-4px)}
+
+    /* detailed footer columns — same glass design language */
+    .cine-detail{position:relative;z-index:10;width:100%;max-width:1120px;margin:0 auto 16px;padding:24px 30px;
+      background:linear-gradient(180deg,rgba(18,20,24,.34),rgba(11,12,15,.6));
+      border:1px solid rgba(255,255,255,.07);border-radius:22px;
+      -webkit-backdrop-filter:blur(16px) saturate(118%);backdrop-filter:blur(16px) saturate(118%);
+      box-shadow:0 34px 70px -34px rgba(0,0,0,.72),inset 0 1px 0 rgba(255,255,255,.05)}
+    .cine-cols{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr 1fr;gap:26px}
+    .cine-brandcol .logo-img{height:26px;margin-bottom:12px}
+    .cine-brandcol p{font-family:var(--fb);color:var(--muted);font-size:13px;line-height:1.55;max-width:34ch;margin:0 0 14px}
+    .cine-socials{display:flex;gap:8px}
+    .cine-soc{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--muted);background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);will-change:transform;transition:color .3s,border-color .3s}
+    .cine-soc:hover{color:var(--fg);border-color:rgba(77,124,254,.45)} .cine-soc svg{width:17px;height:17px}
+    .cine-col h5{font-family:var(--fd);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--faint);font-weight:600;margin:0 0 12px}
+    .cine-col a{display:block;width:max-content;max-width:100%;color:var(--muted);font-size:13.5px;font-family:var(--fd);font-weight:500;padding:5px 0;transition:color .14s,transform .14s}
+    .cine-col a:hover{color:var(--fg);transform:translateX(3px)}
+    .cine-payrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+    .cine-payrow .lbl{font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-right:2px}
+    .cine-chip{font-family:var(--fm);font-size:11px;font-weight:600;color:var(--muted);background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:7px;padding:6px 10px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+    .cine-secure{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-family:var(--fd);font-size:11.5px;font-weight:600;color:#bfe6d4;background:rgba(69,180,131,.14);border:1px solid rgba(69,180,131,.38);border-radius:999px;padding:6px 12px}
+    .cine-secure svg{width:14px;height:14px;color:var(--green)}
+
+    @media(max-width:900px){.cine-cols{grid-template-columns:1.4fr 1fr 1fr;gap:24px 22px}}
+    @media(max-width:900px){
+      /* phones + tablets: drop the fixed curtain so the footer flows normally
+         and never clips its content behind the app's bottom nav */
+      .cine-reveal{height:auto;clip-path:none}
+      .cine-footer{position:relative;height:auto;min-height:100vh;padding-top:8px}
+      .cine-main{margin-top:64px}
+      .cine-marquee{top:30px}
+      /* tall auto-height footer on mobile: pin the giant behind the heading
+         (a % of the tall container would drop it into the link columns) */
+      .cine-giant{top:128px;transform:translate(-50%,0);font-size:44vw;line-height:.85;
+        -webkit-mask-image:radial-gradient(135% 120% at 50% 28%,#000 30%,transparent 74%);mask-image:radial-gradient(135% 120% at 50% 28%,#000 30%,transparent 74%)}
+      .cine-detail{margin-bottom:10px;padding:22px 20px;border-radius:18px}
+      .cine-bottom{justify-content:center;padding-bottom:92px}
+      .cine-copy{order:3}
+      .glass-pill.lg{width:100%;max-width:340px}
+    }
+    @media(max-width:560px){
+      .cine-cols{grid-template-columns:1fr 1fr;gap:20px 18px}
+      .cine-brandcol{grid-column:1 / -1}
+      .cine-secure{margin-left:0}
+      .cine-detail{padding:20px 16px}
+    }
+
+    /* short viewports (laptops, split screens): compress so the whole footer —
+       including the bottom bar — always fits inside the 100vh curtain */
+    @media(min-width:761px) and (max-height:840px){
+      .cine-main{margin-top:20px}
+      .cine-kicker{margin-bottom:12px}
+      .cine-heading{font-size:clamp(34px,5vw,52px);margin-bottom:10px}
+      .cine-sub{margin-bottom:18px}
+      .cine-pills{gap:14px}
+      .glass-pill.lg{padding:14px 28px}
+      .cine-detail{padding:18px 28px;margin-bottom:12px}
+      .cine-cols{gap:18px 24px}
+      .cine-col a{padding:3px 0}
+      .cine-payrow{margin-top:14px;padding-top:14px}
+      .cine-bottom{padding-bottom:18px}
+      .cine-giant{font-size:25vw;top:42%}
+    }
+    /* very short viewports: drop the fixed curtain entirely so nothing is ever
+       clipped — same look, just scrolls normally */
+    @media(min-width:761px) and (max-height:680px){
+      .cine-reveal{height:auto;clip-path:none}
+      .cine-footer{position:relative;height:auto;min-height:100vh}
+    }
+
+    /* app bottom nav — phones + tablets (≤900) */
+    .mobilenav{display:none}
+    @media(max-width:900px){
+      .mobilenav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:55;justify-content:space-around;align-items:center;padding:8px 6px 12px;background:rgba(10,11,13,.96);border-top:1px solid var(--border);backdrop-filter:blur(10px)}
+      .mobilenav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-family:var(--fd);font-size:10px;font-weight:500;color:var(--faint)}
+      .mobilenav a svg{width:22px;height:22px}
+      .mobilenav a.active{color:var(--accent)}
+      .mobilenav a.sell .b{width:44px;height:44px;margin-top:-18px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center}
+      .mobilenav a.sell .b svg{width:22px;height:22px}
+      body{padding-bottom:74px}
+      .sellcta{padding:28px}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="previewbar">
+    <div class="wrap"><span>GETX · <b>Home — Design Preview v10</b> · cinematic footer · approve karo to Next.js banega</span><span class="mono">full homepage · clean</span></div>
+  </div>
+
+  <!-- trust ribbon -->
+  <div class="trustribbon">
+    <div class="wrap">
+      <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <b>100%</b> Buyer Protection</span>
+      <span class="ti"><svg class="grn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg> Verified sellers</span>
+      <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg> Money-back guarantee</span>
+      <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 2-9 13h7l-1 7 9-13h-7z"/></svg> Instant delivery</span>
+    </div>
+  </div>
+
+  <!-- header -->
+  <header class="header">
+    <div class="wrap">
+      <a href="#" aria-label="GETX home"><img class="logo-img" src="../public/getx-logo.webp" alt="GETX" /></a>
+      <nav class="nav">
+        <a href="#" class="active">Browse games</a>
+        <a href="#">How it works</a>
+        <a href="#">Sell</a>
+      </nav>
+      <div class="header-actions">
+        <a class="btn btn-ghost" href="#">Log in</a>
+        <a class="btn btn-sell" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9h18l-1.5 10.5a2 2 0 0 1-2 1.5h-11a2 2 0 0 1-2-1.5z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg> Sell</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"><div class="hero-aurora"></div><div class="hero-grid"></div></div>
+    <div class="wrap">
+      <span class="hero-live"><span class="dot"></span> Live <span class="sep"></span> <span class="rt">★</span> <b>4.9</b>/5 from <b>12,400+</b> gamers</span>
+      <h1>Buy &amp; sell game accounts, <span class="hl">safely</span>.</h1>
+      <p class="lead">Pay safely, get it instantly, and we hold the money in escrow until you're happy.</p>
+      <div class="searchbar">
+        <button class="game-select" aria-label="Choose game"><span class="lbl">All games</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+        <span class="vr"></span>
+        <input placeholder="Search Pokémon GO, accounts, diamonds…" aria-label="Search" />
+        <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Search</button>
+      </div>
+      <div class="hero-badges">
+        <span class="hbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V8a5 5 0 0 1 10 0v3"/></svg> Escrow-protected</span>
+        <span class="hbadge grn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg> ID-verified sellers</span>
+        <span class="hbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/></svg> Money-back guarantee</span>
+        <span class="hbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 2-9 13h7l-1 7 9-13h-7z"/></svg> Instant delivery</span>
+      </div>
+      <div class="hero-proof">
+        <div class="avatars" aria-hidden="true">
+          <span style="background:#4d7cfe">A</span>
+          <span style="background:#45b483">R</span>
+          <span style="background:#f0b429;color:#241a02">S</span>
+          <span style="background:#ff5a76">K</span>
+          <span style="background:#8b5cf6">M</span>
+        </div>
+        <div class="proof-txt">
+          <div><span class="stars">★★★★★</span><b>4.9</b> · <b>50,000+</b> safe trades</div>
+          <div>Trusted by <b>12,400+</b> gamers · <b>₹2Cr+</b> protected in escrow</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BROWSE BY GAME -->
+  <section class="band">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker">Marketplace</span><h2>Browse by game</h2><p>5 hand-picked games. Quality over quantity.</p></div>
+        <a class="link-arrow" href="#">All games <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="games">
+        <a class="gcover" href="#"><div class="gc-art"><img src="../public/topup-card-template.webp" alt="Pokémon GO" /><div class="gc-over"></div><span class="gc-name">Pokémon GO</span></div><div class="gc-foot">1,284 listings</div></a>
+        <a class="gcover" href="#"><div class="gc-art"><span class="gc-mono">FF</span><div class="gc-over"></div><span class="gc-name">Free Fire</span></div><div class="gc-foot">842 listings</div></a>
+        <a class="gcover" href="#"><div class="gc-art"><span class="gc-mono">VAL</span><div class="gc-over"></div><span class="gc-name">Valorant</span></div><div class="gc-foot">615 listings</div></a>
+        <a class="gcover" href="#"><div class="gc-art"><span class="gc-mono">CoC</span><div class="gc-over"></div><span class="gc-name">Clash of Clans</span></div><div class="gc-foot">503 listings</div></a>
+        <a class="gcover" href="#"><div class="gc-art"><span class="gc-mono">PUBG</span><div class="gc-over"></div><span class="gc-name">PUBG Mobile</span></div><div class="gc-foot">471 listings</div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW YOU'RE PROTECTED -->
+  <section class="band">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker">Trust</span><h2>How you're protected</h2><p>Your money is never sent straight to the seller.</p></div></div>
+      <div class="steps">
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V8a5 5 0 0 1 10 0v3"/></svg></div><span class="n">STEP 1</span><h3>You pay safely</h3><p>Your money is locked with GETX — the seller doesn't get it yet. UPI &amp; crypto supported.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 2-9 13h7l-1 7 9-13h-7z"/></svg></div><span class="n">STEP 2</span><h3>You get it instantly</h3><p>The verified seller delivers the account or item. You check everything is exactly as described.</p></div>
+        <div class="step"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></div><span class="n">STEP 3</span><h3>Money is released</h3><p>Happy? The seller gets paid. Problem? Open a dispute — full money-back, guaranteed.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY GETX -->
+  <section class="band">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker">Why GETX</span><h2>Built different — fast &amp; safe</h2><p>The stuff other marketplaces are slow at, we do in minutes.</p></div></div>
+      <div class="features">
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 2-9 13h7l-1 7 9-13h-7z"/></svg></div><h3>Instant delivery</h3><p>Auto-delivery for top-ups, fast verified hand-off for accounts. No waiting around.</p></div>
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M5 12H2M22 12h-3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></div><h3>AI Dispute Judge</h3><p>Fair verdicts in minutes, not days. Reads the chat &amp; proof, decides quickly.</p></div>
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></div><h3>Live Trust Score</h3><p>Real-time seller trust you can actually see — updates with their behaviour.</p></div>
+        <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9h4.5a1.5 1.5 0 0 1 0 3H9m0 0h5"/></svg></div><h3>Lowest fees</h3><p>Keep more of what you earn. UPI + crypto, no surprise charges.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELLER CTA -->
+  <section class="band">
+    <div class="wrap">
+      <div class="sellcta">
+        <div>
+          <span class="kicker">For sellers</span>
+          <h2 style="margin-top:8px">Got accounts to sell? Start earning today.</h2>
+          <p>Set up in 5 minutes, first listing free. Your own CEO dashboard, fast payouts, and AI pricing help.</p>
+          <div class="perks">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5 9-9"/></svg> First listing free</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5 9-9"/></svg> Fast payouts</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 5 5 9-9"/></svg> CEO dashboard</span>
+          </div>
+        </div>
+        <div class="cta-side">
+          <a class="btn btn-primary btn-lg" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9h18l-1.5 10.5a2 2 0 0 1-2 1.5h-11a2 2 0 0 1-2-1.5z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg> Start selling — free</a>
+          <a class="btn btn-ghost" href="#">See seller fees →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="band">
+    <div class="wrap">
+      <div class="sec-head center"><div><span class="kicker">Reviews</span><h2>Loved by gamers</h2><p>4.9★ average from 2,300+ verified buyers.</p></div></div>
+      <div class="reviews">
+        <div class="review"><div class="stars"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg></div><p>"Bought a Pokémon GO account, got it in 2 minutes. Escrow made me feel totally safe — no fear of scam."</p><div class="who"><span class="av">Rk</span><div><div class="nm">Rohit K.</div><div class="mt">Verified buyer · Delhi</div></div></div></div>
+        <div class="review"><div class="stars"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg></div><p>"As a seller, payouts are quick and the dashboard is clean. Finally a platform that treats sellers well."</p><div class="who"><span class="av">An</span><div><div class="nm">Aniket N.</div><div class="mt">Verified seller · Pune</div></div></div></div>
+        <div class="review"><div class="stars"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z"/></svg></div><p>"Had a small issue, raised a dispute, sorted in minutes with full refund. Support is genuinely fast."</p><div class="who"><span class="av">Sm</span><div><div class="nm">Simran M.</div><div class="mt">Verified buyer · Mumbai</div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CINEMATIC FOOTER (v10)
+       ============================================================ -->
+  <div class="cine-reveal">
+    <footer class="cine-footer" aria-label="Site footer">
+
+      <!-- ambient layers -->
+      <div class="cine-aurora"></div>
+      <div class="cine-grid"></div>
+      <div class="cine-giant" id="cineGiant">GETX</div>
+
+      <!-- diagonal marquee -->
+      <div class="cine-marquee">
+        <div class="cine-marquee-track">
+          <div class="cine-marquee-item"><span>Escrow on every order</span><span class="sx">✦</span><span>Instant delivery</span><span class="sx alt">✦</span><span>ID-verified sellers</span><span class="sx">✦</span><span>AI Dispute Judge</span><span class="sx alt">✦</span><span>Lowest fees</span><span class="sx">✦</span><span>100% Buyer Protection</span><span class="sx alt">✦</span></div>
+          <div class="cine-marquee-item"><span>Escrow on every order</span><span class="sx">✦</span><span>Instant delivery</span><span class="sx alt">✦</span><span>ID-verified sellers</span><span class="sx">✦</span><span>AI Dispute Judge</span><span class="sx alt">✦</span><span>Lowest fees</span><span class="sx">✦</span><span>100% Buyer Protection</span><span class="sx alt">✦</span></div>
+        </div>
+      </div>
+
+      <!-- center content -->
+      <div class="cine-main">
+        <span class="cine-kicker">GETX · getx.live</span>
+        <h2 class="cine-heading" id="cineHeading">Ready to level up?</h2>
+        <p class="cine-sub">Join 12,400+ gamers buying and selling accounts, items &amp; top-ups — safe, instant, and escrow-protected from start to finish.</p>
+
+        <div class="cine-pills" id="cinePills">
+          <!-- primary CTAs -->
+          <div class="cine-pill-row">
+            <a href="#" class="glass-pill lg primary magnetic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              Browse marketplace
+            </a>
+            <a href="#" class="glass-pill lg magnetic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18l-1.5 10.5a2 2 0 0 1-2 1.5h-11a2 2 0 0 1-2-1.5z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg>
+              Start selling — free
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- detailed footer columns -->
+      <div class="cine-detail">
+        <div class="cine-cols">
+          <div class="cine-col cine-brandcol">
+            <img class="logo-img" src="../public/getx-logo.webp" alt="GETX" />
+            <p>The fast, trust-first gaming marketplace. Buy &amp; sell game accounts, items &amp; top-ups safely with escrow.</p>
+            <div class="cine-socials">
+              <a class="cine-soc magnetic" href="#" aria-label="Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 5a18 18 0 0 0-4.5-1.4l-.2.4A16 16 0 0 1 18 5.3a16 16 0 0 0-12 0 16 16 0 0 1 2.7-1.3l-.2-.4A18 18 0 0 0 4 5 19 19 0 0 0 1 18a18 18 0 0 0 5.5 2l.7-1.2a11 11 0 0 1-1.8-.9l.4-.3a12 12 0 0 0 10.4 0l.4.3a11 11 0 0 1-1.8.9l.7 1.2A18 18 0 0 0 23 18 19 19 0 0 0 20 5ZM9 14.5A1.6 1.6 0 0 1 7.5 13 1.6 1.6 0 0 1 9 11.5 1.6 1.6 0 0 1 10.5 13 1.6 1.6 0 0 1 9 14.5Zm6 0A1.6 1.6 0 0 1 13.5 13 1.6 1.6 0 0 1 15 11.5 1.6 1.6 0 0 1 16.5 13 1.6 1.6 0 0 1 15 14.5Z"/></svg></a>
+              <a class="cine-soc magnetic" href="#" aria-label="X (Twitter)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h3l-7 8 8 12h-6l-5-7-5 7H1l8-9L1 2h6l4 6 7-6Zm-1 18h2L7 4H5l12 16Z"/></svg></a>
+              <a class="cine-soc magnetic" href="#" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m22 3-20 8 5 2 2 6 3-4 5 4 5-16ZM9 15l-.5 4 2-3 7-7-8.5 6Z"/></svg></a>
+              <a class="cine-soc magnetic" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+            </div>
+          </div>
+
+          <div class="cine-col">
+            <h5>Marketplace</h5>
+            <a href="#">Browse games</a>
+            <a href="#">Pokémon GO</a>
+            <a href="#">Free Fire</a>
+            <a href="#">Top-ups</a>
+            <a href="#">Boosting</a>
+          </div>
+
+          <div class="cine-col">
+            <h5>Sell</h5>
+            <a href="#">Start selling</a>
+            <a href="#">Seller dashboard</a>
+            <a href="#">Fees</a>
+            <a href="#">Seller guide</a>
+            <a href="#">Payouts</a>
+          </div>
+
+          <div class="cine-col">
+            <h5>Company</h5>
+            <a href="#">How it works</a>
+            <a href="#">Trust &amp; safety</a>
+            <a href="#">About us</a>
+            <a href="#">Blog</a>
+            <a href="#">Careers</a>
+          </div>
+
+          <div class="cine-col">
+            <h5>Support</h5>
+            <a href="#">Help center</a>
+            <a href="#">Open a dispute</a>
+            <a href="#">Contact us</a>
+            <a href="#">Terms</a>
+            <a href="#">Privacy</a>
+          </div>
+        </div>
+
+        <div class="cine-payrow">
+          <span class="lbl">We accept</span>
+          <span class="cine-chip">UPI</span>
+          <span class="cine-chip">Razorpay</span>
+          <span class="cine-chip">USDT</span>
+          <span class="cine-chip">BTC</span>
+          <span class="cine-chip">ETH</span>
+          <span class="cine-secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V8a5 5 0 0 1 10 0v3"/></svg> 256-bit secure checkout</span>
+        </div>
+      </div>
+
+      <!-- bottom bar -->
+      <div class="cine-bottom">
+        <div class="cine-copy">© 2026 GETX · getx.live — built for gamers.</div>
+        <div class="cine-badge">
+          <span>Crafted with</span>
+          <span class="cine-heart">❤</span>
+          <span>in India by</span>
+          <span class="brand">GETX</span>
+        </div>
+        <button type="button" class="cine-top magnetic" onclick="gxScrollTop()" aria-label="Back to top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+        </button>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- mobile bottom nav -->
+  <nav class="mobilenav">
+    <a class="active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 11 9-8 9 8M5 10v10h14V10"/></svg>Home</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Browse</a>
+    <a class="sell" href="#"><span class="b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></span>Sell</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M9 13h6M9 17h6"/></svg>Orders</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Account</a>
+  </nav>
+
+  <!-- GSAP (enhancement only — footer is fully visible without it) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+    function gxScrollTop(){ window.scrollTo({ top: 0, behavior: "smooth" }); }
+
+    (function(){
+      if (!window.gsap || !window.ScrollTrigger) return;          // graceful fallback: content stays visible
+      gsap.registerPlugin(ScrollTrigger);
+
+      var reveal  = document.querySelector(".cine-reveal");
+      var giant   = document.getElementById("cineGiant");
+      var heading = document.getElementById("cineHeading");
+      var pills   = document.getElementById("cinePills");
+
+      // giant wordmark parallax-in
+      if (reveal && giant) {
+        gsap.fromTo(giant,
+          { y: "10vh", scale: 0.8, opacity: 0 },
+          { y: "0vh", scale: 1, opacity: 1, ease: "power1.out",
+            scrollTrigger: { trigger: reveal, start: "top 80%", end: "bottom bottom", scrub: 1 } });
+      }
+
+      // staggered content reveal
+      if (reveal && heading && pills) {
+        gsap.fromTo([heading, pills],
+          { y: 50, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.15, ease: "power3.out",
+            scrollTrigger: { trigger: reveal, start: "top 40%", end: "bottom bottom", scrub: 1 } });
+      }
+
+      // magnetic hover (skip on touch / coarse pointers)
+      if (window.matchMedia("(pointer:fine)").matches) {
+        document.querySelectorAll(".magnetic").forEach(function(el){
+          el.addEventListener("mousemove", function(e){
+            var r = el.getBoundingClientRect();
+            var x = e.clientX - r.left - r.width / 2;
+            var y = e.clientY - r.top - r.height / 2;
+            gsap.to(el, { x: x * 0.4, y: y * 0.4, scale: 1.05, ease: "power2.out", duration: 0.4 });
+          });
+          el.addEventListener("mouseleave", function(){
+            gsap.to(el, { x: 0, y: 0, scale: 1, ease: "elastic.out(1, 0.3)", duration: 1.2 });
+          });
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>

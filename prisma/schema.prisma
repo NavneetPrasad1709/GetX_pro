@@ -1,0 +1,537 @@
+// GETX database schema (Step 02).
+//
+// Rules baked into this schema (see docs/ENGINEERING-GUARDRAILS.md):
+//   • Money is ALWAYS an integer in minor units (paisa/cents). Fields end in `Minor`.
+//     Never Float/Decimal for money.
+//   • Money truth = append-only `LedgerEntry`. `Wallet.cachedBalanceMinor` is only a cache.
+//   • Orders & payments are explicit state machines (enums below).
+//   • Webhooks are made idempotent via `ProcessedWebhook` (unique provider event id).
+//   • Index every foreign key + every column we filter/sort by.
+//
+// "seller" = a `SellerProfile` (the seller's first-class business identity, owns wallet +
+// listings + trust score). "buyer" = a plain `User`. A SellerProfile is 1:1 with a User.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // Neon POOLED connection (pgbouncer) — used by the app
+  directUrl = env("DIRECT_URL") // Neon DIRECT connection — used by migrations
+}
+
+// ---------------------------------------------------------------------------
+// Enums (every status is an enum)
+// ---------------------------------------------------------------------------
+
+enum Role {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum KycStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CategoryKind {
+  ACCOUNT
+  ITEM
+  CURRENCY
+  BOOSTING
+}
+
+enum DeliveryType {
+  MANUAL
+  INSTANT
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  SOLD
+  REMOVED
+}
+
+enum OrderStatus {
+  DRAFT
+  AWAITING_PAYMENT
+  UNDERPAID
+  PAID
+  DELIVERED
+  COMPLETED
+  DISPUTED
+  REFUNDED
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentProvider {
+  COINGATE
+  RAZORPAY
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  UNDERPAID
+  EXPIRED
+  FAILED
+}
+
+enum LedgerType {
+  CREDIT
+  DEBIT
+}
+
+enum LedgerReason {
+  SALE
+  FEE
+  REFUND
+  PAYOUT
+  ESCROW_HOLD
+  ESCROW_RELEASE
+}
+
+enum PayoutMethod {
+  RAZORPAY
+  CRYPTO
+}
+
+enum PayoutStatus {
+  REQUESTED
+  PROCESSING
+  PAID
+  FAILED
+}
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED_BUYER
+  RESOLVED_SELLER
+  CLOSED
+}
+
+enum KycSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ---------------------------------------------------------------------------
+// Auth (Auth.js / NextAuth v5 + Prisma adapter) — real auth wired in Step 03
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String? // bcrypt/argon2 hash — set when credentials auth is added (Step 03)
+  role          Role      @default(BUYER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auth.js relations
+  accounts Account[]
+  sessions Session[]
+
+  // Domain relations
+  sellerProfile  SellerProfile?
+  ordersAsBuyer  Order[]        @relation("BuyerOrders")
+  reviewsWritten Review[]       @relation("BuyerReviews")
+  conversations  Conversation[] @relation("BuyerConversations")
+  messages       Message[]
+  disputesOpened Dispute[]      @relation("DisputeOpenedBy")
+  notifications  Notification[]
+  auditLogs      AuditLog[]     @relation("AuditActor")
+
+  @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Seller side
+// ---------------------------------------------------------------------------
+
+model SellerProfile {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  displayName String
+  bio         String?
+  country     String?
+  kycStatus   KycStatus @default(NONE)
+  trustScore  Int       @default(0) // 0-100, recomputed by the trust service (Step 17)
+  totalSales  Int       @default(0)
+  ratingAvg   Float     @default(0) // average of 1-5 ratings (not money → Float is fine)
+  ratingCount Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  wallet          Wallet?
+  listings        Listing[]
+  ordersAsSeller  Order[]         @relation("SellerOrders")
+  reviewsReceived Review[]        @relation("SellerReviews")
+  conversations   Conversation[]  @relation("SellerConversations")
+  kycSubmissions  KycSubmission[]
+
+  @@index([kycStatus])
+  @@index([trustScore])
+  @@index([ratingAvg]) // marketplace "top rated" sort + min-rating filter (Step 07)
+}
+
+// ---------------------------------------------------------------------------
+// Catalog
+// ---------------------------------------------------------------------------
+
+model Game {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  iconUrl   String?
+  bannerUrl String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  categories Category[]
+  listings   Listing[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Category {
+  id        String       @id @default(cuid())
+  name      String
+  slug      String
+  gameId    String
+  kind      CategoryKind
+  sortOrder Int          @default(0)
+  createdAt DateTime     @default(now())
+
+  game     Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  listings Listing[]
+
+  @@unique([gameId, slug])
+  @@index([gameId])
+  @@index([kind])
+}
+
+model Listing {
+  id           String        @id @default(cuid())
+  sellerId     String
+  gameId       String
+  categoryId   String
+  title        String
+  slug         String        @unique
+  description  String
+  type         CategoryKind
+  priceMinor   Int // minor units (paisa/cents)
+  currency     String        @default("INR")
+  stock        Int           @default(1)
+  deliveryType DeliveryType  @default(MANUAL)
+  attributes   Json          @default("{}")
+  status       ListingStatus @default(DRAFT)
+  images       String[]      @default([])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  seller   SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  game     Game          @relation(fields: [gameId], references: [id])
+  category Category      @relation(fields: [categoryId], references: [id])
+  orders   Order[]
+
+  @@index([gameId])
+  @@index([sellerId])
+  @@index([status])
+  @@index([priceMinor])
+  @@index([categoryId])
+  @@index([gameId, status])
+  @@index([sellerId, status]) // seller dashboard: per-status counts + manage list
+  @@index([status, createdAt]) // marketplace default sort: ACTIVE listings, newest first (Step 07)
+}
+
+// ---------------------------------------------------------------------------
+// Orders & payments (state machines)
+// ---------------------------------------------------------------------------
+
+model Order {
+  id              String           @id @default(cuid())
+  buyerId         String
+  sellerId        String
+  listingId       String
+  qty             Int              @default(1)
+  unitPriceMinor  Int
+  feeMinor        Int              @default(0) // buyer platform fee (minor units)
+  totalMinor      Int // amount the buyer pays (minor units)
+  currency        String           @default("INR")
+  status          OrderStatus      @default(DRAFT)
+  paymentProvider PaymentProvider?
+  deliveredAt     DateTime?
+  autoReleaseAt   DateTime? // 3-day escrow auto-release deadline (Vercel Cron sweep)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  buyer   User          @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller  SellerProfile @relation("SellerOrders", fields: [sellerId], references: [id])
+  listing Listing       @relation(fields: [listingId], references: [id])
+
+  payments      Payment[]
+  ledgerEntries LedgerEntry[]
+  review        Review?
+  conversation  Conversation?
+  dispute       Dispute?
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([status])
+  @@index([autoReleaseAt])
+  @@index([listingId])
+}
+
+model Payment {
+  id          String          @id @default(cuid())
+  orderId     String
+  provider    PaymentProvider
+  providerRef String? // gateway invoice/payment id
+  amountMinor Int
+  currency    String          @default("INR")
+  status      PaymentStatus   @default(PENDING)
+  raw         Json? // raw provider payload for audit
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+  @@index([provider, providerRef])
+}
+
+// Idempotency guard: a webhook event id is processed at most once.
+model ProcessedWebhook {
+  id              String          @id @default(cuid())
+  provider        PaymentProvider
+  providerEventId String
+  createdAt       DateTime        @default(now())
+
+  @@unique([provider, providerEventId])
+}
+
+// ---------------------------------------------------------------------------
+// Wallet, ledger & payouts (append-only money truth)
+// ---------------------------------------------------------------------------
+
+model Wallet {
+  id                 String   @id @default(cuid())
+  sellerProfileId    String   @unique
+  cachedBalanceMinor Int      @default(0) // cache only — real balance = sum of ledger
+  currency           String   @default("INR")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  sellerProfile SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+  ledgerEntries LedgerEntry[]
+  payouts       Payout[]
+}
+
+model LedgerEntry {
+  id                String       @id @default(cuid())
+  walletId          String
+  orderId           String?
+  type              LedgerType
+  reason            LedgerReason
+  amountMinor       Int // always POSITIVE; direction is in `type`
+  balanceAfterMinor Int // running balance snapshot for audit
+  createdAt         DateTime     @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  order  Order? @relation(fields: [orderId], references: [id])
+
+  @@index([walletId])
+  @@index([orderId])
+  @@index([walletId, createdAt])
+}
+
+model Payout {
+  id          String       @id @default(cuid())
+  walletId    String
+  amountMinor Int
+  method      PayoutMethod
+  status      PayoutStatus @default(REQUESTED)
+  providerRef String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Reviews, chat, disputes
+// ---------------------------------------------------------------------------
+
+model Review {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  buyerId   String
+  sellerId  String
+  rating    Int // 1-5 (validated by Zod in the app layer)
+  comment   String?
+  createdAt DateTime @default(now())
+
+  order  Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  buyer  User          @relation("BuyerReviews", fields: [buyerId], references: [id])
+  seller SellerProfile @relation("SellerReviews", fields: [sellerId], references: [id])
+
+  @@index([sellerId])
+  @@index([buyerId])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  orderId   String?  @unique
+  buyerId   String
+  sellerId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order    Order?        @relation(fields: [orderId], references: [id])
+  buyer    User          @relation("BuyerConversations", fields: [buyerId], references: [id])
+  seller   SellerProfile @relation("SellerConversations", fields: [sellerId], references: [id])
+  messages Message[]
+
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([conversationId, createdAt])
+}
+
+model Dispute {
+  id             String        @id @default(cuid())
+  orderId        String        @unique
+  openedById     String
+  reason         String
+  status         DisputeStatus @default(OPEN)
+  resolutionNote String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  openedBy User  @relation("DisputeOpenedBy", fields: [openedById], references: [id])
+
+  @@index([status])
+  @@index([openedById])
+}
+
+// ---------------------------------------------------------------------------
+// KYC, notifications, audit
+// ---------------------------------------------------------------------------
+
+model KycSubmission {
+  id         String              @id @default(cuid())
+  sellerId   String
+  docType    String
+  docUrl     String // PRIVATE R2 object key (never a public URL)
+  status     KycSubmissionStatus @default(PENDING)
+  reviewedBy String? // admin User id (soft reference)
+  reviewedAt DateTime?
+  createdAt  DateTime            @default(now())
+
+  seller SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([sellerId])
+  @@index([status])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([entity, entityId])
+}

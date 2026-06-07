@@ -1,0 +1,12 @@
+# Normalize line endings: store LF in the repo, check out native on each OS.
+# Keeps diffs clean across Windows/macOS/Linux and silences CRLF warnings.
+* text=auto eol=lf
+
+# Binary assets — never normalize.
+*.webp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
