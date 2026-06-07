@@ -141,7 +141,7 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
           </dd>
         </div>
         <p className="text-xs text-faint">
-          Payment processing is added at checkout, based on your payment method.
+          Payment processing included — what you see is what you pay.
         </p>
       </dl>
 

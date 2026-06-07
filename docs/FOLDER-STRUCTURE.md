@@ -43,7 +43,11 @@ GetX/
     │   ├── (dashboard)/      # buyer + seller dashboard + become-seller ✅ Step 03
     │   ├── admin/            # admin panel (sirf ADMIN role) ✅ Step 03
     │   ├── api/              # backend endpoints
-    │   │   └── auth/[...nextauth]/  # Auth.js (NextAuth v5) handlers
+    │   │   ├── auth/[...nextauth]/  # Auth.js (NextAuth v5) handlers
+    │   │   └── webhooks/            # ✅ Step 09 — gateway callbacks (source of truth)
+    │   │       ├── coingate/        #   token-verified + API re-fetch → applyPaymentEvent
+    │   │       └── razorpay/        #   HMAC(raw body) verified → applyPaymentEvent
+    │   ├── global-error.tsx  # Sentry: React render crashes ✅ Step 09
     │   ├── layout.tsx
     │   └── globals.css
     │
@@ -66,8 +70,17 @@ GetX/
     │   └── utils.ts          # cn() + chhote helpers
     │
     ├── server/               # backend ka dimaag (business logic)
-    │   ├── actions/          # "use server" actions (auth.ts ✅ Step 03)
-    │   └── services/         # users + mail ✅ Step 03; orders, escrow, payouts aage
+    │   ├── actions/          # "use server" actions (auth, listings, orders, payments ✅)
+    │   └── services/         # users, mail, catalog, marketplace, listings, orders, wallet
+    │       └── payments/     # ✅ Step 09 — gateway abstraction (MONEY-CRITICAL)
+    │           ├── types.ts        # NormalizedPaymentEvent + gateway contract
+    │           ├── coingate.ts     # crypto: invoice (INR→USD @ their rate), token verify, re-fetch
+    │           ├── razorpay.ts     # UPI/INR: order create, HMAC verify, event normalize
+    │           ├── apply-event.ts  # THE transaction: dedupe + CAS + escrow ledger + stock
+    │           └── index.ts        # createChargeForOrder (ownership + status checks)
+    │
+    ├── instrumentation.ts        # Sentry server/edge bootstrap + onRequestError ✅ Step 09
+    ├── instrumentation-client.ts # Sentry browser init ✅ Step 09
     │
     ├── hooks/                # react hooks
     ├── types/                # shared TypeScript types (next-auth.d.ts ✅ Step 03)

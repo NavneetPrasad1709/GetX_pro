@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { Prisma, type Listing, type ListingStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { assertOwner, ForbiddenError } from "@/lib/auth";
+import { getWalletBalances } from "@/server/services/wallet";
 import type { Role } from "@prisma/client";
 import {
   ATTRIBUTE_SCHEMAS,
@@ -331,22 +332,14 @@ export async function getOwnedListing(
 }
 
 /**
- * The wallet's TRUE balance: ledger credits − debits (guardrails §1).
- * `cachedBalanceMinor` is a cache and must never drive display or decisions.
- * Shared by the seller hub and the buyer dashboard — one source of truth.
+ * The wallet's AVAILABLE balance derived from the ledger (guardrails §1).
+ * Since Step 09, escrowed money (open ESCROW_HOLDs) sits on the wallet but is
+ * NOT the seller's yet — it is excluded here. Full math + the held figure live
+ * in `src/server/services/wallet.ts` (getWalletBalances).
  */
 export async function getLedgerBalanceMinor(walletId: string): Promise<number> {
-  const [credit, debit] = await Promise.all([
-    db.ledgerEntry.aggregate({
-      where: { walletId, type: "CREDIT" },
-      _sum: { amountMinor: true },
-    }),
-    db.ledgerEntry.aggregate({
-      where: { walletId, type: "DEBIT" },
-      _sum: { amountMinor: true },
-    }),
-  ]);
-  return (credit._sum.amountMinor ?? 0) - (debit._sum.amountMinor ?? 0);
+  const { availableMinor } = await getWalletBalances(walletId);
+  return availableMinor;
 }
 
 export type SellerStats = {
@@ -355,6 +348,8 @@ export type SellerStats = {
   draftListings: number;
   pendingOrders: number;
   walletBalanceMinor: number;
+  /** escrowed money on paid-but-not-completed orders (Step 09) — not withdrawable yet */
+  walletHeldMinor: number;
   walletCurrency: string;
   ratingAvg: number;
   ratingCount: number;
@@ -384,7 +379,7 @@ export async function getSellerStats(userId: string): Promise<SellerStats> {
     );
   }
 
-  const [activeListings, draftListings, pendingOrders, walletBalanceMinor] =
+  const [activeListings, draftListings, pendingOrders, balances] =
     await Promise.all([
       db.listing.count({ where: { sellerId: profile.id, status: "ACTIVE" } }),
       db.listing.count({ where: { sellerId: profile.id, status: "DRAFT" } }),
@@ -393,8 +388,8 @@ export async function getSellerStats(userId: string): Promise<SellerStats> {
         where: { sellerId: profile.id, status: { in: ["PAID", "DELIVERED"] } },
       }),
       profile.wallet
-        ? getLedgerBalanceMinor(profile.wallet.id)
-        : Promise.resolve(0),
+        ? getWalletBalances(profile.wallet.id)
+        : Promise.resolve({ availableMinor: 0, heldMinor: 0, grossMinor: 0 }),
     ]);
 
   return {
@@ -402,7 +397,8 @@ export async function getSellerStats(userId: string): Promise<SellerStats> {
     activeListings,
     draftListings,
     pendingOrders,
-    walletBalanceMinor,
+    walletBalanceMinor: balances.availableMinor,
+    walletHeldMinor: balances.heldMinor,
     walletCurrency: profile.wallet?.currency ?? "INR",
     ratingAvg: profile.ratingAvg,
     ratingCount: profile.ratingCount,

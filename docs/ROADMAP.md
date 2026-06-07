@@ -23,7 +23,7 @@ Legend: `[ ]` todo · `[x]` done · 🔑 = needs a token/credential (Claude will
 - [x] **Step 06** — Seller onboarding (5-min) + create/manage listings → `step-06-seller.md` ✅
 - [x] **Step 07** — Marketplace browse/search/filter + listing detail page → `step-07-browse.md` ✅
 - [x] **Step 08** — Checkout + order creation flow → `step-08-checkout.md` ✅
-- [ ] **Step 09** 🔑 — Payments: CoinGate (crypto) + Razorpay (UPI) + webhooks → `step-09-payments.md`
+- [x] **Step 09** 🔑 — Payments: CoinGate (crypto) + Razorpay (UPI) + webhooks + Sentry → `step-09-payments.md` ✅
 - [ ] **Step 10** — Escrow + delivery confirm + 3-day buyer protection + auto-release (Vercel Cron) → `step-10-escrow.md`
 - [ ] **Step 11** 🔑 — Real-time chat (Socket.io server on Railway) → `step-11-chat.md`
 - [ ] **Step 12** 🔑 — Image/file upload (Cloudflare R2) → `step-12-uploads.md`

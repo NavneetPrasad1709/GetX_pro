@@ -9,9 +9,8 @@
  *
  * This is intentionally pure + dependency-light so it runs on BOTH the client
  * (live total preview in the buy box) and the server (checkout/escrow, Step 08+).
- * Payment-processing pass-through is NOT included here — its real cost is only
- * known at checkout once a gateway is chosen (Step 09); the buy box shows it as
- * a separate "added at checkout" line.
+ * Payment-processing pass-through is deferred (see DECISIONS, Step 09): the
+ * gateways are charged exactly this total, so the buyer pays what they see.
  */
 import type { CategoryKind } from "@prisma/client";
 import { siteConfig } from "@/config/site";
@@ -21,8 +20,8 @@ export type BuyerFeeBreakdown = {
   subtotalMinor: number;
   /** buyer platform fee on the subtotal (minor units, round-half-up) */
   platformFeeMinor: number;
-  /** subtotal + platform fee (minor units) — the buyer's checkout total
-   *  BEFORE gateway processing pass-through (added at checkout). */
+  /** subtotal + platform fee (minor units) — the buyer's checkout total;
+   *  this exact amount is charged at the gateway (Step 09). */
   totalMinor: number;
   /** the fee rate used (percent) — for "5% platform fee" copy */
   platformFeePercent: number;

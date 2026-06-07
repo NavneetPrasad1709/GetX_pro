@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 /**
  * Security headers (audit fix — SECURITY_AUDIT_REPORT.md). These are the
@@ -46,4 +47,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry (Step 09). Source-map upload happens only when SENTRY_AUTH_TOKEN +
+// org/project are present at BUILD time (CI/Vercel) — optional; without it
+// errors still arrive, just with minified stack traces.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+});

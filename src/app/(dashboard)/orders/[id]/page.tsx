@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LockIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import type { OrderStatus } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
 import { getOrder } from "@/server/services/orders";
 import { formatMoney } from "@/lib/money";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { OrderStatusBadge } from "@/components/orders/order-status-badge";
+import { PayNow } from "@/components/orders/pay-now";
+import { PaymentStatusPoller } from "@/components/orders/payment-status-poller";
 
 export const metadata: Metadata = { title: "Order", robots: { index: false } };
 
-type Props = { params: Promise<{ id: string }> };
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
 const NEXT_STEP: Partial<Record<OrderStatus, string>> = {
   AWAITING_PAYMENT:
     "Complete payment to lock your money in escrow. The seller is notified the moment it clears.",
-  UNDERPAID: "We received a partial payment — pay the remaining balance to proceed.",
+  UNDERPAID:
+    "We received a partial payment — our support team will reconcile or refund it. You don't need to do anything right now.",
   PAID: "Your payment is safe in escrow. The seller will deliver shortly — you'll be notified.",
   DELIVERED:
     "Delivered! Check everything is as described, then confirm to release payment — or open a dispute.",
@@ -32,9 +38,9 @@ const dateFmt = new Intl.DateTimeFormat("en-IN", {
   timeStyle: "short",
 });
 
-export default async function OrderPage({ params }: Props) {
+export default async function OrderPage({ params, searchParams }: Props) {
   const session = await requireUser();
-  const { id } = await params;
+  const [{ id }, sp] = await Promise.all([params, searchParams]);
   const order = await getOrder(
     { id: session.user.id, role: session.user.role },
     id,
@@ -42,6 +48,12 @@ export default async function OrderPage({ params }: Props) {
   if (!order) notFound();
 
   const subtotalMinor = order.unitPriceMinor * order.qty;
+  const isBuyer = order.buyerId === session.user.id;
+  // "?confirming=1" only changes which WAITING UI we show — the order status
+  // itself always comes from the DB (webhook = truth, never the redirect).
+  const confirming =
+    order.status === "AWAITING_PAYMENT" &&
+    (Array.isArray(sp.confirming) ? sp.confirming[0] : sp.confirming) === "1";
 
   return (
     <div className="flex flex-col gap-5">
@@ -107,28 +119,26 @@ export default async function OrderPage({ params }: Props) {
         </div>
       </dl>
 
-      {/* pay now — placeholder until Step 09 wires the gateway */}
-      {order.status === "AWAITING_PAYMENT" ? (
-        <div className="flex flex-col gap-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-primary-hover">
-            <LockIcon className="size-4" aria-hidden="true" />
-            Payment
+      {/* pay now (buyer only) — webhook decides the real status, never the redirect */}
+      {order.status === "AWAITING_PAYMENT" && isBuyer ? (
+        confirming ? (
+          <div className="flex flex-col gap-2">
+            <PaymentStatusPoller />
+            <Link
+              href={`/orders/${order.id}`}
+              className="text-xs font-semibold text-primary hover:text-primary-hover"
+            >
+              Didn&apos;t complete the payment? Pay again →
+            </Link>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {order.paymentProvider
-              ? `You chose ${order.paymentProvider === "RAZORPAY" ? "UPI / Cards (Razorpay)" : "Crypto (CoinGate)"}. `
-              : ""}
-            Secure payment goes live in the next update — your order is reserved
-            until then.
-          </p>
-          <button
-            type="button"
-            disabled
-            className="mt-1 inline-flex w-fit cursor-not-allowed items-center gap-2 rounded-sm bg-muted px-5 py-2.5 font-heading text-sm font-bold text-muted-foreground"
-          >
-            Pay now (coming soon)
-          </button>
-        </div>
+        ) : (
+          <PayNow
+            orderId={order.id}
+            totalMinor={order.totalMinor}
+            currency={order.currency}
+            initialProvider={order.paymentProvider}
+          />
+        )
       ) : null}
 
       <Link

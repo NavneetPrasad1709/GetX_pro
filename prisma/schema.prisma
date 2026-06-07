@@ -337,22 +337,23 @@ model Order {
 }
 
 model Payment {
-  id          String          @id @default(cuid())
-  orderId     String
-  provider    PaymentProvider
-  providerRef String? // gateway invoice/payment id
-  amountMinor Int
-  currency    String          @default("INR")
-  status      PaymentStatus   @default(PENDING)
-  raw         Json? // raw provider payload for audit
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id           String          @id @default(cuid())
+  orderId      String
+  provider     PaymentProvider
+  providerRef  String? // gateway order/invoice id (CoinGate order id / Razorpay order id)
+  webhookToken String? // CoinGate per-order callback token (we generate; CoinGate echoes it back)
+  amountMinor  Int
+  currency     String          @default("INR")
+  status       PaymentStatus   @default(PENDING)
+  raw          Json? // raw provider payload for audit
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
+  @@unique([provider, providerRef]) // webhook → payment lookup is exact + race-safe
   @@index([orderId])
   @@index([status])
-  @@index([provider, providerRef])
 }
 
 // Idempotency guard: a webhook event id is processed at most once.

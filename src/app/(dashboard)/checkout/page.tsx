@@ -128,7 +128,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
             </div>
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">Payment processing</dt>
-              <dd className="text-xs text-faint">added at payment</dd>
+              <dd className="text-xs text-faint">included</dd>
             </div>
             <div className="mt-1 flex items-center justify-between border-t border-border pt-2.5">
               <dt className="font-semibold">Total (held in escrow)</dt>

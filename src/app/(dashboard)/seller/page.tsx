@@ -48,7 +48,10 @@ export default async function SellerOverviewPage() {
       icon: WalletIcon,
       label: "Wallet balance",
       value: formatMoney(stats.walletBalanceMinor, stats.walletCurrency),
-      hint: "Computed from your ledger — payouts in Step 14",
+      hint:
+        stats.walletHeldMinor > 0
+          ? `+ ${formatMoney(stats.walletHeldMinor, stats.walletCurrency)} in escrow — released on completion`
+          : "Computed from your ledger — payouts in Step 14",
     },
     {
       icon: StarIcon,
