@@ -123,8 +123,10 @@ export default async function ListingPage({ params }: Props) {
     value: typeof value === "number" ? value.toLocaleString("en-IN") : value,
   }));
 
+  // Extra bottom padding below 901px so the sticky mobile buy bar (rendered by
+  // BuyBox, sitting above the 74px bottom-nav) never covers the last content.
   return (
-    <main className="flex-1 pt-5 pb-10 min-[761px]:pb-14">
+    <main className="flex-1 pt-5 pb-32 min-[901px]:pb-14">
       <PageContainer className="flex flex-col gap-5">
         <Breadcrumbs
           items={[

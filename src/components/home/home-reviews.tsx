@@ -2,7 +2,12 @@ import { StarIcon } from "lucide-react";
 import { PageContainer } from "@/components/shared/page-container";
 import { SectionHeading } from "@/components/shared/section-heading";
 
-/** Static launch reviews (v10 ".reviews") — replaced by real data at Step 13. */
+/**
+ * DORMANT — NOT rendered on the homepage. Pre-launch we show no fabricated
+ * social proof (see docs/audit/UX_UI_AUDIT_REPORT.md). This component is wired
+ * back in at Step 13 once REAL buyer reviews exist; the sample data below is a
+ * layout placeholder only and must be replaced with live data before use.
+ */
 const REVIEWS: { quote: string; initials: string; name: string; meta: string }[] =
   [
     {

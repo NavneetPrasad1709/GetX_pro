@@ -1,20 +1,17 @@
 import { HeaderSearch } from "@/components/layout/header-search";
 import { TrustBadge } from "@/components/shared/trust-badge";
 import { PageContainer } from "@/components/shared/page-container";
-
-/** v10 hero social proof — avatar stack initials + tones. */
-const PROOF_AVATARS = [
-  { initial: "A", bg: "#4d7cfe", fg: "#fff" },
-  { initial: "R", bg: "#45b483", fg: "#fff" },
-  { initial: "S", bg: "#f0b429", fg: "#241a02" },
-  { initial: "K", bg: "#ff5a76", fg: "#fff" },
-  { initial: "M", bg: "#8b5cf6", fg: "#fff" },
-];
+import { siteConfig } from "@/config/site";
 
 /**
- * Homepage hero (v10) — aurora + grid backdrop, live rating pill, gradient
- * headline, game-scoped search, glass trust badges and social proof.
- * Server-rendered and static so the LCP headline paints immediately.
+ * Homepage hero (v10) — aurora + grid backdrop, launch pill, gradient headline,
+ * game-scoped search and glass trust badges. Server-rendered and static so the
+ * LCP headline paints immediately.
+ *
+ * NOTE: pre-launch we show NO fabricated metrics (no fake ratings/user counts/
+ * escrow totals). Trust comes from real platform promises (escrow, verified
+ * sellers, money-back) until live data exists (reviews = Step 13). See
+ * docs/audit/UX_UI_AUDIT_REPORT.md.
  */
 export function HomeHero() {
   return (
@@ -42,17 +39,13 @@ export function HomeHero() {
       </div>
 
       <PageContainer className="relative z-10">
-        {/* live + rating pill */}
+        {/* launch pill — honest, no fabricated metrics */}
         <span className="inline-flex items-center gap-[9px] rounded-full border border-border bg-white/[0.04] px-3 py-1.5 font-heading text-[11.5px] font-medium text-muted-foreground backdrop-blur-[10px] min-[761px]:px-[15px] min-[761px]:text-[12.5px]">
           <span className="size-[7px] rounded-full bg-success animate-live-dot" />
-          Live
+          Now live
           <span className="h-3 w-px bg-border" aria-hidden="true" />
-          <span className="text-star" aria-hidden="true">
-            ★
-          </span>
           <span>
-            <b className="font-bold text-foreground">4.9</b>/5 from{" "}
-            <b className="font-bold text-foreground">12,400+</b> gamers
+            Escrow-protected &amp; <b className="font-bold text-foreground">verified sellers</b>
           </span>
         </span>
 
@@ -79,42 +72,14 @@ export function HomeHero() {
           <TrustBadge variant="instant" />
         </div>
 
-        {/* social proof — avatar stack + counts */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-[11px] min-[761px]:mt-7 min-[761px]:gap-3.5">
-          <div className="flex" aria-hidden="true">
-            {PROOF_AVATARS.map(({ initial, bg, fg }, i) => (
-              <span
-                key={initial}
-                className={
-                  "grid size-8 place-items-center rounded-full border-2 border-background font-heading text-xs font-bold min-[761px]:size-9 min-[761px]:text-[13px] " +
-                  (i > 0 ? "-ml-2.5 min-[761px]:-ml-[11px]" : "")
-                }
-                style={{ background: bg, color: fg }}
-              >
-                {initial}
-              </span>
-            ))}
-          </div>
-          <div className="text-left font-heading text-xs leading-normal text-muted-foreground min-[761px]:text-[13.5px]">
-            <div>
-              <span
-                className="mr-[5px] tracking-[1.5px] text-star"
-                aria-hidden="true"
-              >
-                ★★★★★
-              </span>
-              <b className="font-semibold text-foreground">4.9</b> ·{" "}
-              <b className="font-semibold text-foreground">50,000+</b> safe
-              trades
-            </div>
-            <div>
-              Trusted by{" "}
-              <b className="font-semibold text-foreground">12,400+</b> gamers ·{" "}
-              <b className="font-semibold text-foreground">₹2Cr+</b> protected
-              in escrow
-            </div>
-          </div>
-        </div>
+        {/* honest launch line — real launch games, no fabricated counts */}
+        <p className="mx-auto mt-6 max-w-[52ch] text-[13px] text-faint min-[761px]:mt-7 min-[761px]:text-[13.5px]">
+          Launching with{" "}
+          <span className="font-medium text-muted-foreground">
+            {siteConfig.launchGames.join(", ")}
+          </span>{" "}
+          — every order escrow-protected, every seller verified.
+        </p>
       </PageContainer>
     </section>
   );

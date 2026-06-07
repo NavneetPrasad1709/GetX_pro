@@ -239,3 +239,16 @@
     }
   }
 }
+
+/* App-like cross-document view transitions (progressive enhancement). Smooths
+   full navigations — e.g. the header search GET form → /marketplace — in
+   browsers that support it; a no-op everywhere else. Disabled for users who
+   prefer reduced motion. */
+@view-transition {
+  navigation: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}

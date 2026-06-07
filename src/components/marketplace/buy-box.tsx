@@ -48,6 +48,7 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
   const checkoutHref = `/checkout?listing=${encodeURIComponent(slug)}&qty=${clampedQty}`;
 
   return (
+    <>
     <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 min-[761px]:p-5">
       {/* unit price + delivery */}
       <div className="flex items-start justify-between gap-3">
@@ -176,5 +177,32 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
         Payment held in escrow until you confirm delivery
       </p>
     </div>
+
+      {/* Sticky mobile buy bar — app-like persistent CTA, shares qty/total with
+          the box above. Sits just above the fixed mobile bottom-nav (74px) and
+          is hidden on desktop where the sidebar box is always in view. */}
+      <div className="fixed inset-x-0 bottom-[74px] z-40 border-t border-border bg-card/95 backdrop-blur-md min-[901px]:hidden">
+        <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-3 px-[22px] py-2.5">
+          <div className="min-w-0">
+            <div className="font-heading text-lg leading-tight font-bold tabular-nums">
+              {formatMoney(totalMinor, currency)}
+            </div>
+            <div className="text-[11px] text-faint">
+              {clampedQty > 1 ? `${clampedQty} × · ` : ""}incl. {platformFeePercent}% fee
+            </div>
+          </div>
+          {inStock ? (
+            <CtaLink href={checkoutHref} className="shrink-0 px-7 py-3">
+              <ShoppingCartIcon className="size-[17px]" aria-hidden="true" />
+              Buy now
+            </CtaLink>
+          ) : (
+            <span className="shrink-0 rounded-sm bg-muted px-6 py-3 font-heading text-sm font-bold text-muted-foreground">
+              Out of stock
+            </span>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

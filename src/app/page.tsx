@@ -1,9 +1,9 @@
 import { HomeHero } from "@/components/home/home-hero";
+import { CategoryMegaGrid } from "@/components/home/category-mega-grid";
 import { BrowseGames } from "@/components/home/browse-games";
 import { ProtectionSteps } from "@/components/home/protection-steps";
 import { WhyGetx } from "@/components/home/why-getx";
 import { SellerCta } from "@/components/home/seller-cta";
-import { HomeReviews } from "@/components/home/home-reviews";
 import { getActiveGames } from "@/server/services/catalog";
 import { GAME_COPY, getGameCopy } from "@/config/games";
 import type { GameTileData } from "@/components/marketplace/game-card";
@@ -20,9 +20,13 @@ function fallbackTiles(): GameTileData[] {
 }
 
 /**
- * Homepage — the approved v10 design (docs/design-preview-v10.html):
- * hero → browse by game → protection steps → why GETX → seller CTA → reviews.
- * Step 05: game covers/counts come from the live catalog (was static).
+ * Homepage (v10, evolved Step 07): hero → shop-by-category mega-grid (Eldorado-
+ * style scannable facets) → browse by game → protection steps → why GETX →
+ * seller CTA. Game covers/counts come from the live catalog (Step 05).
+ *
+ * The fake-testimonial "reviews" band was removed pre-launch (no fabricated
+ * social proof — see docs/audit/UX_UI_AUDIT_REPORT.md); HomeReviews returns
+ * with REAL data at Step 13.
  */
 export default async function HomePage() {
   let tiles: GameTileData[];
@@ -50,11 +54,11 @@ export default async function HomePage() {
   return (
     <main className="flex flex-1 flex-col">
       <HomeHero />
+      <CategoryMegaGrid />
       <BrowseGames games={tiles} />
       <ProtectionSteps />
       <WhyGetx />
       <SellerCta />
-      <HomeReviews />
     </main>
   );
 }
