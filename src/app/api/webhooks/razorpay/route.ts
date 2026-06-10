@@ -5,6 +5,7 @@ import {
   normalizeRazorpayEvent,
   verifyRazorpayWebhook,
 } from "@/server/services/payments/razorpay";
+import { clientIpFromHeaders, isWebhookIpAllowed } from "@/config/webhooks";
 
 /**
  * Razorpay webhook (guardrails §2). Order of operations is the whole game:
@@ -24,6 +25,14 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request): Promise<Response> {
   try {
+    // IP allowlist (Step 32) — drop forged traffic before any work. Open by
+    // default until RAZORPAY_WEBHOOK_IPS is set (see src/config/webhooks.ts).
+    const ip = clientIpFromHeaders(req.headers);
+    if (!isWebhookIpAllowed("RAZORPAY", ip)) {
+      console.warn(`[webhook:razorpay] rejected non-allowlisted IP ${ip}`);
+      return new Response("Forbidden", { status: 403 });
+    }
+
     const rawBody = await req.text();
 
     if (!verifyRazorpayWebhook(rawBody, req.headers.get("x-razorpay-signature"))) {

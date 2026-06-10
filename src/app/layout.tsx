@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Inter, Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { DeferredToaster } from "@/components/layout/deferred-toaster";
-import { SiteHeader } from "@/components/layout/site-header";
-import { CinematicFooter } from "@/components/layout/cinematic-footer";
-import { MobileNav } from "@/components/layout/mobile-nav";
+import { OrganizationJsonLd } from "@/components/seo/organization-jsonld";
+import { SwRegister } from "@/components/pwa/sw-register";
+import { InstallBanner } from "@/components/pwa/install-banner";
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { PostHogPageview } from "@/components/analytics/posthog-pageview";
 import { siteConfig } from "@/config/site";
 
 // v10 brand: Poppins for display/UI, Inter for body copy, JetBrains Mono for chips.
@@ -29,6 +32,21 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   metadataBase: new URL(siteConfig.url),
   applicationName: siteConfig.name,
+  // PWA (Step 24) — installable app metadata.
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "GETX",
+  },
+  icons: {
+    icon: "/favicon.webp",
+    apple: "/icons/apple-touch-icon.png",
+  },
+  other: {
+    "msapplication-TileColor": "#4d7cfe",
+    "msapplication-TileImage": "/icons/icon-192x192.png",
+  },
   keywords: [
     "game accounts",
     "buy game accounts",
@@ -76,16 +94,24 @@ export default function RootLayout({
       {/* suppressHydrationWarning: browser extensions (ColorZilla, Grammarly...)
           inject attributes into <body> before React hydrates. This only mutes
           attribute mismatches on <body> itself — real bugs in children still warn. */}
-      {/* pb-[74px]: keeps content clear of the fixed bottom app nav (≤900px). */}
+      {/* Chrome (header/footer/bottom-nav) lives in per-group layout shells
+          (Prompt 01), not here — root is bare providers only. */}
       <body
         suppressHydrationWarning
-        className="flex min-h-full flex-col bg-background pb-[74px] text-foreground min-[901px]:pb-0"
+        className="flex min-h-full flex-col bg-background text-foreground"
       >
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">{children}</div>
-        <CinematicFooter />
-        <MobileNav />
-        <DeferredToaster />
+        {/* Analytics (Step 31) — PostHog renders children directly when no key is set (no overhead) */}
+        <PostHogProvider>
+          <Suspense fallback={null}>
+            <PostHogPageview />
+          </Suspense>
+          {children}
+          <OrganizationJsonLd />
+          <DeferredToaster />
+          {/* PWA (Step 24) — rendered after content, both no-op until mounted (never block FCP) */}
+          <SwRegister />
+          <InstallBanner />
+        </PostHogProvider>
       </body>
     </html>
   );

@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 
 /**
@@ -24,10 +25,16 @@ export type WalletBalances = {
   grossMinor: number;
 };
 
+/**
+ * `client` lets callers pass a transaction client (`tx`) so the balance is read
+ * INSIDE the same transaction/lock — required by payout reservation (Step 14),
+ * which locks the wallet row before checking + debiting available funds.
+ */
 export async function getWalletBalances(
   walletId: string,
+  client: Prisma.TransactionClient | typeof db = db,
 ): Promise<WalletBalances> {
-  const groups = await db.ledgerEntry.groupBy({
+  const groups = await client.ledgerEntry.groupBy({
     by: ["type", "reason"],
     where: { walletId },
     _sum: { amountMinor: true },

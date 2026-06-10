@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { TurnstileField } from "@/components/auth/turnstile-field";
 import { DevLinkNotice } from "@/components/auth/dev-link-notice";
 
-export function RegisterForm() {
+export function RegisterForm({ referralCode }: { referralCode?: string }) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [devLink, setDevLink] = useState<string | null>(null);
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export function RegisterForm() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: { name: "", email: "", password: "", ref: referralCode },
   });
 
   async function onSubmit(values: RegisterInput) {
@@ -71,6 +71,12 @@ export function RegisterForm() {
       className="flex flex-col gap-4"
       noValidate
     >
+      {referralCode ? (
+        <p className="rounded-lg bg-primary/10 p-3 text-sm text-primary">
+          🎁 Referral applied — you&apos;ll get welcome credit after sign-up.
+        </p>
+      ) : null}
+
       <div className="flex flex-col gap-2">
         <Label htmlFor="register-name">Name</Label>
         <Input

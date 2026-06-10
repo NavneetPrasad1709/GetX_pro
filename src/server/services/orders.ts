@@ -1,7 +1,19 @@
 import { Prisma, type Order, type OrderStatus, type Role } from "@prisma/client";
 import { db } from "@/lib/db";
-import { computeBuyerFee, computeSellerCommissionMinor } from "@/lib/fees";
+import {
+  computeBuyerFee,
+  computeSellerCommissionMinorForLevel,
+} from "@/lib/fees";
 import type { CreateOrderParsed } from "@/lib/validators/order";
+import { fireFraudSignal } from "@/server/services/fraud/dispatch";
+import { checkOrderVelocity } from "@/server/services/fraud/signals";
+import {
+  getLoyaltyBalance,
+  redeemPoints,
+  computeRedemptionCap,
+} from "@/server/services/loyalty";
+import { pointsToMinorUnits, minorUnitsToPoints } from "@/config/loyalty";
+import { captureServerEvent } from "@/lib/posthog";
 
 /**
  * Order lifecycle (Step 08). SERVER-SIDE ONLY — called from server actions
@@ -58,7 +70,7 @@ export async function createOrder(
   user: SessionUser,
   input: CreateOrderParsed,
 ): Promise<Order> {
-  return db.$transaction(async (tx) => {
+  const order = await db.$transaction(async (tx) => {
     const listing = await tx.listing.findUnique({
       where: { slug: input.listingSlug },
       select: {
@@ -69,7 +81,9 @@ export async function createOrder(
         stock: true,
         status: true,
         type: true,
-        seller: { select: { userId: true } },
+        seller: {
+          select: { userId: true, sellerLevel: true, subscriptionTier: true },
+        },
       },
     });
 
@@ -92,41 +106,60 @@ export async function createOrder(
     }
 
     // Recompute ALL money server-side from the DB (never trust the client).
-    const { subtotalMinor, platformFeeMinor, totalMinor } = computeBuyerFee(
-      listing.priceMinor,
-      input.qty,
-    );
-    const sellerFeeMinor = computeSellerCommissionMinor(
+    const { subtotalMinor, platformFeeMinor, totalMinor, shieldFeeMinor, hasShield } =
+      computeBuyerFee(listing.priceMinor, input.qty, { shield: input.shield });
+    const sellerFeeMinor = computeSellerCommissionMinorForLevel(
       subtotalMinor,
       listing.type,
+      listing.seller.sellerLevel,
+      listing.seller.subscriptionTier, // GETX Pro discount (Prompt 15)
     );
 
-    const data = {
-      qty: input.qty,
-      unitPriceMinor: listing.priceMinor,
-      feeMinor: platformFeeMinor,
-      sellerFeeMinor,
-      totalMinor,
-      currency: listing.currency,
-      paymentProvider: input.provider ?? null,
-      status: "AWAITING_PAYMENT" as const,
-    };
-
-    // Idempotency: reuse the buyer's existing open order for this listing.
+    // Idempotency: reuse the buyer's existing open order for this listing (and its prior redemption).
     const existing = await tx.order.findFirst({
       where: {
         buyerId: user.id,
         listingId: listing.id,
         status: "AWAITING_PAYMENT",
       },
-      select: { id: true },
+      select: { id: true, loyaltyPointsRedeemed: true },
     });
+
+    // Loyalty redemption (Step 21). Server re-clamps the advisory client value to: the user's
+    // balance, the 20% subtotal cap, AND the platform fee (so the discount is fully platform-funded
+    // — the seller's take and the escrow reconciliation stay untouched). Reusing an open order
+    // preserves its earlier redemption rather than redeeming twice.
+    let redeemPts = existing ? existing.loyaltyPointsRedeemed : 0;
+    if (!existing && input.redeemPoints && input.redeemPoints > 0) {
+      const balance = await getLoyaltyBalance(user.id, tx);
+      const cap = Math.min(
+        computeRedemptionCap(subtotalMinor),
+        minorUnitsToPoints(platformFeeMinor),
+        balance,
+      );
+      redeemPts = Math.max(0, Math.min(input.redeemPoints, cap));
+    }
+    const discountMinor = Math.min(pointsToMinorUnits(redeemPts), platformFeeMinor);
+
+    const data = {
+      qty: input.qty,
+      unitPriceMinor: listing.priceMinor,
+      feeMinor: platformFeeMinor - discountMinor,
+      sellerFeeMinor,
+      totalMinor: totalMinor - discountMinor,
+      hasShield,
+      shieldFeeMinor,
+      loyaltyPointsRedeemed: redeemPts,
+      currency: listing.currency,
+      paymentProvider: input.provider ?? null,
+      status: "AWAITING_PAYMENT" as const,
+    };
 
     if (existing) {
       return tx.order.update({ where: { id: existing.id }, data });
     }
 
-    return tx.order.create({
+    const created = await tx.order.create({
       data: {
         buyerId: user.id,
         sellerId: listing.sellerId,
@@ -134,7 +167,18 @@ export async function createOrder(
         ...data,
       },
     });
+    // Deduct the points inside the SAME tx so a rollback un-redeems them.
+    if (redeemPts > 0) {
+      await redeemPoints(tx, user.id, redeemPts, created.id);
+    }
+    // Analytics (Step 31): fires only on a NEW order (not idempotent reuse) — IDs only.
+    captureServerEvent("checkout_started", user.id, { orderId: created.id, listingId: listing.id });
+    return created;
   });
+
+  // Fraud signal (Prompt 16): card-testing / order velocity — fire-and-forget.
+  fireFraudSignal("order_velocity_1h", checkOrderVelocity(user.id));
+  return order;
 }
 
 // --- transition (guardrail §3) ----------------------------------------------
@@ -179,6 +223,10 @@ const orderDetailInclude = {
       user: { select: { image: true } },
     },
   },
+  // Sensitive hand-over payload — only ever read through getOrder, which gates
+  // access to the buyer, the order's seller, and admins (Step 10).
+  delivery: { select: { content: true, createdAt: true } },
+  dispute: { select: { status: true, reason: true, createdAt: true } },
 } satisfies Prisma.OrderInclude;
 
 export type OrderDetail = Prisma.OrderGetPayload<{
@@ -241,4 +289,76 @@ export async function getBuyerOrders(userId: string): Promise<BuyerOrderRow[]> {
     listingSlug: listing.slug,
     sellerName: seller.displayName,
   }));
+}
+
+export type SellerOrderRow = {
+  id: string;
+  status: OrderStatus;
+  qty: number;
+  totalMinor: number;
+  currency: string;
+  createdAt: Date;
+  autoReleaseAt: Date | null;
+  listingTitle: string;
+  listingSlug: string;
+  buyerName: string;
+};
+
+/** Order statuses a seller sees — everything from payment onward (pre-payment noise hidden). */
+const SELLER_VISIBLE_STATUSES: OrderStatus[] = [
+  "UNDERPAID",
+  "PAID",
+  "DELIVERED",
+  "DISPUTED",
+  "COMPLETED",
+  "REFUNDED",
+];
+
+/**
+ * The seller's orders to fulfil/track (Step 10), newest first. Resolves the
+ * caller's SellerProfile (the real seller identity); returns [] if they have no
+ * profile yet. Uses @@index([sellerId]).
+ */
+export async function getSellerOrders(userId: string): Promise<SellerOrderRow[]> {
+  const profile = await db.sellerProfile.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+  if (!profile) return [];
+
+  const rows = await db.order.findMany({
+    where: { sellerId: profile.id, status: { in: SELLER_VISIBLE_STATUSES } },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      status: true,
+      qty: true,
+      totalMinor: true,
+      currency: true,
+      createdAt: true,
+      autoReleaseAt: true,
+      listing: { select: { title: true, slug: true } },
+      buyer: { select: { name: true } },
+    },
+  });
+
+  return rows.map(({ listing, buyer, ...row }) => ({
+    ...row,
+    listingTitle: listing.title,
+    listingSlug: listing.slug,
+    buyerName: buyer.name ?? "Buyer",
+  }));
+}
+
+/**
+ * Count of orders needing THIS user's action — DELIVERED as buyer (confirm
+ * receipt to release escrow) + PAID as seller (must deliver). Drives the mobile
+ * bottom-nav "Orders" badge. Two indexed counts; read-only, ownership-scoped.
+ */
+export async function getActionRequiredCount(userId: string): Promise<number> {
+  const [buyerCount, sellerCount] = await Promise.all([
+    db.order.count({ where: { buyerId: userId, status: "DELIVERED" } }),
+    db.order.count({ where: { seller: { userId }, status: "PAID" } }),
+  ]);
+  return buyerCount + sellerCount;
 }

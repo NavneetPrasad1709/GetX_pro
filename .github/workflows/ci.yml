@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  # Fast gate — no database needed (pure typecheck/lint/unit). Fails the PR early.
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:coverage
+
+  # Build + money-path integration tests against an EPHEMERAL Postgres (no
+  # external accounts — a throwaway service container is the test DB).
+  build-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: getx
+          POSTGRES_PASSWORD: getx
+          POSTGRES_DB: getx_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U getx"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://getx:getx@localhost:5432/getx_test
+      DIRECT_URL: postgresql://getx:getx@localhost:5432/getx_test
+      TEST_DATABASE_URL: postgresql://getx:getx@localhost:5432/getx_test
+      AUTH_SECRET: ci-test-secret-not-used-in-prod
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma generate
+      - run: npm run build
+      - run: npm run test:integration
+
+  # End-to-end (Playwright) against a built server with seeded data.
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: getx
+          POSTGRES_PASSWORD: getx
+          POSTGRES_DB: getx_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U getx"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://getx:getx@localhost:5432/getx_test
+      DIRECT_URL: postgresql://getx:getx@localhost:5432/getx_test
+      AUTH_SECRET: ci-test-secret-not-used-in-prod
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      TURNSTILE_DEV_BYPASS: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma generate
+      - run: npm run db:seed
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

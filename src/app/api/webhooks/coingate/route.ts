@@ -7,6 +7,7 @@ import {
   parseCoinGateCallback,
 } from "@/server/services/payments/coingate";
 import { db } from "@/lib/db";
+import { clientIpFromHeaders, isWebhookIpAllowed } from "@/config/webhooks";
 
 /**
  * CoinGate payment callback (guardrails §2). CoinGate does NOT sign callbacks,
@@ -27,6 +28,14 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request): Promise<Response> {
   try {
+    // IP allowlist (Step 32) — drop forged traffic early. Open by default until
+    // COINGATE_WEBHOOK_IPS is set (see src/config/webhooks.ts).
+    const ip = clientIpFromHeaders(req.headers);
+    if (!isWebhookIpAllowed("COINGATE", ip)) {
+      console.warn(`[webhook:coingate] rejected non-allowlisted IP ${ip}`);
+      return new Response("Forbidden", { status: 403 });
+    }
+
     const rawBody = await req.text();
     const callback = parseCoinGateCallback(rawBody, req.headers.get("content-type"));
     if (!callback) {

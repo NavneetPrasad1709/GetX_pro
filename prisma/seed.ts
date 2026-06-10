@@ -4,8 +4,8 @@
  * Idempotent: every write is an upsert keyed on a unique column, so running
  * `npm run db:seed` repeatedly never creates duplicates.
  *
- * Seeds: 5 launch games (+ categories), 1 admin, 2 demo sellers (with wallets),
- * 4 demo listings, 1 demo buyer.
+ * Seeds: 5 launch games (+ categories), 1 admin, 3 demo sellers (with wallets),
+ * 12 demo listings (8 concentrated in Pokémon GO — niche-first), 1 demo buyer.
  *
  * NOTE: demo users have `passwordHash: null` — real credential auth (hashing) is
  * wired in Step 03. These accounts exist so the marketplace has data to render.
@@ -100,6 +100,20 @@ const SELLERS = [
     totalSales: 60,
     ratingAvg: 4.6,
     ratingCount: 40,
+  },
+  {
+    // Newcomer — totalSales < NEW_SELLER_BOOST_MAX_SALES (10), so their boosted
+    // listings demonstrate the Prompt 12 new-seller visibility boost on ?sort=newest.
+    email: "seller3@getx.live",
+    name: "Diya Sharma",
+    displayName: "PixelRookie",
+    bio: "New to GETX — fast, friendly Pokémon GO deals. Every order escrow-protected.",
+    country: "IN",
+    kycStatus: "PENDING" as const,
+    trustScore: 0,
+    totalSales: 3,
+    ratingAvg: 0,
+    ratingCount: 0,
   },
 ];
 
@@ -211,64 +225,195 @@ async function main() {
     return { gameId: game.id, categoryId: cat.id };
   };
 
-  const listings = [
+  // `boost: true` → set newSellerBoostUntil (only meaningful for the newcomer,
+  // whose totalSales < 10). All listings get a 60-day expiry for the auto-pause cron.
+  type SeedListing = {
+    slug: string;
+    sellerEmail: string;
+    gameSlug: string;
+    catSlug: string;
+    type: "ACCOUNT" | "ITEM" | "CURRENCY" | "BOOSTING";
+    title: string;
+    description: string;
+    priceMinor: number;
+    stock: number;
+    deliveryType: "MANUAL" | "INSTANT";
+    boost?: boolean;
+  };
+
+  const listings: SeedListing[] = [
+    // --- Pokémon GO (niche-first depth: all 4 categories filled) -----------
     {
       slug: "pokemon-go-lvl40-200-shinies",
       sellerEmail: "seller1@getx.live",
       gameSlug: "pokemon-go",
       catSlug: "accounts",
-      type: "ACCOUNT" as const,
+      type: "ACCOUNT",
       title: "Level 40 Pokemon GO Account · 200+ Shinies · Legendary Team",
       description:
         "Stacked level 40 account. 200+ shinies, multiple legendaries, 90+ best buddies. Email-changeable, full access handover. Manual delivery within 1 hour.",
       priceMinor: inr(4990),
       stock: 1,
-      deliveryType: "MANUAL" as const,
+      deliveryType: "MANUAL",
     },
+    {
+      slug: "pokemon-go-lvl35-starter-account",
+      sellerEmail: "seller3@getx.live",
+      gameSlug: "pokemon-go",
+      catSlug: "accounts",
+      type: "ACCOUNT",
+      title: "Level 35 Pokemon GO Account · Great Starter · 30+ Shinies",
+      description:
+        "Solid level 35 account to jump straight into raids. 30+ shinies, a few legendaries, decent IV mons. Email-changeable, full access handover.",
+      priceMinor: inr(1499),
+      stock: 1,
+      deliveryType: "MANUAL",
+      boost: true,
+    },
+    {
+      slug: "pokemon-go-lvl38-shiny-legendary",
+      sellerEmail: "seller1@getx.live",
+      gameSlug: "pokemon-go",
+      catSlug: "accounts",
+      type: "ACCOUNT",
+      title: "Level 38 Pokemon GO Account · Shiny Legendaries · 100% Legit",
+      description:
+        "Level 38 with a strong shiny legendary lineup, high-CP attackers, and plenty of rare candy stocked. Safe escrow handover within the hour.",
+      priceMinor: inr(2999),
+      stock: 1,
+      deliveryType: "MANUAL",
+    },
+    {
+      slug: "pokemon-go-rare-candy-bundle",
+      sellerEmail: "seller1@getx.live",
+      gameSlug: "pokemon-go",
+      catSlug: "items",
+      type: "ITEM",
+      title: "Pokemon GO · Rare Candy Bundle (200x)",
+      description:
+        "Bundle of 200 Rare Candy delivered to your account. Power up your favourite legendaries fast. Manual delivery via secure chat after payment.",
+      priceMinor: inr(899),
+      stock: 25,
+      deliveryType: "MANUAL",
+    },
+    {
+      slug: "pokemon-go-tm-bundle",
+      sellerEmail: "seller3@getx.live",
+      gameSlug: "pokemon-go",
+      catSlug: "items",
+      type: "ITEM",
+      title: "Pokemon GO · Elite TM Bundle (Fast + Charged)",
+      description:
+        "Elite Fast TM + Elite Charged TM bundle to lock in the exact movesets you want. Manual delivery within a few hours.",
+      priceMinor: inr(699),
+      stock: 30,
+      deliveryType: "MANUAL",
+      boost: true,
+    },
+    {
+      slug: "pokemon-go-1000-pokecoins",
+      sellerEmail: "seller2@getx.live",
+      gameSlug: "pokemon-go",
+      catSlug: "pokecoins",
+      type: "CURRENCY",
+      title: "Pokemon GO · 1000 PokeCoins Top-up",
+      description:
+        "1000 PokeCoins topped up to your account. Stock your bag, buy incubators and storage. Fast delivery after escrow payment confirms.",
+      priceMinor: inr(699),
+      stock: 100,
+      deliveryType: "INSTANT",
+    },
+    {
+      slug: "pokemon-go-5000-pokecoins",
+      sellerEmail: "seller2@getx.live",
+      gameSlug: "pokemon-go",
+      catSlug: "pokecoins",
+      type: "CURRENCY",
+      title: "Pokemon GO · 5000 PokeCoins Top-up (Best Value)",
+      description:
+        "5000 PokeCoins topped up to your account — the best-value bundle for serious trainers. Delivered quickly after payment confirms.",
+      priceMinor: inr(2999),
+      stock: 50,
+      deliveryType: "INSTANT",
+    },
+    {
+      slug: "pokemon-go-boost-lvl1-to-20",
+      sellerEmail: "seller1@getx.live",
+      gameSlug: "pokemon-go",
+      catSlug: "boosting",
+      type: "BOOSTING",
+      title: "Pokemon GO · Account Leveling 1 → 20 (Boosting)",
+      description:
+        "We level your account from 1 to 20 safely and quickly — no bots, hand-played. Typical turnaround 5–7 days. You keep full control after handback.",
+      priceMinor: inr(3499),
+      stock: 3,
+      deliveryType: "MANUAL",
+    },
+    // --- Other launch games -----------------------------------------------
     {
       slug: "coc-th15-max-account",
       sellerEmail: "seller1@getx.live",
       gameSlug: "clash-of-clans",
       catSlug: "accounts",
-      type: "ACCOUNT" as const,
+      type: "ACCOUNT",
       title: "Clash of Clans TH15 Max Account · Legend League",
       description:
         "Town Hall 15 fully maxed, Legend League, all heroes maxed. Supercell ID transferable. Safe escrow handover.",
       priceMinor: inr(7990),
       stock: 1,
-      deliveryType: "MANUAL" as const,
+      deliveryType: "MANUAL",
+    },
+    {
+      slug: "coc-500-gems",
+      sellerEmail: "seller1@getx.live",
+      gameSlug: "clash-of-clans",
+      catSlug: "gems",
+      type: "CURRENCY",
+      title: "Clash of Clans · 500 Gems Top-up",
+      description:
+        "500 gems topped up to your village. Speed up upgrades and finish that hero. Delivered after escrow payment confirms.",
+      priceMinor: inr(299),
+      stock: 80,
+      deliveryType: "INSTANT",
     },
     {
       slug: "valorant-immortal-full-skins",
       sellerEmail: "seller2@getx.live",
       gameSlug: "valorant",
       catSlug: "accounts",
-      type: "ACCOUNT" as const,
+      type: "ACCOUNT",
       title: "Valorant Immortal Account · Full Skin Collection",
       description:
         "Immortal-ranked Valorant account with 40+ premium skins including Reaver & Elderflame bundles. Original owner email included.",
       priceMinor: inr(12990),
       stock: 1,
-      deliveryType: "MANUAL" as const,
+      deliveryType: "MANUAL",
     },
     {
       slug: "free-fire-1000-diamonds-topup",
       sellerEmail: "seller2@getx.live",
       gameSlug: "free-fire",
       catSlug: "diamonds",
-      type: "CURRENCY" as const,
+      type: "CURRENCY",
       title: "Free Fire · 1000 Diamonds Top-up (by Player ID)",
       description:
         "Instant 1000 diamonds top-up using your Free Fire player ID. No login required. Delivered within minutes.",
       priceMinor: inr(799),
       stock: 100,
-      deliveryType: "INSTANT" as const,
+      deliveryType: "INSTANT",
     },
   ];
+
+  const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
   for (const l of listings) {
     const ids = await categoryId(l.gameSlug, l.catSlug);
     const sellerId = sellerProfilesByEmail[l.sellerEmail];
+    const expiresAt = new Date(Date.now() + SIXTY_DAYS_MS);
+    const newSellerBoostUntil = l.boost
+      ? new Date(Date.now() + SEVEN_DAYS_MS)
+      : null;
     await prisma.listing.upsert({
       where: { slug: l.slug },
       update: {
@@ -282,6 +427,8 @@ async function main() {
         sellerId,
         gameId: ids.gameId,
         categoryId: ids.categoryId,
+        expiresAt,
+        newSellerBoostUntil,
       },
       create: {
         slug: l.slug,
@@ -296,10 +443,25 @@ async function main() {
         sellerId,
         gameId: ids.gameId,
         categoryId: ids.categoryId,
+        expiresAt,
+        newSellerBoostUntil,
       },
     });
   }
   console.log(`  ✓ ${listings.length} demo listings`);
+
+  // 6) Community badges (Step 27) — idempotent upsert on the code PK.
+  const BADGES = [
+    { code: "EARLY_SELLER", name: "Early Seller", description: "One of the first 50 sellers on GETX", iconUrl: "/badges/early-seller.svg" },
+    { code: "TOP_SELLER", name: "Top Seller", description: "Top 10 sellers for a game in a calendar month", iconUrl: "/badges/top-seller.svg" },
+    { code: "TRUSTED_VETERAN", name: "Trusted Veteran", description: "500+ completed orders", iconUrl: "/badges/trusted-veteran.svg" },
+    { code: "GUIDE_AUTHOR", name: "Guide Author", description: "Published at least one community guide", iconUrl: "/badges/guide-author.svg" },
+    { code: "COMMUNITY_HERO", name: "Community Hero", description: "Awarded by the GETX team", iconUrl: "/badges/community-hero.svg" },
+  ];
+  for (const b of BADGES) {
+    await prisma.badge.upsert({ where: { code: b.code }, update: { name: b.name, description: b.description, iconUrl: b.iconUrl }, create: b });
+  }
+  console.log(`  ✓ ${BADGES.length} community badges`);
 
   console.log("✅ Seed complete.");
 }

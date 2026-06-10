@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   ArrowRightIcon,
+  BellIcon,
   CoinsIcon,
   Gamepad2Icon,
   RocketIcon,
@@ -24,6 +25,8 @@ type Props = {
   kind: CategoryKind;
   listingCount: number;
   href: string;
+  /** false → no listings yet: show the "request a seller" bell, not an arrow (Prompt 12). */
+  hasSupply?: boolean;
   className?: string;
 };
 
@@ -33,6 +36,7 @@ export function CategoryCard({
   kind,
   listingCount,
   href,
+  hasSupply = true,
   className,
 }: Props) {
   const Icon = KIND_ICON[kind];
@@ -40,6 +44,7 @@ export function CategoryCard({
   return (
     <Link
       href={href}
+      title={hasSupply ? undefined : "No listings yet — click to request a seller"}
       className={cn(
         "group/cat flex items-center gap-3 rounded-lg border border-border bg-card p-3.5 transition-all duration-150 hover:-translate-y-px hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none min-[761px]:p-4",
         className,
@@ -53,13 +58,20 @@ export function CategoryCard({
           {name}
         </span>
         <span className="block text-[12px] text-faint">
-          {formatListingCount(listingCount)}
+          {hasSupply ? formatListingCount(listingCount) : "Request a seller"}
         </span>
       </span>
-      <ArrowRightIcon
-        className="size-4 shrink-0 text-faint transition-all duration-150 group-hover/cat:translate-x-0.5 group-hover/cat:text-primary"
-        aria-hidden="true"
-      />
+      {hasSupply ? (
+        <ArrowRightIcon
+          className="size-4 shrink-0 text-faint transition-all duration-150 group-hover/cat:translate-x-0.5 group-hover/cat:text-primary"
+          aria-hidden="true"
+        />
+      ) : (
+        <BellIcon
+          className="size-4 shrink-0 text-faint transition-colors duration-150 group-hover/cat:text-primary"
+          aria-hidden="true"
+        />
+      )}
     </Link>
   );
 }

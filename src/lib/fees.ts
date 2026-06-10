@@ -12,16 +12,25 @@
  * Payment-processing pass-through is deferred (see DECISIONS, Step 09): the
  * gateways are charged exactly this total, so the buyer pays what they see.
  */
-import type { CategoryKind } from "@prisma/client";
+import type { CategoryKind, SellerSubscriptionTier } from "@prisma/client";
 import { siteConfig } from "@/config/site";
+
+export type CheckoutOptions = {
+  /** Shield buyer-protection add-on (Prompt 15b, Stream 5). */
+  shield?: boolean;
+};
 
 export type BuyerFeeBreakdown = {
   /** unit price × quantity (minor units) */
   subtotalMinor: number;
   /** buyer platform fee on the subtotal (minor units, round-half-up) */
   platformFeeMinor: number;
-  /** subtotal + platform fee (minor units) — the buyer's checkout total;
-   *  this exact amount is charged at the gateway (Step 09). */
+  /** Shield add-on fee (minor units); 0 when not selected */
+  shieldFeeMinor: number;
+  /** whether Shield was selected (snapshotted on the order) */
+  hasShield: boolean;
+  /** subtotal + platform fee + shield fee (minor units) — the buyer's checkout
+   *  total; this exact amount is charged at the gateway (Step 09). */
   totalMinor: number;
   /** the fee rate used (percent) — for "5% platform fee" copy */
   platformFeePercent: number;
@@ -43,6 +52,7 @@ function percentOfMinorHalfUp(amountMinor: number, percent: number): number {
 export function computeBuyerFee(
   unitPriceMinor: number,
   qty = 1,
+  options: CheckoutOptions = {},
 ): BuyerFeeBreakdown {
   const { buyerPlatformFeePercent, minPlatformFeeMinor } = siteConfig.fees;
   const quantity = Math.max(1, Math.floor(qty));
@@ -51,12 +61,23 @@ export function computeBuyerFee(
   const rawFee = percentOfMinorHalfUp(subtotalMinor, buyerPlatformFeePercent);
   const platformFeeMinor = Math.max(rawFee, minPlatformFeeMinor);
 
+  const hasShield = options.shield === true;
+  const shieldFeeMinor = hasShield ? computeShieldFeeMinor(subtotalMinor) : 0;
+
   return {
     subtotalMinor,
     platformFeeMinor,
-    totalMinor: subtotalMinor + platformFeeMinor,
+    shieldFeeMinor,
+    hasShield,
+    totalMinor: subtotalMinor + platformFeeMinor + shieldFeeMinor,
     platformFeePercent: buyerPlatformFeePercent,
   };
+}
+
+/** Shield add-on fee = max(1% of subtotal, ₹20). Pure, minor units (Stream 5). */
+export function computeShieldFeeMinor(subtotalMinor: number): number {
+  const { feePercent, minFeeMinor } = siteConfig.fees.shield;
+  return Math.max(percentOfMinorHalfUp(subtotalMinor, feePercent), minFeeMinor);
 }
 
 /**
@@ -72,4 +93,70 @@ export function computeSellerCommissionMinor(
 ): number {
   const percent = siteConfig.fees.sellerCommissionPercent[kind];
   return percentOfMinorHalfUp(subtotalMinor, percent);
+}
+
+/**
+ * Commission discount per seller level (percentage POINTS off the base rate).
+ * These mirror SELLER_LEVELS[].perks.commissionDiscountPct to keep fees.ts
+ * free of a circular import with trust-score.ts.
+ */
+const LEVEL_DISCOUNT_PCT: Record<string, number> = {
+  BRONZE: 0,
+  SILVER: 0.5,
+  GOLD: 1.5,
+  PLATINUM: 3.0,
+  ELITE: 5.0,
+};
+
+/**
+ * Effective commission rate for a seller at the given level. Never goes below 0.
+ */
+export function effectiveSellerCommissionPct(
+  basePercent: number,
+  sellerLevel: string,
+): number {
+  const discount = LEVEL_DISCOUNT_PCT[sellerLevel] ?? 0;
+  return Math.max(0, basePercent - discount);
+}
+
+/**
+ * Level- AND subscription-discounted seller commission — used in createOrder so
+ * the rate reflects BOTH the seller's trust level (Prompt 11) and a GETX Pro
+ * subscription (Prompt 15, −proCommissionDiscount pp). Floored at 1% (never
+ * free). The result is SNAPSHOTTED on Order.sellerFeeMinor at creation, so a
+ * later level/subscription change never re-prices an existing order.
+ */
+export function computeSellerCommissionMinorForLevel(
+  subtotalMinor: number,
+  kind: CategoryKind,
+  sellerLevel: string,
+  subscriptionTier: SellerSubscriptionTier = "FREE",
+): number {
+  const base = siteConfig.fees.sellerCommissionPercent[kind];
+  const afterLevel = effectiveSellerCommissionPct(base, sellerLevel);
+  const proDiscount =
+    subscriptionTier === "PRO"
+      ? siteConfig.fees.subscription.proCommissionDiscount
+      : 0;
+  const effective = Math.max(1, afterLevel - proDiscount); // floor 1% — never free
+  return percentOfMinorHalfUp(subtotalMinor, effective);
+}
+
+/** Flat fee to feature a listing for a daily or weekly period (Prompt 15). */
+export type BoostDuration = "daily" | "weekly";
+
+export function computeBoostFeeMinor(duration: BoostDuration): number {
+  const { dailyFeeMinor, weeklyFeeMinor } = siteConfig.fees.boost;
+  return duration === "daily" ? dailyFeeMinor : weeklyFeeMinor;
+}
+
+/** Flat one-time listing bump fee (Prompt 15b, Stream 7). */
+export function computeBumpFeeMinor(): number {
+  return siteConfig.fees.boost.bumpFeeMinor;
+}
+
+/** Instant-payout fee = max(1% of amount, ₹50). Pure, minor units (Stream 6). */
+export function computeInstantPayoutFeeMinor(payoutAmountMinor: number): number {
+  const { feePercent, minFeeMinor } = siteConfig.payouts.instant;
+  return Math.max(percentOfMinorHalfUp(payoutAmountMinor, feePercent), minFeeMinor);
 }

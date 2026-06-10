@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { Prisma, type SellerProfile } from "@prisma/client";
 import { db } from "@/lib/db";
 import { generateToken, hashToken } from "@/lib/tokens";
+import { captureServerEvent } from "@/lib/posthog";
 import { siteConfig } from "@/config/site";
 import {
   sendPasswordResetEmail,
@@ -227,7 +228,12 @@ export async function resetPassword(input: {
   const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
   try {
     await db.$transaction([
-      db.user.update({ where: { email }, data: { passwordHash } }),
+      // Bump sessionVersion (Step 32): a password reset signs out every other
+      // device — standard account-takeover recovery hygiene.
+      db.user.update({
+        where: { email },
+        data: { passwordHash, sessionVersion: { increment: 1 } },
+      }),
       db.verificationToken.deleteMany({ where: { identifier } }),
     ]);
   } catch (err) {
@@ -297,6 +303,8 @@ export async function becomeSeller(
         });
       }
 
+      // Analytics (Step 31): fires only on a NEW profile (not idempotent reuse) — IDs only.
+      captureServerEvent("seller_onboarded", userId, { sellerId: profile.id });
       return profile;
     });
   } catch (err) {

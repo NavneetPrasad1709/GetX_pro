@@ -38,11 +38,11 @@ export function HomeReviews() {
   return (
     <section className="border-t border-border py-10 min-[761px]:py-12 min-[1025px]:py-[62px]">
       <PageContainer>
+        {/* description prop removed — will be populated with real aggregate data at Step 13 */}
         <SectionHeading
           align="center"
           kicker="Reviews"
           title="Loved by gamers"
-          description="4.9★ average from 2,300+ verified buyers."
           className="mb-5 min-[761px]:mb-7"
         />
 

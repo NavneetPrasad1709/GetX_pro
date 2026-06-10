@@ -1,6 +1,19 @@
 import type { OrderStatus, PaymentStatus, Prisma } from "@prisma/client";
+import { captureException } from "@sentry/nextjs";
 import { db } from "@/lib/db";
 import { ORDER_TRANSITIONS } from "@/server/services/orders";
+import { fireFraudSignal } from "@/server/services/fraud/dispatch";
+import {
+  checkWashTrade,
+  checkMicroOrderRing,
+} from "@/server/services/fraud/signals";
+import { notifyOrderEvent } from "@/server/services/notifications";
+import {
+  autoDeliver,
+  DeliveryStockoutError,
+  getDeliveryItemCount,
+  pauseListingOnStockout,
+} from "@/server/services/delivery";
 import type { NormalizedPaymentEvent, PaymentEventKind } from "./types";
 
 /**
@@ -54,6 +67,14 @@ export type ApplyEventResult =
       orderStatus: OrderStatus;
       /** payment confirmed but stock raced to 0 — admin follow-up created */
       oversold?: boolean;
+      /** INSTANT-delivery listing (drives post-commit auto-delivery) */
+      instant?: boolean;
+      hasShield?: boolean;
+      listingId?: string;
+      /** set post-commit: an item was auto-assigned + the order moved to DELIVERED */
+      autoDelivered?: boolean;
+      /** set post-commit: INSTANT but no item/key — fell back to MANUAL delivery */
+      deliveryStockout?: boolean;
     }
   /** same providerEventId seen before — no-op */
   | { outcome: "duplicate" }
@@ -80,7 +101,8 @@ const PAYMENT_STATUS_FOR_KIND: Record<PaymentEventKind, PaymentStatus> = {
 export async function applyPaymentEvent(
   event: NormalizedPaymentEvent,
 ): Promise<ApplyEventResult> {
-  return db.$transaction(async (tx) => {
+  const result = await db.$transaction(
+    async (tx): Promise<ApplyEventResult> => {
     // 1) Idempotency guard — MUST be the first write. `skipDuplicates` maps
     // to INSERT … ON CONFLICT DO NOTHING: a replay yields count 0 (no thrown
     // error, no aborted transaction), and a concurrent duplicate blocks on
@@ -117,6 +139,8 @@ export async function applyPaymentEvent(
               currency: true,
               sellerId: true,
               listingId: true,
+              hasShield: true,
+              listing: { select: { deliveryType: true } },
             },
           },
         },
@@ -389,10 +413,76 @@ export async function applyPaymentEvent(
             },
           });
 
-          return { outcome: "applied", orderId: order.id, orderStatus: "PAID", oversold };
+          // Auto-delivery (Step 19) runs POST-COMMIT (below) in its own short transaction so the
+          // payment tx stays short and doesn't contend with the seller-wallet escrow lock.
+          return {
+            outcome: "applied",
+            orderId: order.id,
+            orderStatus: "PAID",
+            oversold,
+            instant: order.listing.deliveryType === "INSTANT",
+            hasShield: order.hasShield,
+            listingId: order.listingId,
+          };
         }
       }
   });
+
+  // Post-commit fraud signals (Prompt 16): wash-trade + micro-order ring run
+  // ONLY once the order has truly reached PAID. Fire-and-forget — never affects
+  // the webhook response (the provider just needs a 200).
+  if (result.outcome === "applied" && result.orderStatus === "PAID") {
+    void db.order
+      .findUnique({
+        where: { id: result.orderId },
+        select: { buyerId: true, sellerId: true },
+      })
+      .then((o) => {
+        if (!o) return;
+        fireFraudSignal("suspected_wash_trade", checkWashTrade(o.buyerId, o.sellerId, result.orderId));
+        fireFraudSignal("micro_order_ring", checkMicroOrderRing(o.buyerId, o.sellerId));
+      })
+      .catch(() => {});
+
+    // Step 19: auto / instant delivery — POST-COMMIT, in its own short tx (no escrow-lock contention).
+    // Awaited so the item is handed over before the webhook returns. A stockout / missing key NEVER
+    // fails the (already-committed) payment — the order just falls back to MANUAL delivery.
+    if (result.instant && result.listingId) {
+      try {
+        await autoDeliver(result.orderId, result.listingId, result.hasShield ?? false);
+        result.autoDelivered = true;
+        void notifyOrderEvent(result.orderId, "DELIVERED").catch(() => {});
+        if ((await getDeliveryItemCount(result.listingId)) === 0) {
+          await pauseListingOnStockout(result.listingId);
+        }
+      } catch (e) {
+        result.deliveryStockout = true;
+        if (!(e instanceof DeliveryStockoutError)) {
+          captureException(e); // unexpected — payment is fine, delivery falls back to MANUAL
+        }
+        void notifyOrderEvent(result.orderId, "PAID").catch(() => {});
+        void db.fraudFlag
+          .upsert({
+            where: { targetId_reason: { targetId: result.orderId, reason: "auto_delivery_stockout" } },
+            create: {
+              targetType: "ORDER",
+              targetId: result.orderId,
+              reason: "auto_delivery_stockout",
+              severity: "LOW",
+              autoDetected: true,
+              metadata: { listingId: result.listingId },
+            },
+            update: {},
+          })
+          .catch(() => {});
+      }
+    } else {
+      // Step 22: payment cleared (manual delivery) → tell the seller to deliver + the buyer it's safe.
+      void notifyOrderEvent(result.orderId, "PAID").catch(() => {});
+    }
+  }
+
+  return result;
   // A thrown error here (DB fault mid-transaction) rolls EVERYTHING back,
   // including the dedupe row — the provider's retry will reprocess cleanly.
 }

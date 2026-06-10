@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
   MinusIcon,
   PlusIcon,
   ZapIcon,
   PackageIcon,
   ShoppingCartIcon,
-  MessageCircleIcon,
-  LockIcon,
+  CheckCircle2Icon,
+  AlertTriangleIcon,
+  ShieldCheckIcon,
 } from "lucide-react";
 import type { DeliveryType } from "@prisma/client";
 import { computeBuyerFee } from "@/lib/fees";
+import { siteConfig } from "@/config/site";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { Price } from "@/components/shared/price";
 import { CtaLink } from "@/components/shared/cta-link";
+import { EscrowProtectionPanel } from "@/components/shared/escrow-protection-panel";
 
 type Props = {
   slug: string;
@@ -29,6 +31,9 @@ type Props = {
 // A sane per-order quantity ceiling on top of available stock.
 const MAX_QTY = 99;
 
+// At or below this remaining stock, show an urgency signal (scarcity converts).
+const LOW_STOCK_THRESHOLD = 3;
+
 /**
  * Buy box (Step 07) — quantity, a live fee/total preview (lib/fees.ts, the same
  * math checkout uses in Step 08), and the primary "Buy now" CTA. Client island
@@ -39,13 +44,14 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
   const inStock = stock > 0;
   const maxQty = Math.min(stock, MAX_QTY);
   const [qty, setQty] = useState(1);
+  const [shield, setShield] = useState(false);
 
   const clampedQty = Math.min(Math.max(1, qty), Math.max(1, maxQty));
-  const { subtotalMinor, platformFeeMinor, totalMinor, platformFeePercent } =
-    computeBuyerFee(priceMinor, clampedQty);
+  const { subtotalMinor, platformFeeMinor, totalMinor, platformFeePercent, shieldFeeMinor } =
+    computeBuyerFee(priceMinor, clampedQty, { shield });
 
   const instant = deliveryType === "INSTANT";
-  const checkoutHref = `/checkout?listing=${encodeURIComponent(slug)}&qty=${clampedQty}`;
+  const checkoutHref = `/checkout?listing=${encodeURIComponent(slug)}&qty=${clampedQty}${shield ? "&shield=1" : ""}`;
 
   return (
     <>
@@ -76,9 +82,17 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
       {/* stock / quantity */}
       {inStock ? (
         <div className="flex items-center justify-between gap-3">
-          <span className="text-sm text-muted-foreground">
-            {stock > 1 ? `${stock} in stock` : "1 available"}
-          </span>
+          {stock > LOW_STOCK_THRESHOLD ? (
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
+              <CheckCircle2Icon className="size-4" aria-hidden="true" />
+              In stock
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-400">
+              <AlertTriangleIcon className="size-4" aria-hidden="true" />
+              Only {stock} left
+            </span>
+          )}
           {maxQty > 1 ? (
             <div
               className="flex items-center gap-1 rounded-lg border border-input p-1"
@@ -134,6 +148,12 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
             {formatMoney(platformFeeMinor, currency)}
           </dd>
         </div>
+        {shield ? (
+          <div className="flex items-center justify-between">
+            <dt className="text-muted-foreground">Shield protection</dt>
+            <dd className="tabular-nums">{formatMoney(shieldFeeMinor, currency)}</dd>
+          </div>
+        ) : null}
         <div className="mt-1 flex items-center justify-between border-t border-border pt-2">
           <dt className="font-semibold">Total</dt>
           <dd>
@@ -144,6 +164,26 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
           Payment processing included — what you see is what you pay.
         </p>
       </dl>
+
+      {/* Shield add-on (Prompt 15b) — extends protection + full refund cover. */}
+      <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-border bg-card p-3 transition-colors has-checked:border-primary/50 has-checked:bg-primary/5">
+        <input
+          type="checkbox"
+          checked={shield}
+          onChange={(e) => setShield(e.target.checked)}
+          className="mt-0.5 size-4 accent-primary"
+        />
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-1.5 text-sm font-semibold">
+            <ShieldCheckIcon className="size-4 text-primary" aria-hidden="true" />
+            Add Shield protection
+          </span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">
+            Extends your escrow window to {siteConfig.fees.shield.extendedEscrowDays}{" "}
+            days and guarantees a full refund (incl. fees) if anything&apos;s wrong.
+          </span>
+        </span>
+      </label>
 
       {/* CTAs */}
       <div className="flex flex-col gap-2.5">
@@ -162,26 +202,18 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
             Out of stock
           </button>
         )}
-
-        <Link
-          href={`/chat/new?listing=${encodeURIComponent(slug)}`}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-sm border border-border bg-background px-[26px] py-3 font-heading text-[14.5px] font-semibold text-foreground transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-        >
-          <MessageCircleIcon className="size-[18px]" aria-hidden="true" />
-          Chat with seller
-        </Link>
       </div>
 
-      <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-        <LockIcon className="size-3.5 text-primary" aria-hidden="true" />
-        Payment held in escrow until you confirm delivery
-      </p>
+      <EscrowProtectionPanel variant="compact" />
     </div>
 
       {/* Sticky mobile buy bar — app-like persistent CTA, shares qty/total with
           the box above. Sits just above the fixed mobile bottom-nav (74px) and
           is hidden on desktop where the sidebar box is always in view. */}
-      <div className="fixed inset-x-0 bottom-[74px] z-40 border-t border-border bg-card/95 backdrop-blur-md min-[901px]:hidden">
+      <div
+        className="fixed inset-x-0 bottom-[74px] z-40 border-t border-border bg-card/95 backdrop-blur-md min-[901px]:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-3 px-[22px] py-2.5">
           <div className="min-w-0">
             <div className="font-heading text-lg leading-tight font-bold tabular-nums">

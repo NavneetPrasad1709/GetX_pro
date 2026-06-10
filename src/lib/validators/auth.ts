@@ -27,6 +27,8 @@ export const registerSchema = z.object({
   email: emailField,
   password: passwordField,
   turnstileToken: z.string().optional(),
+  // Referral code captured from ?ref= at signup (Prompt 22). Optional, attribution-only.
+  ref: z.string().trim().max(16).optional(),
 });
 
 export const loginSchema = z.object({

@@ -1,0 +1,1377 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GETX — Audit UI/UX Preview (Prompts 01–07)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* v10 tokens (match design-preview-v10) */
+      :root {
+        --bg: #0a0b0d;
+        --surface: #14161b;
+        --surface-2: #1b1e25;
+        --border: #262a33;
+        --text: #e9edf5;
+        --muted: #9aa4b2;
+        --faint: #6b7280;
+        --primary: #4d7cfe;
+        --primary-strong: #3d6bf0;
+        --success: #45b483;
+        --warning: #e0a800;
+        --amber: #fbbf24;
+        --danger: #ef4759;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, system-ui, sans-serif;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1, h2, h3, .h { font-family: Poppins, sans-serif; }
+      a { color: var(--primary); }
+      .wrap { max-width: 1120px; margin: 0 auto; padding: 0 22px; }
+      .doc-hero {
+        background: radial-gradient(ellipse at top, rgba(77, 124, 254, 0.18), transparent 60%);
+        border-bottom: 1px solid var(--border);
+        padding: 48px 0 36px;
+      }
+      .doc-hero h1 { font-size: 30px; font-weight: 800; margin: 0 0 8px; }
+      .doc-hero p { color: var(--muted); margin: 0; max-width: 720px; }
+      .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+      .chip {
+        font-family: Poppins; font-size: 12px; font-weight: 600;
+        padding: 5px 11px; border-radius: 999px;
+        background: rgba(77, 124, 254, 0.12); color: var(--primary);
+        border: 1px solid rgba(77, 124, 254, 0.25);
+      }
+      .chip.done { background: rgba(69, 180, 131, 0.12); color: var(--success); border-color: rgba(69,180,131,.25); }
+
+      section.block { padding: 40px 0; border-bottom: 1px solid var(--border); }
+      .eyebrow { font-family: Poppins; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--primary); }
+      .block h2 { font-size: 22px; font-weight: 700; margin: 6px 0 4px; }
+      .block .lede { color: var(--muted); margin: 0 0 22px; max-width: 760px; font-size: 14.5px; }
+      .note { color: var(--faint); font-size: 12.5px; margin-top: 12px; }
+
+      /* generic device frame */
+      .frame { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); }
+      .frame + .frame { margin-top: 16px; }
+      .cap { font-size: 12px; color: var(--faint); margin: 8px 2px 0; font-family: Poppins; font-weight: 600; }
+
+      /* headers */
+      .hdr { display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 18px; border-bottom: 1px solid var(--border); background: rgba(10,11,13,.88); }
+      .logo { font-family: Poppins; font-weight: 800; font-size: 18px; letter-spacing: -.02em; }
+      .logo b { color: var(--primary); }
+      .nav { display: flex; gap: 6px; }
+      .nav a { color: var(--muted); text-decoration: none; font-family: Poppins; font-weight: 500; font-size: 14px; padding: 8px 12px; border-radius: 6px; }
+      .nav a.active { color: var(--text); }
+      .search { flex: 1; max-width: 360px; display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--faint); font-size: 13px; }
+      .spacer { margin-left: auto; }
+      .btn { font-family: Poppins; font-weight: 700; font-size: 13px; border: none; border-radius: 6px; padding: 9px 16px; cursor: default; }
+      .btn.cta { background: var(--primary-strong); color: #fff; box-shadow: 0 6px 20px -8px var(--primary); }
+      .btn.ghost { background: transparent; color: var(--muted); }
+      .lock { color: var(--success); font-weight: 600; font-size: 13px; font-family: Poppins; }
+      .ribbon { background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 11.5px; color: var(--muted); padding: 6px 18px; display: flex; gap: 18px; }
+
+      /* footers */
+      .foot-slim { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 14px 18px; border-top: 1px solid var(--border); font-family: Poppins; font-size: 12px; color: var(--muted); }
+      .pay-chips { margin-left: auto; display: flex; gap: 6px; }
+      .pay-chips span { border: 1px solid var(--border); border-radius: 5px; padding: 2px 7px; font-size: 11px; color: var(--faint); }
+      .foot-cine { padding: 22px 18px; border-top: 1px solid var(--border); background: linear-gradient(180deg, var(--surface), var(--bg)); }
+      .foot-cine .marq { font-family: Poppins; font-weight: 800; font-size: 34px; color: rgba(255,255,255,.05); letter-spacing: .1em; }
+
+      .body-stub { padding: 26px 18px; color: var(--faint); font-size: 13px; text-align: center; }
+
+      /* mega nav panel */
+      .mega { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .mega .g { padding: 8px; border-radius: 8px; }
+      .mega .g:hover { background: var(--surface-2); }
+      .mega .gname { display: flex; gap: 8px; align-items: center; font-family: Poppins; font-weight: 600; font-size: 13.5px; }
+      .mono { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-2); display: grid; place-items: center; font-size: 10px; font-weight: 700; color: rgba(255,255,255,.4); font-family: monospace; }
+      .mega .cats { list-style: none; padding: 0 0 0 36px; margin: 6px 0 0; }
+      .mega .cats li { font-size: 13px; color: var(--muted); padding: 2px 0; }
+      .mega .cats li:hover { color: var(--primary); }
+
+      /* grid + cards */
+      .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+      .card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--surface); }
+      .card .cover { aspect-ratio: 4/3; background: radial-gradient(ellipse at top left, rgba(77,124,254,.16), transparent 55%), var(--surface-2); display: grid; place-items: center; position: relative; }
+      .card .cover .ph { font-family: Poppins; font-weight: 800; font-size: 30px; color: rgba(255,255,255,.18); }
+      .tag { position: absolute; top: 8px; left: 8px; font-size: 11px; font-weight: 600; background: rgba(10,11,13,.7); padding: 3px 8px; border-radius: 999px; }
+      .tag.r { right: 8px; left: auto; color: var(--primary); background: rgba(77,124,254,.2); }
+      .card .b { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+      .ttl { font-size: 13.5px; font-weight: 500; }
+      .price { font-family: Poppins; font-weight: 700; font-size: 18px; }
+      .sellerrow { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); padding-top: 8px; font-size: 12px; color: var(--muted); }
+      .av { width: 22px; height: 22px; border-radius: 999px; background: var(--surface-2); display: inline-block; }
+      .sellerrow a { text-decoration: none; }
+      .trust { margin-left: auto; color: var(--success); font-weight: 600; display: inline-flex; gap: 3px; align-items: center; }
+      .urgent { color: var(--amber); font-weight: 700; font-size: 12.5px; display: inline-flex; gap: 5px; align-items: center; }
+      .instock { color: var(--success); font-weight: 600; font-size: 12.5px; display: inline-flex; gap: 5px; align-items: center; }
+      .verified { display: inline-flex; gap: 4px; align-items: center; background: rgba(69,180,131,.12); color: var(--success); font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+
+      /* two-col product */
+      .twocol { display: grid; grid-template-columns: 1fr 320px; gap: 22px; }
+      .panel { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 16px; }
+      .stat3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; text-align: center; }
+      .stat3 .s { background: var(--surface-2); border-radius: 8px; padding: 10px; }
+      .stat3 .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); }
+      .stat3 .v { font-family: Poppins; font-weight: 700; font-size: 17px; margin-top: 2px; }
+      .trustbadges { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; font-size: 12px; color: var(--muted); }
+      .trustbadges span { display: inline-flex; gap: 6px; align-items: center; }
+
+      /* dashboard shell */
+      .shell { display: flex; min-height: 320px; }
+      .side { width: 200px; border-right: 1px solid var(--border); padding: 14px 10px; background: var(--surface); }
+      .side .grp { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); padding: 8px 10px 4px; }
+      .side a { display: flex; gap: 10px; align-items: center; text-decoration: none; color: var(--muted); font-family: Poppins; font-weight: 500; font-size: 13.5px; padding: 8px 10px; border-radius: 7px; }
+      .side a.active { background: rgba(77,124,254,.1); color: var(--primary); font-weight: 600; }
+      .main { flex: 1; padding: 18px; }
+      .kyc { display: flex; gap: 10px; align-items: center; border: 1px solid rgba(224,168,0,.3); background: rgba(224,168,0,.06); border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-bottom: 14px; }
+      .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+      .tabs a { text-decoration: none; font-family: Poppins; font-weight: 600; font-size: 13px; padding: 5px 12px; border-radius: 999px; color: var(--muted); }
+      .tabs a.active { background: var(--surface-2); color: var(--text); }
+      .orow { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+      .obadge { margin-left: auto; font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+
+      /* phone */
+      .phone { width: 300px; border: 1px solid var(--border); border-radius: 26px; overflow: hidden; background: var(--bg); margin: 0 auto; }
+      .phone .screen { height: 460px; position: relative; }
+      .botnav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 8px 6px 12px; border-top: 1px solid var(--border); background: rgba(10,11,13,.96); }
+      .botnav .t { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--faint); position: relative; }
+      .botnav .t.active { color: var(--primary); }
+      .botnav .ic { width: 22px; height: 22px; border-radius: 6px; background: currentColor; opacity: .8; position: relative; }
+      .botnav .dot { position: absolute; top: -4px; right: -8px; background: var(--primary-strong); color: #fff; font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 999px; display: grid; place-items: center; padding: 0 3px; }
+      .twocol.mob { grid-template-columns: 1fr; }
+      table.cmp { border-collapse: collapse; width: 100%; font-size: 13px; }
+      table.cmp td, table.cmp th { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+      table.cmp th { background: var(--surface-2); font-family: Poppins; font-size: 12px; }
+      .before { color: var(--danger); }
+      .after { color: var(--success); }
+      @media (max-width: 720px) { .twocol { grid-template-columns: 1fr; } .shell { flex-direction: column; } .side { width: auto; border-right: none; border-bottom: 1px solid var(--border); } .mega { grid-template-columns: 1fr 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="doc-hero">
+      <div class="wrap">
+        <div class="eyebrow">GETX · Marketplace audit</div>
+        <h1>UI / UX Preview — Audit Prompts 01–07</h1>
+        <p>
+          A visual reference for the restructuring pass. These are static mockups (v10 design tokens:
+          blue <b style="color:var(--primary)">#4d7cfe</b> on dark, Poppins) of what changed in the real
+          app. Open this file in a browser to scroll through each prompt's UI. The real screens are the
+          Next.js components — this is the "see what I built" companion.
+        </p>
+        <div class="badge-row">
+          <span class="chip done">01 Layout shells</span>
+          <span class="chip done">02 Nav + search</span>
+          <span class="chip done">03 Product page</span>
+          <span class="chip done">04 Seller profiles</span>
+          <span class="chip done">05 Checkout</span>
+          <span class="chip done">06 Dashboard shell</span>
+          <span class="chip done">07 Mobile</span>
+          <span class="chip">08–25 next</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 01 LAYOUT SHELLS -->
+    <section class="block">
+      <div class="wrap">
+        <div class="eyebrow">Prompt 01</div>
+        <h2>Five layout shells (no more one-footer-everywhere)</h2>
+        <p class="lede">
+          The single marketing chrome that painted checkout, dashboards & admin is gone. Each context now
+          gets its own shell. The GSAP cinematic footer renders only on marketing routes.
+        </p>
+
+        <div class="frame">
+          <div class="ribbon"><span>⚡ Instant delivery</span><span>🛡 Escrow protected</span><span>💸 Lowest fees</span></div>
+          <div class="hdr">
+            <div class="logo">GET<b>X</b></div>
+            <div class="nav"><a class="active">Marketplace</a><a>Games ▾</a><a>Sell</a><a>Help</a></div>
+            <div class="search">🔍 Search listings…</div>
+            <span class="spacer"></span><button class="btn ghost">Log in</button><button class="btn cta">Sell</button>
+          </div>
+          <div class="body-stub">marketing page content …</div>
+          <div class="foot-cine"><div class="marq">GETX · GETX · GETX</div><div style="color:var(--faint);font-size:12px;margin-top:8px">Cinematic footer — marketing only</div></div>
+        </div>
+        <div class="cap">MARKETING shell — full chrome (trust ribbon + nav + search + Sell CTA + cinematic footer)</div>
+
+        <div class="frame">
+          <div class="hdr">
+            <div class="logo">GET<b>X</b></div>
+            <div class="search">🔍 Search listings…</div>
+            <span class="spacer"></span><button class="btn ghost">Log in</button>
+          </div>
+          <div class="body-stub">marketplace / listing / seller content …</div>
+          <div class="foot-slim"><span>© 2026 GETX</span><a style="text-decoration:none;color:var(--muted)">Terms</a><a style="text-decoration:none;color:var(--muted)">Privacy</a><a style="text-decoration:none;color:var(--muted)">Fees</a><span class="pay-chips"><span>UPI</span><span>USDT</span><span>BTC</span></span></div>
+        </div>
+        <div class="cap">SHOP shell — search-first header + slim legal footer (no GSAP)</div>
+
+        <div class="frame">
+          <div class="hdr">
+            <div class="logo">GET<b>X</b></div>
+            <span class="spacer"></span><span class="lock">🔒 Secure checkout</span>
+          </div>
+          <div class="body-stub">order summary + pay …</div>
+        </div>
+        <div class="cap">CHECKOUT shell — logo + green lock only. No footer, no Sell CTA, no distractions.</div>
+      </div>
+    </section>
+
+    <!-- 02 NAV + SEARCH -->
+    <section class="block">
+      <div class="wrap">
+        <div class="eyebrow">Prompt 02</div>
+        <h2>Games mega-nav + persistent header search</h2>
+        <p class="lede">Hover "Games" → deep-links to every game × category in one move. Search is now in the desktop header, not buried in the drawer.</p>
+        <div class="mega">
+          <div class="g"><div class="gname"><span class="mono">PoGO</span> Pokémon GO</div><ul class="cats"><li>Accounts</li><li>Items</li><li>Top-ups</li><li>Boosting</li></ul></div>
+          <div class="g"><div class="gname"><span class="mono">CoC</span> Clash of Clans</div><ul class="cats"><li>Accounts</li><li>Items</li><li>Top-ups</li><li>Boosting</li></ul></div>
+          <div class="g"><div class="gname"><span class="mono">VAL</span> Valorant</div><ul class="cats"><li>Accounts</li><li>Items</li><li>Top-ups</li><li>Boosting</li></ul></div>
+          <div class="g"><div class="gname"><span class="mono">FF</span> Free Fire</div><ul class="cats"><li>Accounts</li><li>Items</li><li>Top-ups</li><li>Boosting</li></ul></div>
+          <div class="g"><div class="gname"><span class="mono">PUBG</span> PUBG Mobile</div><ul class="cats"><li>Accounts</li><li>Items</li><li>Top-ups</li><li>Boosting</li></ul></div>
+        </div>
+        <div class="cap">Mega-nav panel — static data, zero DB calls, links use the live /marketplace?game=&type= contract</div>
+      </div>
+    </section>
+
+    <!-- 03 PRODUCT -->
+    <section class="block">
+      <div class="wrap">
+        <div class="eyebrow">Prompt 03</div>
+        <h2>Listing card v2 + sticky buy box with urgency</h2>
+        <p class="lede">Seller name is now a link, "Only N left" creates urgency, the buy box sticks on desktop, and the no-photo cover reads as branding ("No photo yet") not an error.</p>
+        <div class="twocol">
+          <div class="cards">
+            <div class="card">
+              <div class="cover"><div class="ph">PoGO</div><span class="tag">Pokémon GO</span><span class="tag r">⚡ Instant</span></div>
+              <div class="b"><div class="ttl">Lv40 account · 90+ shinies, legendary box</div><div class="price">₹4,999</div>
+                <div class="sellerrow"><span class="av"></span><a href="#">ShinyHunter</a><span class="trust">🛡 96</span></div></div>
+            </div>
+            <div class="card">
+              <div class="cover"><div class="ph" style="opacity:.5">PoGO</div><div style="position:absolute;bottom:14px;font-size:11px;color:var(--faint)">No photo yet</div><span class="tag">Pokémon GO</span></div>
+              <div class="b"><div class="ttl">100,000 PokéCoins — instant by friend code</div><div class="price">₹1,299</div>
+                <div class="sellerrow"><span class="av"></span><a href="#">CoinVault</a><span class="trust">🛡 88</span></div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="price" style="font-size:24px">₹4,999</div>
+            <div style="font-size:11px;color:var(--faint);margin:2px 0 12px">per item</div>
+            <div class="urgent">⚠ Only 2 left</div>
+            <div style="border-top:1px solid var(--border);margin:14px 0;padding-top:12px;font-size:13px;color:var(--muted)">
+              Subtotal <span style="float:right">₹4,999</span><br />Platform fee (5%) <span style="float:right">₹250</span>
+              <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;color:var(--text);font-weight:700">Total <span style="float:right" class="price">₹5,249</span></div>
+            </div>
+            <button class="btn cta" style="width:100%;padding:13px">🛒 Buy now</button>
+            <div style="text-align:center;font-size:11px;color:var(--faint);margin-top:10px">🔒 Held in escrow until you confirm delivery</div>
+          </div>
+        </div>
+        <div class="cap">Sticky right rail (desktop) · amber "Only N left" when stock ≤ 3 · in-stock shows green ✓</div>
+      </div>
+    </section>
+
+    <!-- 04 SELLER PROFILE -->
+    <section class="block">
+      <div class="wrap">
+        <div class="eyebrow">Prompt 04</div>
+        <h2>Seller profile as a conversion surface</h2>
+        <p class="lede">One shared trust-tone, a real "ID Verified" badge, and a 3rd stat: response time (computed from chat timestamps; "New seller" when there isn't enough signal yet).</p>
+        <div class="panel" style="max-width:560px">
+          <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">
+            <span class="av" style="width:52px;height:52px"></span>
+            <div>
+              <div style="display:flex;gap:8px;align-items:center"><span class="h" style="font-weight:700;font-size:18px">ShinyHunter</span> <span class="verified">✔ ID Verified</span></div>
+              <div style="font-size:12px;color:var(--faint);margin-top:3px">Member since Jan 2026 · India</div>
+              <div style="font-size:12px;color:var(--faint)">Avg. response: ~4 min</div>
+            </div>
+          </div>
+          <div class="stat3">
+            <div class="s"><div class="k">Trust</div><div class="v" style="color:var(--success)">🛡 96</div></div>
+            <div class="s"><div class="k">Sales</div><div class="v">312</div></div>
+            <div class="s"><div class="k">Response</div><div class="v">~4 min</div></div>
+          </div>
+        </div>
+        <div class="cap">3-stat header (Trust · Sales · Response) · empty states now branded with escrow reassurance + CTA</div>
+      </div>
+    </section>
+
+    <!-- 05 CHECKOUT -->
+    <section class="block">
+      <div class="wrap">
+        <div class="eyebrow">Prompt 05</div>
+        <h2>One-step checkout + trust badges + mobile pay bar</h2>
+        <p class="lede">"Pay securely" creates the order AND opens the gateway in one press (no extra page load). Three trust badges sit at the payment action; crypto poller now recovers gracefully after 2 min.</p>
+        <div class="panel" style="max-width:420px">
+          <label style="display:flex;gap:10px;align-items:center;border:1px solid var(--primary);background:rgba(77,124,254,.05);border-radius:8px;padding:12px;margin-bottom:8px"><input type="radio" checked /> <b style="font-size:13px">UPI / Cards (Razorpay)</b></label>
+          <label style="display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px"><input type="radio" /> <b style="font-size:13px">Crypto (CoinGate)</b></label>
+          <button class="btn cta" style="width:100%;padding:13px">Pay securely · ₹5,249</button>
+          <div class="trustbadges" style="margin-top:14px"><span style="color:var(--success)">🛡 Escrow protected</span><span style="color:var(--primary)">↺ Money-back</span><span>🔒 256-bit SSL</span></div>
+          <div style="text-align:center;font-size:11px;color:var(--faint);margin-top:10px">By paying you agree to the <a>Terms of Service</a> and <a>Refund Policy</a>.</div>
+        </div>
+        <div class="cap">Mobile: a sticky bottom pay bar (Qty · total · Pay securely) shares the exact same state, safe-area aware</div>
+      </div>
+    </section>
+
+    <!-- 06 DASHBOARD SHELL -->
+    <section class="block">
+      <div class="wrap">
+        <div class="eyebrow">Prompt 06</div>
+        <h2>Dashboard app shell — sidebar, topbar, KYC banner, order tabs</h2>
+        <p class="lede">Authenticated routes get a real app shell: role-aware sidebar + topbar (with search). Sellers see a KYC banner hub-wide; order lists gain status tabs; the mobile Orders tab badges action-required.</p>
+        <div class="frame">
+          <div class="hdr" style="height:52px"><div class="logo" style="font-size:16px">GET<b>X</b></div><div class="search" style="max-width:220px">🔍 Search GETX…</div><span class="spacer"></span>✉️ <span class="av"></span></div>
+          <div class="shell">
+            <div class="side">
+              <a class="active">▦ Dashboard</a><a>🛍 Orders</a><a>✉ Messages</a>
+              <div class="grp">Seller hub</div>
+              <a>🏪 Overview</a><a>📦 Listings</a><a>＋ New listing</a><a>👛 Wallet</a><a>🛡 Verify</a>
+            </div>
+            <div class="main">
+              <div class="kyc">⚠ Verify your identity to unlock payouts and earn the ID Verified badge. <a style="margin-left:auto" href="#">Verify now →</a></div>
+              <div class="tabs"><a class="active">All (12)</a><a>Needs action (2)</a><a>Active (5)</a><a>Completed (5)</a></div>
+              <div class="orow"><div><div style="font-size:13px;font-weight:600">Lv40 Pokémon GO account</div><div style="font-size:11px;color:var(--faint)">Buyer · Qty 1 · 8 Jun 2026</div></div><span class="obadge" style="color:var(--amber)">PAID — deliver</span></div>
+              <div class="orow"><div><div style="font-size:13px;font-weight:600">100k PokéCoins</div><div style="font-size:11px;color:var(--faint)">Buyer · Qty 1 · 7 Jun 2026</div></div><span class="obadge" style="color:var(--success)">COMPLETED</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="cap">Role-aware sidebar (buyer / seller hub / admin sections) · KYC banner · SSR status tabs via ?filter=</div>
+      </div>
+    </section>
+
+    <!-- 07 MOBILE -->
+    <section class="block">
+      <div class="wrap">
+        <div class="eyebrow">Prompt 07</div>
+        <h2>Mobile: Messages tab, badges, role-aware drawer</h2>
+        <p class="lede">The wasted "Sell" FAB is gone — Messages gets a dedicated tab with an unread badge, Orders shows an action-required badge, and the hamburger drawer adapts to role.</p>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <div>
+            <div class="phone"><div class="screen">
+              <div style="padding:40px 16px;color:var(--faint);font-size:13px;text-align:center">app content …</div>
+              <div class="botnav">
+                <div class="t"><span class="ic"></span>Home</div>
+                <div class="t"><span class="ic"></span>Browse</div>
+                <div class="t"><span class="ic">'<span class="dot">3</span></span>Messages</div>
+                <div class="t active"><span class="ic"><span class="dot">2</span></span>Orders</div>
+                <div class="t"><span class="ic"></span>Account</div>
+              </div>
+            </div></div>
+            <div class="cap">5-tab bottom nav: Home · Browse · <b style="color:var(--primary)">Messages (badge)</b> · Orders (badge) · Account</div>
+          </div>
+          <div style="flex:1;min-width:260px">
+            <table class="cmp">
+              <tr><th>Before</th><th>After (Prompt 07)</th></tr>
+              <tr><td class="before">Center "Sell" FAB (useless after onboarding)</td><td class="after">Messages tab with live unread badge</td></tr>
+              <tr><td class="before">Messages unreachable from nav</td><td class="after">One tap from any screen</td></tr>
+              <tr><td class="before">Drawer = same links for everyone</td><td class="after">Seller → "Seller hub"; Admin → +"Admin panel"; Buyer → "Start selling"</td></tr>
+              <tr><td class="before">Buy bar clipped by iPhone home indicator</td><td class="after">safe-area-inset-bottom padding added</td></tr>
+            </table>
+            <p class="note">Deferred to a focused follow-up: the marketplace filter <b>bottom-sheet</b> (Task 2 — isolated, larger). Tasks 3 & 5 turned out moot after Prompts 01/06 (chat now scrolls inside the app shell; the old sub-navs were replaced by the sidebar).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ Prompt 08 -->
+    <section class="block">
+      <div class="wrap">
+        <div class="chip">Prompt 08 · Search &amp; Filters</div>
+        <h2>Popular sort · Instant-only toggle · Seller experience &amp; Verified filters · Facet counts</h2>
+        <p class="lede">New "Most popular" sort key (by seller total sales), one-tap ⚡ Instant-only toggle, minSales/verified filters, and facet counts (e.g. "Pokémon GO (12)") that prevent dead-end clicks.</p>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <div style="flex:1;min-width:260px">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:13px">
+              <div style="display:flex;gap:8px;margin-bottom:8px">
+                <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--faint)">🔍 Search listings…</div>
+                <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--muted);font-size:12px">Most popular ▾</div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+                <span style="background:var(--primary);background:color-mix(in srgb,var(--primary) 15%,transparent);border:1px solid var(--primary);color:var(--primary);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:600">⚡ Instant only</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px">
+                  <div style="font-size:10px;color:var(--faint);margin-bottom:3px">GAME</div>
+                  <div style="color:var(--muted);font-size:12px">Pokémon GO (12) ▾</div>
+                </div>
+                <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px">
+                  <div style="font-size:10px;color:var(--faint);margin-bottom:3px">EXPERIENCE</div>
+                  <div style="color:var(--muted);font-size:12px">50+ sales ▾</div>
+                </div>
+                <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px">
+                  <div style="font-size:10px;color:var(--faint);margin-bottom:3px">SELLER STATUS</div>
+                  <div style="color:var(--success);font-size:12px">✓ Verified only</div>
+                </div>
+              </div>
+            </div>
+            <div class="cap">Facet counts show live availability · Instant toggle above panel · Popular sort</div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <table class="cmp">
+              <tr><th>Before</th><th>After (Prompt 08)</th></tr>
+              <tr><td class="before">No "popular" sort</td><td class="after">Most popular (by seller sales)</td></tr>
+              <tr><td class="before">No instant-only shortcut</td><td class="after">⚡ One-tap toggle above filters</td></tr>
+              <tr><td class="before">No experience/verified filter</td><td class="after">minSales + verified selects</td></tr>
+              <tr><td class="before">Game/type options show no counts</td><td class="after">Facet counts (e.g. "Account (7)")</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ Prompt 09 -->
+    <section class="block">
+      <div class="wrap">
+        <div class="chip">Prompt 09 · Trust Signals + Legal Pages</div>
+        <h2>Fake metric removed · 13 legal/marketing pages · Verified badge on cards · New-seller state · Browse CTA</h2>
+        <p class="lede">Payment-processor blocker resolved (Razorpay/CoinGate require live /terms + /privacy + /refund-policy). Fake "12,400+ gamers" removed. Verified badge on every listing card for KYC-approved sellers.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px">
+          <!-- Hero Browse CTA -->
+          <div style="flex:1;min-width:220px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Homepage Hero — Browse CTA</h3>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center">
+              <div style="font-size:20px;font-weight:800;margin-bottom:8px;color:var(--text)">Buy &amp; sell game accounts, <span style="color:var(--primary)">safely</span>.</div>
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--faint);font-size:12px;margin-bottom:10px;max-width:280px;margin-left:auto;margin-right:auto">🔍 Search…</div>
+              <a style="display:inline-flex;align-items:center;gap:6px;background:var(--primary-strong);color:#fff;font-size:13px;font-weight:700;padding:10px 22px;border-radius:5px;text-decoration:none">🔍 Browse listings</a>
+              <div style="margin-top:10px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+                <span style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--muted)">🔒 Escrow</span>
+                <span style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--muted)">✅ Verified</span>
+                <span style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--muted)">↩ Money-back</span>
+              </div>
+            </div>
+            <div class="cap">Blue "Browse listings" CTA — full-width mobile, auto desktop</div>
+          </div>
+
+          <!-- Verified badge on card -->
+          <div style="flex:1;min-width:220px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Listing Card — Verified Badge</h3>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;max-width:200px">
+              <div style="background:var(--surface-2);height:80px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:11px;position:relative">
+                <span style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.6);border-radius:999px;padding:2px 7px;font-size:10px;color:var(--text)">Pokémon GO</span>
+                <span style="position:absolute;top:6px;right:6px;background:color-mix(in srgb,var(--primary) 20%,transparent);color:var(--primary);border-radius:999px;padding:2px 7px;font-size:10px">⚡ Instant</span>
+              </div>
+              <div style="padding:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                  <span style="font-size:10px;background:var(--surface-2);padding:2px 5px;border-radius:4px;color:var(--muted)">ACCOUNT</span>
+                  <span style="font-size:11px;color:var(--warning)">★ 4.9 (12)</span>
+                </div>
+                <div style="font-size:12px;font-weight:600;color:var(--text);margin:4px 0">Lv40 Acc — Team Mystic …</div>
+                <div style="font-size:14px;font-weight:800;color:var(--text)">₹2,500</div>
+                <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;align-items:center;gap:6px">
+                  <span style="width:22px;height:22px;border-radius:50%;background:var(--surface-2);display:inline-block"></span>
+                  <span style="font-size:11px;color:var(--muted)">PokeDealer99</span>
+                  <span style="margin-left:2px;background:color-mix(in srgb,var(--success) 12%,transparent);color:var(--success);border-radius:999px;padding:1px 6px;font-size:10px;font-weight:700">✓ Verified</span>
+                  <span style="margin-left:auto;font-size:11px;color:var(--primary)">🛡 85</span>
+                </div>
+              </div>
+            </div>
+            <div class="cap">Green "Verified" badge for KYC-approved sellers only</div>
+          </div>
+
+          <!-- New-seller trust state -->
+          <div style="flex:1;min-width:220px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Seller Trust Panel — New Seller</h3>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;text-align:center">
+                <div style="background:var(--surface-2);border-radius:6px;padding:8px"><div style="font-size:9px;color:var(--faint);margin-bottom:3px">TRUST</div><div style="font-size:16px;font-weight:800;color:var(--muted)">50</div></div>
+                <div style="background:var(--surface-2);border-radius:6px;padding:8px"><div style="font-size:9px;color:var(--faint);margin-bottom:3px">RATING</div><div style="font-size:12px;font-weight:600;color:var(--muted)">New</div></div>
+                <div style="background:var(--surface-2);border-radius:6px;padding:8px"><div style="font-size:9px;color:var(--faint);margin-bottom:3px">SALES</div><div style="font-size:16px;font-weight:800;color:var(--muted)">0</div></div>
+              </div>
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:12px;color:var(--muted)">
+                <span style="font-weight:700;color:var(--text)">New seller.</span> Every order is escrow-protected regardless of review count — your money is held safely until you confirm delivery.
+              </div>
+            </div>
+            <div class="cap">Trust-positive state instead of orphaned zeros</div>
+          </div>
+        </div>
+
+        <!-- Legal pages grid -->
+        <h3 style="font-size:13px;font-weight:700;margin:16px 0 10px;color:var(--text)">13 New Pages (all return HTTP 200)</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
+          <div style="background:color-mix(in srgb,var(--danger) 12%,transparent);border:1px solid var(--danger);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/terms</div>
+            <div style="color:var(--muted);font-size:11px">Razorpay/CoinGate required</div>
+          </div>
+          <div style="background:color-mix(in srgb,var(--danger) 12%,transparent);border:1px solid var(--danger);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/privacy</div>
+            <div style="color:var(--muted);font-size:11px">IT Act 2000 + PDPB</div>
+          </div>
+          <div style="background:color-mix(in srgb,var(--danger) 12%,transparent);border:1px solid var(--danger);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/fees</div>
+            <div style="color:var(--muted);font-size:11px">Pulled from siteConfig</div>
+          </div>
+          <div style="background:color-mix(in srgb,var(--danger) 12%,transparent);border:1px solid var(--danger);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/refund-policy</div>
+            <div style="color:var(--muted);font-size:11px">Razorpay/CoinGate required</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/how-it-works</div>
+            <div style="color:var(--muted);font-size:11px">3-step + seller flow</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/help</div>
+            <div style="color:var(--muted);font-size:11px">7-question FAQ</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/about</div>
+            <div style="color:var(--muted);font-size:11px">Mission + differentiators</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/trust-safety</div>
+            <div style="color:var(--muted);font-size:11px">Escrow + KYC + dispute</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/seller-guide</div>
+            <div style="color:var(--muted);font-size:11px">Onboarding + fees table</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/payouts</div>
+            <div style="color:var(--muted);font-size:11px">₹500 min, UPI+crypto</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/contact</div>
+            <div style="color:var(--muted);font-size:11px">Discord + email only</div>
+          </div>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px">
+            <div style="font-weight:700;color:var(--text)">/blog · /careers</div>
+            <div style="color:var(--muted);font-size:11px">Coming-soon stubs</div>
+          </div>
+        </div>
+        <p class="note" style="margin-top:12px">Red cards = payment-processor required (launch blockers). All 13 pages: static RSC + generateMetadata + PageContainer + Breadcrumbs + real honest content (no Lorem Ipsum).</p>
+
+        <table class="cmp" style="margin-top:16px">
+          <tr><th>Before</th><th>After (Prompt 09)</th></tr>
+          <tr><td class="before">Footer: "Join 12,400+ gamers…" (fabricated)</td><td class="after">Honest copy — no user count claim</td></tr>
+          <tr><td class="before">13 footer links → 404</td><td class="after">All 13 pages return HTTP 200</td></tr>
+          <tr><td class="before">Listing card — no KYC badge</td><td class="after">Green ✓ Verified badge for KYC-approved</td></tr>
+          <tr><td class="before">New seller shows 3 zeros — looks unsafe</td><td class="after">Trust-positive "New seller" escrow message</td></tr>
+          <tr><td class="before">Hero: only a search bar (cold start for anon)</td><td class="after">Blue "Browse listings" CTA below search</td></tr>
+          <tr><td class="before">Empty review: single grey paragraph</td><td class="after">Two-line trust-positive state (escrow reassurance)</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Prompt 10 -->
+    <section class="block">
+      <div class="wrap">
+        <h2>Prompt 10 — Performance</h2>
+        <p class="note">ISR revalidate added to 5 public pages · getCategoryPreviews N→1 batch · bundle analyzer gated · priority prop on LCP images · GSAP confirmed scoped to (marketing) shell only.</p>
+        <table class="diff">
+          <tr><th>Before</th><th>After</th></tr>
+          <tr><td class="before">getCategoryPreviews: N Neon round-trips (4 queries for 4 categories)</td><td class="after">1 query: WHERE categoryId IN [...], grouped in memory</td></tr>
+          <tr><td class="before">Public pages always dynamic (slow cold render)</td><td class="after">homepage 3600s · game pages 300s · listing 60s ISR</td></tr>
+          <tr><td class="before">First listing images lazy-loaded (LCP regression)</td><td class="after">priority={true} on first 2-4 above-the-fold cards</td></tr>
+          <tr><td class="before">No bundle analysis tooling</td><td class="after">npm run analyze (ANALYZE=true gate, Vercel never fires it)</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Prompt 11 -->
+    <section class="block">
+      <div class="wrap">
+        <h2>Prompt 11 — Trust Engine + Seller Levels</h2>
+        <p class="note">6-signal formula · 5 seller levels · commission discounts · listing caps · nightly cron · admin override · live broadcast to socket server.</p>
+
+        <h3 style="margin:1.5rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">Seller Level Badges</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem">
+          <span style="background:rgba(217,119,6,.15);color:#d97706;padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:700">Bronze</span>
+          <span style="background:rgba(148,163,184,.15);color:#94a3b8;padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:700">Silver</span>
+          <span style="background:rgba(250,204,21,.15);color:#facc15;padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:700">Gold</span>
+          <span style="background:rgba(34,211,238,.15);color:#22d3ee;padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:700">Platinum</span>
+          <span style="background:rgba(77,124,254,.15);color:#4d7cfe;padding:4px 12px;border-radius:999px;font-size:.75rem;font-weight:700">Elite</span>
+        </div>
+
+        <h3 style="margin:0 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">Trust Score Pill (on listing card)</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
+          <span style="background:rgba(52,211,153,.1);color:#34d399;padding:2px 8px;border-radius:999px;font-size:.75rem;font-weight:700">🛡 92</span>
+          <span style="background:rgba(250,204,21,.1);color:#facc15;padding:2px 8px;border-radius:999px;font-size:.75rem;font-weight:700">🛡 67</span>
+          <span style="background:rgba(251,146,60,.1);color:#fb923c;padding:2px 8px;border-radius:999px;font-size:.75rem;font-weight:700">🛡 44</span>
+          <span style="background:rgba(248,113,113,.1);color:#f87171;padding:2px 8px;border-radius:999px;font-size:.75rem;font-weight:700">🛡 21</span>
+        </div>
+
+        <h3 style="margin:0 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">Level Progress Panel (seller dashboard)</h3>
+        <div style="background:#161616;border:1px solid #2a2a2a;border-radius:12px;padding:20px;max-width:380px;font-family:inherit">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+            <div>
+              <p style="color:#666;font-size:.7rem;margin:0 0 4px">Your Level</p>
+              <span style="background:rgba(250,204,21,.15);color:#facc15;padding:6px 14px;border-radius:999px;font-size:.85rem;font-weight:700">Gold</span>
+            </div>
+            <div style="text-align:right">
+              <p style="color:#666;font-size:.7rem;margin:0 0 4px">Trust Score</p>
+              <p style="font-size:1.6rem;font-weight:800;margin:0;color:#fff">71<span style="font-size:.85rem;color:#666">/100</span></p>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+            <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px">
+              <p style="color:#666;font-size:.65rem;margin:0 0 2px">Commission discount</p>
+              <p style="font-size:.85rem;font-weight:700;margin:0;color:#fff">-1.5%</p>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px">
+              <p style="color:#666;font-size:.65rem;margin:0 0 2px">Max listings</p>
+              <p style="font-size:.85rem;font-weight:700;margin:0;color:#fff">50</p>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px">
+              <p style="color:#666;font-size:.65rem;margin:0 0 2px">Payout speed</p>
+              <p style="font-size:.85rem;font-weight:700;margin:0;color:#fff">3 days</p>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px">
+              <p style="color:#666;font-size:.65rem;margin:0 0 2px">Featured eligible</p>
+              <p style="font-size:.85rem;font-weight:700;margin:0;color:#fff">Yes</p>
+            </div>
+          </div>
+          <div>
+            <p style="color:#666;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px">Next: <span style="background:rgba(34,211,238,.15);color:#22d3ee;padding:2px 8px;border-radius:999px;font-size:.65rem;font-weight:700;margin-left:4px">Platinum</span></p>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">
+              <li style="display:flex;align-items:center;gap:8px;font-size:.8rem">
+                <span style="color:#34d399;font-size:1rem">✓</span>
+                <span style="flex:1;color:#888;text-decoration:line-through">Trust score ≥ 65</span>
+                <span style="font-family:monospace;font-size:.7rem;color:#34d399">71</span>
+              </li>
+              <li style="display:flex;align-items:center;gap:8px;font-size:.8rem">
+                <span style="color:#666;font-size:1rem">○</span>
+                <span style="flex:1;color:#ccc">75 completed sales</span>
+                <span style="font-family:monospace;font-size:.7rem;color:#888">23</span>
+              </li>
+              <li style="display:flex;align-items:center;gap:8px;font-size:.8rem">
+                <span style="color:#34d399;font-size:1rem">✓</span>
+                <span style="flex:1;color:#888;text-decoration:line-through">KYC verified</span>
+                <span style="font-family:monospace;font-size:.7rem;color:#34d399">Done</span>
+              </li>
+              <li style="display:flex;align-items:center;gap:8px;font-size:.8rem">
+                <span style="color:#34d399;font-size:1rem">✓</span>
+                <span style="flex:1;color:#888;text-decoration:line-through">Dispute rate ≤ 10%</span>
+                <span style="font-family:monospace;font-size:.7rem;color:#34d399">2.1%</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After</th></tr>
+          <tr><td class="before">Trust score — no formula, no levels, no display</td><td class="after">6-signal formula (0-100) · 5 levels BRONZE→ELITE</td></tr>
+          <tr><td class="before">Commission: flat per-category rate for all sellers</td><td class="after">Elite get -5% off base rate (snapshotted at order creation)</td></tr>
+          <tr><td class="before">Any seller could list unlimited listings</td><td class="after">Listing cap enforced per level (Bronze: 10, Elite: 500)</td></tr>
+          <tr><td class="before">Trust only recomputed manually</td><td class="after">Hooks in reviews/escrow/kyc + nightly cron at 02:00 UTC</td></tr>
+          <tr><td class="before">No admin trust control</td><td class="after">overrideTrustScoreAction + override lock flag</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Prompt 12 -->
+    <section class="block">
+      <div class="wrap">
+        <h2>Prompt 12 — Marketplace Liquidity &amp; Cold-Start</h2>
+        <p class="note">Empty categories now capture demand instead of bouncing buyers · new-seller search boost · stale-listing auto-pause · admin liquidity dashboard · Pokémon GO seeded to depth (12 listings).</p>
+
+        <h3 style="margin:1.5rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">Demand Capture Card (empty category)</h3>
+        <div style="max-width:420px;border:1px solid #2a2a2a;border-radius:12px;background:rgba(22,22,22,.6);padding:20px">
+          <div style="display:flex;gap:12px">
+            <span style="display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border-radius:8px;background:rgba(77,124,254,.12);color:#4d7cfe;font-size:1.1rem">🔔</span>
+            <div>
+              <p style="font-weight:700;font-size:1rem;margin:0 0 4px;color:#fff">Be the first to know when PUBG Mobile Accounts go live</p>
+              <p style="font-size:.84rem;color:#9aa;margin:0 0 12px">Enter your email — we'll notify you the moment a verified seller lists here. No spam.</p>
+              <input placeholder="you@email.com" style="width:100%;box-sizing:border-box;background:#0e0e0e;border:1px solid #2a2a2a;border-radius:8px;padding:9px 12px;color:#fff;font-size:.85rem;margin-bottom:8px" />
+              <button style="width:100%;background:#4d7cfe;color:#fff;border:0;border-radius:8px;padding:10px;font-weight:700;font-size:.85rem;cursor:pointer">Notify me</button>
+              <p style="font-size:.75rem;color:#9aa;margin:12px 0 0">Are you a seller? <span style="color:#4d7cfe;font-weight:600">List yours →</span></p>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin:1.75rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">Admin Liquidity Dashboard (ops view)</h3>
+        <div style="overflow-x:auto;border:1px solid #2a2a2a;border-radius:10px">
+          <table style="width:100%;border-collapse:collapse;font-size:.8rem;min-width:520px">
+            <thead><tr style="background:rgba(22,22,22,.6);text-align:left;color:#888;text-transform:uppercase;font-size:.65rem">
+              <th style="padding:8px 12px">Game</th><th style="padding:8px 12px">Category</th><th style="padding:8px 12px;text-align:right">Active</th><th style="padding:8px 12px;text-align:right">Demand</th><th style="padding:8px 12px">Fill rate</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-top:1px solid #2a2a2a"><td style="padding:8px 12px"><span style="display:inline-block;width:8px;height:8px;border-radius:99px;background:#34d399;margin-right:6px"></span>Pokémon GO</td><td style="padding:8px 12px">Accounts</td><td style="padding:8px 12px;text-align:right;font-weight:700">6</td><td style="padding:8px 12px;text-align:right;color:#9aa">2</td><td style="padding:8px 12px"><span style="display:inline-block;width:60px;height:6px;border-radius:99px;background:#2a2a2a;vertical-align:middle"><span style="display:block;width:75%;height:100%;border-radius:99px;background:#4d7cfe"></span></span> <span style="color:#888;font-size:.7rem">75%</span></td></tr>
+              <tr style="border-top:1px solid #2a2a2a"><td style="padding:8px 12px"><span style="display:inline-block;width:8px;height:8px;border-radius:99px;background:#facc15;margin-right:6px"></span>Valorant</td><td style="padding:8px 12px">Skins</td><td style="padding:8px 12px;text-align:right;font-weight:700">2</td><td style="padding:8px 12px;text-align:right;color:#9aa">5</td><td style="padding:8px 12px"><span style="display:inline-block;width:60px;height:6px;border-radius:99px;background:#2a2a2a;vertical-align:middle"><span style="display:block;width:29%;height:100%;border-radius:99px;background:#4d7cfe"></span></span> <span style="color:#888;font-size:.7rem">29%</span></td></tr>
+              <tr style="border-top:1px solid #2a2a2a;background:rgba(248,113,113,.05)"><td style="padding:8px 12px"><span style="display:inline-block;width:8px;height:8px;border-radius:99px;background:#f87171;margin-right:6px"></span>PUBG Mobile</td><td style="padding:8px 12px">Accounts</td><td style="padding:8px 12px;text-align:right;font-weight:700">0</td><td style="padding:8px 12px;text-align:right;color:#9aa">12</td><td style="padding:8px 12px"><span style="display:inline-block;width:60px;height:6px;border-radius:99px;background:#2a2a2a;vertical-align:middle"><span style="display:block;width:0%;height:100%;border-radius:99px;background:#4d7cfe"></span></span> <span style="color:#888;font-size:.7rem">0%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After</th></tr>
+          <tr><td class="before">Empty category = silent dead end, buyer bounces</td><td class="after">Demand-capture email form ("notify me when live")</td></tr>
+          <tr><td class="before">13 of 17 categories empty at seed</td><td class="after">All 4 Pokémon GO categories seeded (12 listings total)</td></tr>
+          <tr><td class="before">New sellers buried in newest sort within hours</td><td class="after">7-day visibility boost ranks them first (display-only)</td></tr>
+          <tr><td class="before">90-day ghost listings sit on the marketplace forever</td><td class="after">Auto-paused after 60 days inactivity + seller notified</td></tr>
+          <tr><td class="before">No supply visibility for the ops team</td><td class="after">/admin/liquidity — red rows = recruit sellers here</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Prompt 13 -->
+    <section class="block">
+      <div class="wrap">
+        <h2>Prompt 13 — Escrow UX: Make Protection Visible</h2>
+        <p class="note">The escrow engine was always production-grade — now it FEELS it. Visual stepper on the order page, "How GETX protects you" panel on listing + checkout, protection-framed countdown. Zero money-logic change.</p>
+
+        <h3 style="margin:1.5rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">Escrow Stepper (order page · PAID state)</h3>
+        <div style="display:flex;align-items:flex-start;gap:0;border:1px solid #2a2a2a;border-radius:12px;background:rgba(22,22,22,.5);padding:20px;flex-wrap:wrap">
+          <div style="flex:1;min-width:120px;display:flex;flex-direction:column;align-items:center;text-align:center">
+            <span style="display:grid;place-items:center;width:32px;height:32px;border-radius:99px;border:1px solid #34d399;background:rgba(52,211,153,.2);color:#34d399;font-weight:700">✓</span>
+            <p style="font-size:.8rem;font-weight:600;color:#9aa;margin:8px 0 0">Payment</p>
+          </div>
+          <div style="flex:1;min-width:120px;display:flex;flex-direction:column;align-items:center;text-align:center">
+            <span style="display:grid;place-items:center;width:32px;height:32px;border-radius:99px;border:1px solid #4d7cfe;background:rgba(77,124,254,.2);color:#4d7cfe;font-weight:700">2</span>
+            <p style="font-size:.8rem;font-weight:700;color:#fff;margin:8px 0 4px">Held in escrow</p>
+            <p style="font-size:.72rem;color:#9aa;margin:0;max-width:140px">GETX holds your funds safely. The seller is notified to deliver.</p>
+          </div>
+          <div style="flex:1;min-width:120px;display:flex;flex-direction:column;align-items:center;text-align:center">
+            <span style="display:grid;place-items:center;width:32px;height:32px;border-radius:99px;border:1px solid #2a2a2a;background:rgba(255,255,255,.04);color:#888;font-weight:700">3</span>
+            <p style="font-size:.8rem;font-weight:600;color:#888;margin:8px 0 0">Delivered</p>
+          </div>
+          <div style="flex:1;min-width:120px;display:flex;flex-direction:column;align-items:center;text-align:center">
+            <span style="display:grid;place-items:center;width:32px;height:32px;border-radius:99px;border:1px solid #2a2a2a;background:rgba(255,255,255,.04);color:#888;font-weight:700">4</span>
+            <p style="font-size:.8rem;font-weight:600;color:#888;margin:8px 0 0">Confirmed</p>
+          </div>
+        </div>
+
+        <h3 style="margin:1.75rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">"How GETX protects you" panel</h3>
+        <div style="max-width:380px;border:1px solid #2a2a2a;border-radius:10px;background:rgba(22,22,22,.6);padding:16px">
+          <p style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:.88rem;margin:0 0 12px;color:#fff">🛡 How GETX protects you</p>
+          <div style="display:flex;gap:10px;margin-bottom:10px"><span style="color:#4d7cfe">🔒</span><div><p style="font-size:.8rem;font-weight:600;margin:0;color:#fff">Escrow-protected</p><p style="font-size:.76rem;color:#9aa;margin:0">The seller receives nothing until you confirm delivery.</p></div></div>
+          <div style="display:flex;gap:10px;margin-bottom:10px"><span style="color:#4d7cfe">↩</span><div><p style="font-size:.8rem;font-weight:600;margin:0;color:#fff">Money-back guarantee</p><p style="font-size:.76rem;color:#9aa;margin:0">Not delivered or not as described? Full refund.</p></div></div>
+          <div style="display:flex;gap:10px"><span style="color:#facc15">⚠</span><div><p style="font-size:.8rem;font-weight:600;margin:0;color:#fff">Dispute resolution</p><p style="font-size:.76rem;color:#9aa;margin:0">Open a dispute within 3 days — our team resolves fairly.</p></div></div>
+          <p style="font-size:.7rem;color:#666;border-top:1px solid #2a2a2a;margin:12px 0 0;padding-top:10px">Payment auto-releases 3 days after delivery if you take no action.</p>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After</th></tr>
+          <tr><td class="before">Order page: just a status badge + one grey line</td><td class="after">4-step visual stepper, current step highlighted</td></tr>
+          <tr><td class="before">Escrow = one muted line below the buy CTA</td><td class="after">Full "How GETX protects you" panel on listing + checkout</td></tr>
+          <tr><td class="before">Countdown framed as pressure ("auto-releases in 2d")</td><td class="after">Framed as protection ("You are protected until…")</td></tr>
+          <tr><td class="before">Dispute path hidden until something goes wrong</td><td class="after">Pre-explained inline: "reviewed within 48 hours"</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Prompt 14 -->
+    <section class="block">
+      <div class="wrap">
+        <h2>Prompt 14 — Seller Conversion: Registration → First Sale</h2>
+        <p class="note">Activation checklist on the seller hub · KYC nudges · guided first-listing (templates + price benchmarks + photo tips) · first-sale celebration · founder funnel metrics.</p>
+
+        <h3 style="margin:1.5rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">Onboarding Checklist (seller hub)</h3>
+        <div style="max-width:420px;border:1px solid #2a2a2a;border-radius:12px;background:#161616;padding:20px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px"><span style="font-weight:700">Get your shop ready</span><span style="color:#888;font-size:.8rem">2/4 done</span></div>
+          <div style="height:6px;background:#2a2a2a;border-radius:99px;margin-bottom:16px"><div style="width:50%;height:100%;background:#4d7cfe;border-radius:99px"></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem">
+            <div style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid #232323;border-radius:8px"><span style="color:#34d399">✓</span><span style="color:#888;text-decoration:line-through;flex:1">Verify your email</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid #232323;border-radius:8px"><span style="color:#facc15">◷</span><span style="flex:1">Complete KYC verification <span style="color:#facc15;font-size:.7rem">in review</span></span><span style="color:#4d7cfe;font-size:.75rem;font-weight:600">Check status →</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid #232323;border-radius:8px"><span style="color:#34d399">✓</span><span style="color:#888;text-decoration:line-through;flex:1">Create your first listing</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid #232323;border-radius:8px"><span style="color:#666">○</span><span style="flex:1">Set your payout method</span><span style="color:#4d7cfe;font-size:.75rem;font-weight:600">Set up →</span></div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After</th></tr>
+          <tr><td class="before">New seller hub: 4 stat cards all showing "—"</td><td class="after">4-step activation checklist with progress bar</td></tr>
+          <tr><td class="before">First listing = blank form, zero guidance</td><td class="after">Category templates + price benchmark + photo tips</td></tr>
+          <tr><td class="before">First sale: silent — "where's my money?" panic</td><td class="after">🎉 celebration card explaining escrow release</td></tr>
+          <tr><td class="before">No KYC reminder in the listing flow</td><td class="after">Non-blocking "payouts blocked until KYC" callout</td></tr>
+          <tr><td class="before">Founder can't see activation drop-off</td><td class="after">/admin 5-step funnel with conversion %</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Prompt 15 -->
+    <section class="block">
+      <div class="wrap">
+        <h2>Prompt 15 — Revenue Optimization (high-priority streams)</h2>
+        <p class="note">Opt-in monetization, additive — base take-rate unchanged. This batch: Featured/Promoted listings + homepage/category placement + GETX Pro subscription. Streams 3/5/6/7 queued.</p>
+
+        <h3 style="margin:1.5rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">"Promoted" Listing Card (FTC-labeled)</h3>
+        <div style="position:relative;width:200px;border:1px solid #2a2a2a;border-radius:10px;overflow:hidden;background:#161616">
+          <div style="position:relative;aspect-ratio:4/3;background:linear-gradient(135deg,#1a1a2e,#16213e)">
+            <div style="position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:4px">
+              <span style="background:rgba(245,158,11,.85);color:#000;padding:2px 8px;border-radius:99px;font-size:.6rem;font-weight:800;text-transform:uppercase">Promoted</span>
+              <span style="background:rgba(8,9,11,.7);color:#fff;padding:3px 10px;border-radius:99px;font-size:.65rem;font-weight:600">Pokémon GO</span>
+            </div>
+          </div>
+          <div style="padding:12px">
+            <p style="font-size:.8rem;margin:0 0 8px">Level 40 Account · 200+ Shinies</p>
+            <p style="font-weight:800;margin:0 0 8px">₹4,990</p>
+            <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #2a2a2a;padding-top:8px">
+              <span style="width:20px;height:20px;border-radius:99px;background:#2a2a2a"></span>
+              <span style="font-size:.7rem;color:#888;flex:1">ProGamerStore</span>
+              <span style="background:rgba(77,124,254,.15);color:#4d7cfe;padding:1px 6px;border-radius:99px;font-size:.6rem;font-weight:800">PRO</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin:1.75rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">GETX Pro — Free vs Pro</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:160px;border:1px solid #2a2a2a;border-radius:12px;padding:16px;background:#161616">
+            <p style="font-weight:700;margin:0">Free</p><p style="font-size:1.4rem;font-weight:800;margin:4px 0 10px">₹0</p>
+            <p style="font-size:.75rem;color:#888;margin:0">10 listings · standard commission · escrow payouts</p>
+          </div>
+          <div style="flex:1;min-width:160px;border:1px solid rgba(77,124,254,.4);border-radius:12px;padding:16px;background:rgba(77,124,254,.05)">
+            <div style="display:flex;align-items:center;gap:6px"><p style="font-weight:700;margin:0">Pro</p><span style="background:rgba(77,124,254,.15);color:#4d7cfe;padding:1px 6px;border-radius:99px;font-size:.55rem;font-weight:800">POPULAR</span></div>
+            <p style="font-size:1.4rem;font-weight:800;margin:4px 0 10px">₹499<span style="font-size:.7rem;color:#888;font-weight:400">/mo</span></p>
+            <p style="font-size:.75rem;color:#ccc;margin:0">−2% commission · 15 listings · PRO badge · priority support</p>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After</th></tr>
+          <tr><td class="before">Only revenue = flat 13% transaction take</td><td class="after">+ opt-in boosts + GETX Pro (→ ~14.5–16% blended)</td></tr>
+          <tr><td class="before">No way for sellers to stand out</td><td class="after">Paid "Promoted" placement (capped 2/page, labeled)</td></tr>
+          <tr><td class="before">Flat commission for every seller</td><td class="after">GETX Pro: −2% commission, self-funding for volume</td></tr>
+          <tr><td class="before">Fees would have to rise to grow revenue</td><td class="after">Take-rate grows with ZERO base-commission change</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem">Money path follows guardrails §1/§5: every charge locks the seller wallet (FOR UPDATE), validates available balance, and writes DEBIT seller + CREDIT FEE platform in one transaction.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Prompt 16 -->
+    <section class="block">
+      <div class="wrap">
+        <h2>Prompt 16 — Anti-Fraud Architecture</h2>
+        <p class="note">Layered fraud defense (rule-based core): account integrity · transaction velocity · listing scam-phrase · review rings · wash-trade collusion · refund abuse. Auto-actions + admin fraud queue. AI scam-scoring bundled with the AI layer (Prompt 23).</p>
+
+        <h3 style="margin:1.5rem 0 .75rem;font-size:.9rem;letter-spacing:.05em;text-transform:uppercase;color:#888">Admin Fraud Queue (/admin/fraud)</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <span style="background:rgba(168,85,247,.15);color:#a855f7;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700">1 CRITICAL</span>
+          <span style="background:rgba(248,113,113,.15);color:#f87171;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700">3 HIGH</span>
+          <span style="background:rgba(245,158,11,.15);color:#f59e0b;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700">2 MEDIUM</span>
+          <span style="background:rgba(77,124,254,.15);color:#4d7cfe;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700">0 LOW</span>
+        </div>
+        <div style="overflow-x:auto;border:1px solid #2a2a2a;border-radius:10px">
+          <table style="width:100%;border-collapse:collapse;font-size:.78rem;min-width:560px">
+            <thead><tr style="background:rgba(22,22,22,.6);text-align:left;color:#888;text-transform:uppercase;font-size:.62rem">
+              <th style="padding:8px 12px">Severity</th><th style="padding:8px 12px">Target</th><th style="padding:8px 12px">Reason</th><th style="padding:8px 12px">Auto-action</th><th style="padding:8px 12px">Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-top:1px solid #2a2a2a"><td style="padding:8px 12px"><span style="background:rgba(168,85,247,.15);color:#a855f7;padding:2px 8px;border-radius:99px;font-size:.62rem;font-weight:700">CRITICAL</span></td><td style="padding:8px 12px;color:#9aa">USER</td><td style="padding:8px 12px;font-weight:600">suspected_wash_trade</td><td style="padding:8px 12px"><span style="background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:99px;font-size:.6rem;font-weight:700">HOLD_PAYOUT</span></td><td style="padding:8px 12px;color:#4d7cfe;font-size:.7rem">Dismiss · Action</td></tr>
+              <tr style="border-top:1px solid #2a2a2a"><td style="padding:8px 12px"><span style="background:rgba(248,113,113,.15);color:#f87171;padding:2px 8px;border-radius:99px;font-size:.62rem;font-weight:700">HIGH</span></td><td style="padding:8px 12px;color:#9aa">USER</td><td style="padding:8px 12px;font-weight:600">ip_multi_account</td><td style="padding:8px 12px;color:#666">—</td><td style="padding:8px 12px;color:#4d7cfe;font-size:.7rem">Dismiss · Action</td></tr>
+              <tr style="border-top:1px solid #2a2a2a"><td style="padding:8px 12px"><span style="background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:99px;font-size:.62rem;font-weight:700">MEDIUM</span></td><td style="padding:8px 12px;color:#9aa">LISTING</td><td style="padding:8px 12px;font-weight:600">scam_phrase_content</td><td style="padding:8px 12px"><span style="background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:99px;font-size:.6rem;font-weight:700">FREEZE_LISTING</span></td><td style="padding:8px 12px;color:#4d7cfe;font-size:.7rem">Dismiss · Action</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After</th></tr>
+          <tr><td class="before">Wash-trade rings inflate fake seller reputation</td><td class="after">Shared IP/device on a paid order → CRITICAL + payout frozen</td></tr>
+          <tr><td class="before">Throwaway multi-accounts undetected</td><td class="after">IP + device-fingerprint cross-account graph</td></tr>
+          <tr><td class="before">Off-platform "whatsapp me" listings slip through</td><td class="after">Scam-phrase scan auto-freezes the listing</td></tr>
+          <tr><td class="before">Dispute-abuse / card-testing invisible</td><td class="after">Velocity + dispute-rate signals → admin queue</td></tr>
+          <tr><td class="before">Exit-scam sellers paid out before disputes land</td><td class="after">High refund rate auto-holds payout (fail-closed)</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem">All signals are fire-and-forget (never block checkout/listing/payment); auto-actions run inside the flag's transaction (no partial states); admin decisions are audit-logged.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 16 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 16 · AI Support Bot (24/7)</span>
+        <h2 style="margin-top:10px">A floating, streaming AI chat — answers orders/escrow/fees/disputes, escalates to a human when stuck</h2>
+        <p class="lede">A buyer (or even a not-logged-in guest) can ask a question on any shop or dashboard page and get a streaming answer in seconds. The bot is grounded in the user's REAL orders &amp; disputes (injected server-side), and when it can't help — or the user asks for a person — it files a ticket for the team. Powered by <b style="color:var(--primary)">claude-sonnet-4-6</b> via the shared AI layer.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <!-- The floating widget -->
+          <div style="flex:1;min-width:300px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">The chat widget (bottom-right, every page)</h3>
+            <div style="position:relative;width:340px;max-width:100%;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:0 20px 50px -20px #000">
+              <!-- header -->
+              <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);background:rgba(10,11,13,.6)">
+                <span style="display:grid;place-items:center;width:28px;height:28px;border-radius:999px;background:var(--primary-strong);color:#fff;font-size:13px">💬</span>
+                <div><div style="font-family:Poppins;font-weight:600;font-size:13px">GETX Support</div><div style="font-size:10.5px;color:var(--muted)">AI assistant · replies in seconds</div></div>
+                <span style="margin-left:auto;color:var(--faint);font-size:16px">✕</span>
+              </div>
+              <!-- messages -->
+              <div style="padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px">
+                <div style="align-self:flex-end;max-width:85%;background:var(--primary-strong);color:#fff;border-radius:14px;padding:8px 11px;font-size:12.5px">Where is my order? I paid yesterday.</div>
+                <div style="align-self:flex-start;max-width:85%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:8px 11px;font-size:12.5px;color:var(--text)">Your order <b>#PoGO-4821</b> is <b style="color:var(--amber)">PAID</b> and held safely in escrow — the seller has been notified to deliver. You're protected; nothing is released to them until you confirm delivery.</div>
+                <div style="align-self:flex-end;max-width:85%;background:var(--primary-strong);color:#fff;border-radius:14px;padding:8px 11px;font-size:12.5px">Can I talk to a human?</div>
+                <div style="align-self:flex-start;display:inline-flex;gap:4px;align-items:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:9px 12px">
+                  <span style="width:6px;height:6px;border-radius:99px;background:var(--muted);display:inline-block"></span>
+                  <span style="width:6px;height:6px;border-radius:99px;background:var(--muted);display:inline-block;opacity:.6"></span>
+                  <span style="width:6px;height:6px;border-radius:99px;background:var(--muted);display:inline-block;opacity:.3"></span>
+                </div>
+                <div style="border:1px solid rgba(69,180,131,.3);background:rgba(69,180,131,.1);color:var(--success);border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:600">Your query has been escalated — a team member will follow up.</div>
+              </div>
+              <!-- composer -->
+              <div style="border-top:1px solid var(--border);padding:8px 10px">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--faint);font-size:12px">Type your message…</div>
+                  <span style="display:grid;place-items:center;width:32px;height:32px;border-radius:8px;background:var(--primary-strong);color:#fff">➤</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:9.5px;color:var(--faint)">Enter to send · Shift+Enter = new line</span><span style="font-size:9.5px;color:var(--faint)">0/500</span></div>
+              </div>
+            </div>
+            <div class="cap">Streams character-by-character · typing dots while thinking · 20-turn cap with reset banner · self-hides if AI is off</div>
+          </div>
+
+          <!-- Admin queue -->
+          <div style="flex:1;min-width:280px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Admin escalation queue (/admin/support)</h3>
+            <div style="display:flex;gap:6px;margin-bottom:10px">
+              <span style="background:var(--surface-2);color:var(--text);border-radius:999px;padding:3px 11px;font-size:11.5px;font-family:Poppins;font-weight:600">All</span>
+              <span style="color:var(--muted);border-radius:999px;padding:3px 11px;font-size:11.5px;font-family:Poppins;font-weight:600">Open</span>
+              <span style="color:var(--muted);border-radius:999px;padding:3px 11px;font-size:11.5px;font-family:Poppins;font-weight:600">Closed</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border)">
+                <div style="min-width:0;flex:1"><div style="font-size:12.5px;font-weight:600">Can I talk to a human?</div><div style="font-size:10.5px;color:var(--faint)">buyer@example.com · 10 Jun 2026, 4:21 PM</div></div>
+                <span style="background:rgba(224,168,0,.15);color:var(--warning);border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700">Open</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border)">
+                <div style="min-width:0;flex:1"><div style="font-size:12.5px;font-weight:600">Refund not received after dispute</div><div style="font-size:10.5px;color:var(--faint)">Guest · 10 Jun 2026, 2:09 PM</div></div>
+                <span style="background:rgba(224,168,0,.15);color:var(--warning);border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700">Open</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:11px 12px">
+                <div style="min-width:0;flex:1"><div style="font-size:12.5px;font-weight:600;color:var(--muted)">How do payouts work?</div><div style="font-size:10.5px;color:var(--faint)">seller@example.com · 9 Jun 2026</div></div>
+                <span style="background:var(--surface-2);color:var(--muted);border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700">Closed</span>
+              </div>
+            </div>
+            <div class="cap">Click a ticket → full transcript + a resolution-note box + "Close ticket" (ADMIN-gated, audit-logged). "Guest" = the user wasn't signed in.</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 16)</th></tr>
+          <tr><td class="before">No live help — a stuck buyer emails or just bounces</td><td class="after">24/7 floating AI chat on every shop + dashboard page (guests too)</td></tr>
+          <tr><td class="before">A bot would have to guess your order status</td><td class="after">Grounded in YOUR last 5 orders + open disputes (injected server-side, never trusted from the client)</td></tr>
+          <tr><td class="before">"I want a human" goes nowhere</td><td class="after">Escalation files a SupportTicket → admin queue; green banner confirms it</td></tr>
+          <tr><td class="before">AI could quote a stale fee/policy</td><td class="after">Fees + dispute SLA pulled from siteConfig — one source of truth</td></tr>
+          <tr><td class="before">An AI outage would risk breaking the page</td><td class="after">Degrades gracefully: widget self-hides, page + money paths untouched</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Money-safe by design:</b> the bot only READS context and FILES tickets — it can never move escrow or write the ledger. <b>To switch it on:</b> the owner sets <code>ANTHROPIC_API_KEY</code> (and <code>NEXT_PUBLIC_SUPPORT_ENABLED=true</code>); until then the widget stays hidden and the API returns 503 — no crash, no error shown to anyone. Rate-limited to 30 messages/hour. QA: qa-step16-support.ts <b>47/47</b>.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 20 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 20 · Seller "CEO" Dashboard</span>
+        <h2 style="margin-top:10px">A real analytics cockpit at /seller/analytics — revenue, order funnel, top listings + AI price coaching</h2>
+        <p class="lede">Sellers should feel like they run a business, not fill in forms. This is their cockpit: daily revenue trend, where every order sits, their best-selling listings, and a one-tap <b style="color:var(--primary)">AI price check</b> per listing (powered by Claude Haiku). Numbers come straight from the real money ledger — revenue is your take <i>after</i> commission.</p>
+
+        <!-- stat cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:6px 0 18px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:10.5px;color:var(--faint)">💵 Total earned</div><div style="font-family:Poppins;font-weight:700;font-size:18px;color:var(--success);margin-top:3px">₹4,600</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:10.5px;color:var(--faint)">👛 Available</div><div style="font-family:Poppins;font-weight:700;font-size:18px;margin-top:3px">₹4,600</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:10.5px;color:var(--faint)">🔒 In escrow</div><div style="font-family:Poppins;font-weight:700;font-size:18px;color:var(--warning);margin-top:3px">₹0</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-size:10.5px;color:var(--faint)">🛍 Orders (30d)</div><div style="font-family:Poppins;font-weight:700;font-size:18px;margin-top:3px">6</div></div>
+        </div>
+
+        <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+          <!-- revenue line -->
+          <div style="flex:1;min-width:260px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-family:Poppins;font-weight:600;font-size:13px;margin-bottom:2px">Revenue</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Daily earnings (after commission)</div>
+            <svg viewBox="0 0 280 90" style="width:100%;height:90px">
+              <polyline fill="none" stroke="#4d7cfe" stroke-width="2" points="0,70 40,60 80,64 120,38 160,44 200,20 240,28 280,10" />
+              <line x1="0" y1="88" x2="280" y2="88" stroke="#262a33" />
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--faint);margin-top:4px"><span>1 Jun</span><span>15 Jun</span><span>Today</span></div>
+          </div>
+          <!-- funnel bars -->
+          <div style="flex:1;min-width:260px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-family:Poppins;font-weight:600;font-size:13px;margin-bottom:2px">Order funnel</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Where your orders are right now</div>
+            <div style="display:flex;align-items:flex-end;gap:14px;height:92px;padding:0 6px">
+              <div style="flex:1;text-align:center"><div style="height:18px;background:#4d7cfe;border-radius:4px 4px 0 0"></div><div style="font-size:9px;color:var(--faint);margin-top:4px">Paid 1</div></div>
+              <div style="flex:1;text-align:center"><div style="height:72px;background:#45b483;border-radius:4px 4px 0 0"></div><div style="font-size:9px;color:var(--faint);margin-top:4px">Done 4</div></div>
+              <div style="flex:1;text-align:center"><div style="height:18px;background:#e0a800;border-radius:4px 4px 0 0"></div><div style="font-size:9px;color:var(--faint);margin-top:4px">Disp 1</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- top listings + AI price -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px">
+          <div style="font-family:Poppins;font-weight:600;font-size:13px;margin-bottom:10px">Top listings <span style="font-weight:400;color:var(--muted);font-size:11px">— tap “Suggest” for an AI price check</span></div>
+          <div style="display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);padding-bottom:8px;font-size:10.5px;color:var(--faint)"><span style="flex:1">Listing</span><span style="width:50px;text-align:right">Sales</span><span style="width:70px;text-align:right">Revenue</span><span style="width:80px;text-align:right">AI price</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;font-size:12.5px;border-bottom:1px solid var(--border)"><span style="flex:1">Lv40 Pokémon GO account</span><span style="width:50px;text-align:right">3</span><span style="width:70px;text-align:right;font-weight:600">₹2,760</span><span style="width:80px;text-align:right"><span style="border:1px solid var(--border);border-radius:6px;padding:2px 8px;color:var(--primary);font-size:11px">✨ Suggest</span></span></div>
+          <div style="background:rgba(77,124,254,.05);border:1px solid rgba(77,124,254,.3);border-radius:8px;padding:8px 10px;margin:8px 0;font-size:11.5px;color:var(--text)">Your price is below the category average — you have room to raise it without hurting demand.<br/><b>Suggested: ₹2,800–₹3,200</b></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;font-size:12.5px"><span style="flex:1">100k PokéCoins bundle</span><span style="width:50px;text-align:right">1</span><span style="width:70px;text-align:right;font-weight:600">₹1,840</span><span style="width:80px;text-align:right"><span style="border:1px solid var(--border);border-radius:6px;padding:2px 8px;color:var(--primary);font-size:11px">✨ Suggest</span></span></div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 20)</th></tr>
+          <tr><td class="before">/seller/analytics was a "soon" stub</td><td class="after">A live cockpit: revenue trend + funnel + top listings</td></tr>
+          <tr><td class="before">Seller couldn't see revenue over time</td><td class="after">Daily revenue line chart, 7 / 30 / 90-day range switch</td></tr>
+          <tr><td class="before">No view of where orders are stuck</td><td class="after">Order-funnel bar chart (paid / delivered / completed / disputed …)</td></tr>
+          <tr><td class="before">Sellers guess at pricing</td><td class="after">Per-listing AI price suggestion grounded in peer benchmarks</td></tr>
+          <tr><td class="before">—</td><td class="after">4 stat cards reconciled to the real ledger (earned/available/escrow/orders)</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Truthful numbers:</b> revenue = your CREDIT/SALE rows (already net of commission); "in escrow" = funds held for active orders you can't withdraw yet. <b>AI price</b> uses Claude Haiku and degrades to a fallback line until <code>ANTHROPIC_API_KEY</code> is set — the rest of the dashboard works regardless. QA: qa-step20.ts <b>26/26</b>.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 21 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 21 · Loyalty Points</span>
+        <h2 style="margin-top:10px">Earn points on every buy &amp; sell — redeem them as a checkout discount</h2>
+        <p class="lede">A repeat-purchase loop: 50 points just for signing up, points on every completed order, and a one-tap discount at checkout. The clever bit is <b style="color:var(--primary)">where the discount comes from</b> — it's funded out of the platform fee, so the seller always gets paid in full and the escrow math never changes. (Referral rewards already shipped separately — this adds the points layer.)</p>
+
+        <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+          <!-- rewards balance card -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Rewards page (/loyalty)</h3>
+            <div style="background:rgba(77,124,254,.05);border:1px solid rgba(77,124,254,.3);border-radius:12px;padding:16px">
+              <div style="font-size:11px;color:var(--muted)">Your points balance</div>
+              <div style="font-family:Poppins;font-weight:800;font-size:34px;margin:2px 0 4px">1,650 <span style="font-size:14px;color:var(--muted);font-weight:500">pts</span></div>
+              <div style="font-size:12px;color:var(--muted)">Worth up to <b style="color:var(--text)">₹165</b> off your next orders. Non-transferable, no cash-out.</div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:10px;margin-top:10px;overflow:hidden">
+              <div style="display:flex;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12.5px"><span>Welcome bonus</span><span style="color:var(--success);font-weight:700">+50 pts</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border);font-size:12.5px"><span>Purchase reward</span><span style="color:var(--success);font-weight:700">+100 pts</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 12px;font-size:12.5px"><span style="color:var(--muted)">Redeemed at checkout</span><span style="color:var(--muted);font-weight:700">−500 pts</span></div>
+            </div>
+            <div class="cap">Balance is always derived (Σ earn − Σ redeem) — never a stored total, same as the money ledger</div>
+          </div>
+
+          <!-- checkout redeem toggle -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Checkout redeem toggle</h3>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:4px"><span>Subtotal</span><span style="color:var(--text)">₹1,000</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:4px"><span>Platform fee (5%)</span><span style="color:var(--text)">₹50</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--primary);margin-bottom:8px"><span>Reward points (−500)</span><span style="font-weight:700">−₹50</span></div>
+              <label style="display:flex;gap:10px;align-items:center;border:1px solid var(--primary);background:rgba(77,124,254,.05);border-radius:8px;padding:10px;margin-bottom:10px"><input type="checkbox" checked /> <span style="flex:1"><span style="font-size:12.5px;font-weight:700">Use 500 reward points</span><br/><span style="font-size:11px;color:var(--muted)">−₹50 off this order</span></span></label>
+              <div style="background:var(--primary-strong);color:#fff;text-align:center;border-radius:6px;padding:11px;font-family:Poppins;font-weight:700;font-size:13px">Pay securely · ₹1,000</div>
+            </div>
+            <div class="cap">Server re-clamps the points to balance ∧ 20% ∧ platform-fee — the client value is never trusted</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 21)</th></tr>
+          <tr><td class="before">No reason to come back after one order</td><td class="after">Earn points every buy/sell → redeem as a discount</td></tr>
+          <tr><td class="before">New signups had zero immediate value</td><td class="after">50-point welcome bonus on every account</td></tr>
+          <tr><td class="before">—</td><td class="after">/loyalty (buyer) + /seller/loyalty (sale-filtered) dashboards</td></tr>
+          <tr><td class="before">A discount would normally eat into seller pay or break escrow math</td><td class="after">Discount funded from the platform fee → seller paid in full, reconciliation untouched</td></tr>
+          <tr><td class="before">Refund would silently swallow redeemed points</td><td class="after">Refund returns the points (compensating entry — ledger stays balanced)</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Money-safe by design:</b> points are a separate append-only ledger (never touch escrow/wallets); every earn/redeem is idempotent per order; the discount caps at the platform fee so the escrow reconciliation <code>sale + fee + commission = total</code> holds with zero changes to the release logic. QA: qa-step21.ts <b>23/23</b> drives the full buy→redeem→pay→release→refund cycle.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 24 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 24 · Installable PWA</span>
+        <h2 style="margin-top:10px">GETX installs to the home screen and survives a dropped connection</h2>
+        <p class="lede">On a phone-first audience, GETX is now a real installable app: an install banner, a standalone app-like window, cached assets via a service worker, and a branded “You’re offline” screen when the network drops. No app store needed.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <!-- install banner mock -->
+          <div style="flex:1;min-width:260px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Install banner</h3>
+            <div style="border-top:2px solid var(--primary);background:#1a1b1f;border-radius:0 0 10px 10px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+              <div style="width:32px;height:32px;border-radius:8px;background:var(--primary-strong);display:grid;place-items:center;color:#fff;font-family:Poppins;font-weight:800;font-size:13px">G</div>
+              <span style="flex:1;font-size:12.5px;font-weight:500">Install GETX for a faster, app-like experience.</span>
+              <span style="background:var(--primary-strong);color:#fff;border-radius:6px;padding:7px 14px;font-family:Poppins;font-weight:700;font-size:12.5px">Install</span>
+              <span style="color:var(--faint)">✕</span>
+            </div>
+            <div class="cap">Android: native install prompt · iOS: “Add to Home Screen” tip · hidden once installed or dismissed</div>
+          </div>
+          <!-- offline screen mock -->
+          <div style="flex:1;min-width:220px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Offline fallback</h3>
+            <div class="phone" style="width:220px"><div class="screen" style="height:300px;display:grid;place-items:center;text-align:center;padding:24px">
+              <div>
+                <div style="width:56px;height:56px;border-radius:14px;background:var(--primary-strong);margin:0 auto 16px;display:grid;place-items:center;color:#fff;font-family:Poppins;font-weight:800;font-size:22px">G</div>
+                <div style="font-family:Poppins;font-weight:800;font-size:17px">You're offline</div>
+                <div style="font-size:11.5px;color:var(--muted);margin:8px 0 16px">Recently viewed listings &amp; orders are cached — check back when connected.</div>
+                <div style="background:var(--primary-strong);color:#fff;border-radius:6px;padding:9px;font-family:Poppins;font-weight:700;font-size:12px">Try again</div>
+              </div>
+            </div></div>
+            <div class="cap">Renders purely from cache — zero DB/auth calls</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 24)</th></tr>
+          <tr><td class="before">Browser-only — no home-screen presence</td><td class="after">Installable PWA (manifest, icons, standalone window)</td></tr>
+          <tr><td class="before">A dropped connection = broken page</td><td class="after">Service worker serves a cached “You’re offline” screen</td></tr>
+          <tr><td class="before">Every asset re-fetched each visit</td><td class="after">Workbox caching: static 30d, images 7d, API 1-min stale</td></tr>
+          <tr><td class="before">No re-engagement hook on mobile</td><td class="after">Install banner (Android prompt + iOS tip)</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Safe by design:</b> the service worker registers in <b>production only</b> (dev hot-reload untouched); icons are generated from the brand mark via sharp; Web Push is deferred to Phase 3. QA: qa-step24.ts <b>36/36</b>.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 26 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 26 · Demand Forecast + AI Pricing</span>
+        <h2 style="margin-top:10px">A daily market pulse — sellers see demand &amp; price advice; ops sees what buyers search for</h2>
+        <p class="lede">Every night a job rolls up completed orders + searches into per-game/category signals. Sellers get an AI demand read (HIGH / MEDIUM / LOW) and a raise/lower/keep price nudge; the founder dashboard gets a trending-searches cloud showing exactly which games to recruit supply for.</p>
+
+        <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+          <!-- market pulse -->
+          <div style="flex:1;min-width:260px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-family:Poppins;font-weight:600;font-size:13px;margin-bottom:2px">📈 Market Pulse <span style="font-weight:400;color:var(--muted);font-size:11px">(seller listings page)</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:12px">AI demand read for the games you sell in</div>
+            <div style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px;font-size:12.5px;flex-wrap:wrap"><span style="font-weight:500">Pokémon GO <span style="color:var(--muted)">· Accounts</span></span><span style="background:rgba(69,180,131,.15);color:var(--success);border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700">HIGH demand</span><span style="color:var(--muted);font-size:11.5px">Orders + searches climbing week-on-week.</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;flex-wrap:wrap"><span style="font-weight:500">Valorant <span style="color:var(--muted)">· Items</span></span><span style="background:rgba(224,168,0,.15);color:var(--warning);border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700">MEDIUM demand</span><span style="color:var(--muted);font-size:11.5px">Steady; no strong trend.</span></div>
+          </div>
+          <!-- trending searches -->
+          <div style="flex:1;min-width:240px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-family:Poppins;font-weight:600;font-size:13px;margin-bottom:2px">🔎 Trending searches <span style="font-weight:400;color:var(--muted);font-size:11px">(/admin/analytics)</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:12px">What buyers searched for, last 7 days</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <span style="border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:11.5px">shiny legendary <b style="color:var(--primary)">142</b></span>
+              <span style="border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:11.5px">lvl 40 account <b style="color:var(--primary)">98</b></span>
+              <span style="border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:11.5px">pokecoins <b style="color:var(--primary)">71</b></span>
+              <span style="border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:11.5px">valorant skins <b style="color:var(--primary)">53</b></span>
+              <span style="border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:11.5px">free fire diamonds <b style="color:var(--primary)">37</b></span>
+            </div>
+            <div class="cap">Demand signal → which game/category to recruit sellers for</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 26)</th></tr>
+          <tr><td class="before">Sellers price blind, with no market context</td><td class="after">Daily HIGH/MED/LOW demand read + raise/lower/keep nudge</td></tr>
+          <tr><td class="before">Search demand was invisible &amp; unlogged</td><td class="after">Fire-and-forget SearchLog → nightly aggregation</td></tr>
+          <tr><td class="before">Ops guessed which games to add supply for</td><td class="after">Trending-searches cloud on the founder dashboard</td></tr>
+          <tr><td class="before">—</td><td class="after">Idempotent daily cron rolls orders+searches into MarketSignal</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Graceful + advisory:</b> &lt;3 days of data → a neutral low-data fallback (no AI call); no <code>ANTHROPIC_API_KEY</code> → pills show “unavailable”; search logging never blocks a query. The AI never changes a price — the seller clicks save. QA: qa-step26.ts <b>11/11</b>.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 27 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 27 · Community</span>
+        <h2 style="margin-top:10px">Guides, leaderboards &amp; creator badges — the “I live here” layer</h2>
+        <p class="lede">Reputation becomes status: sellers write game guides (SEO + buyer trust), per-game leaderboards rank the best, and badges reward the behaviours that grow the marketplace — first sales, 500-order veterans, top sellers, guide authors.</p>
+
+        <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+          <!-- leaderboard -->
+          <div style="flex:1;min-width:240px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px">
+            <div style="font-family:Poppins;font-weight:600;font-size:13px;margin-bottom:10px">🏆 Pokémon GO — Top sellers <span style="font-weight:400;color:var(--muted);font-size:11px">(30 days)</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:17px">🥇</span><span style="width:24px;height:24px;border-radius:99px;background:var(--surface-2)"></span><span style="flex:1;font-size:12.5px;font-weight:600">ShinyHunter <span style="color:var(--primary)">★★</span></span><span style="font-size:12px;font-weight:700">312 sales</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:17px">🥈</span><span style="width:24px;height:24px;border-radius:99px;background:var(--surface-2)"></span><span style="flex:1;font-size:12.5px;font-weight:600">CoinVault <span style="color:var(--primary)">★</span></span><span style="font-size:12px;font-weight:700">204 sales</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:7px 0"><span style="font-size:17px">🥉</span><span style="width:24px;height:24px;border-radius:99px;background:var(--surface-2)"></span><span style="flex:1;font-size:12.5px;font-weight:600">PokeDealer99</span><span style="font-size:12px;font-weight:700">158 sales</span></div>
+          </div>
+          <!-- badges + guide -->
+          <div style="flex:1;min-width:240px">
+            <div style="font-family:Poppins;font-weight:600;font-size:13px;margin-bottom:8px">Creator badges (on seller profile)</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+              <span style="background:rgba(77,124,254,.1);color:var(--primary);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700">★ Early Seller</span>
+              <span style="background:rgba(77,124,254,.1);color:var(--primary);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700">★ Trusted Veteran</span>
+              <span style="background:rgba(77,124,254,.1);color:var(--primary);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700">★ Guide Author</span>
+              <span style="background:rgba(77,124,254,.1);color:var(--primary);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700">★ Top Seller</span>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px">
+              <span style="background:var(--surface-2);color:var(--muted);border-radius:5px;padding:2px 6px;font-size:10px;font-weight:600">POKÉMON GO</span>
+              <div style="font-family:Poppins;font-weight:600;font-size:13.5px;margin:6px 0 4px">How to value a Level 40 account</div>
+              <div style="font-size:11px;color:var(--muted)">ShinyHunter · ❤ 64 · 👁 1,203</div>
+            </div>
+            <div class="cap">Markdown guides rendered XSS-safe (no raw HTML) · veterans auto-publish, others reviewed</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 27)</th></tr>
+          <tr><td class="before">No reason to visit beyond a single purchase</td><td class="after">Community guides + leaderboards = a place to hang out</td></tr>
+          <tr><td class="before">Reputation was invisible beyond a trust number</td><td class="after">Creator badges (Early Seller, Trusted Veteran, Top Seller, Guide Author)</td></tr>
+          <tr><td class="before">Top sellers weren't surfaced to buyers</td><td class="after">Per-game 30-day leaderboards with medals + badges</td></tr>
+          <tr><td class="before">No seller-generated SEO content</td><td class="after">Player-written guides (filter by game, like/view counts)</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Safe + idempotent:</b> badges are permanent + awarded at most once (unique guard); milestone awards ride inside the escrow-release tx (cheap, never break a payout); guide Markdown is rendered without raw HTML (no XSS). QA: qa-step27.ts <b>18/18</b>.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 28 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 28 · Algolia Search</span>
+        <h2 style="margin-top:10px">Instant, typo-tolerant search — with Postgres as a zero-config safety net</h2>
+        <p class="lede">When the catalog grows, ILIKE search gets slow and misses typos. This wires in Algolia: live suggestions as you type, typo tolerance (“pokmon” → Pokémon GO), and sub-100ms faceted results. It's <b>dormant until keys are set</b> — the existing Postgres search keeps serving until then, then it upgrades with zero code change.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <!-- instant search dropdown -->
+          <div style="flex:1;min-width:280px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Instant search (as you type)</h3>
+            <div style="position:relative">
+              <div style="display:flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px">🔍 pokmon<span style="width:1px;height:14px;background:var(--primary);margin-left:1px;animation:none"></span></div>
+              <div style="border:1px solid var(--border);background:var(--surface);border-radius:8px;margin-top:4px;overflow:hidden;box-shadow:0 12px 30px -12px #000">
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12.5px"><span style="flex:1">Lv40 account · 90+ shinies</span><span style="color:var(--muted);font-size:11px">Pokémon GO</span><span style="font-weight:700">₹4,999</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12.5px"><span style="flex:1">100k PokéCoins bundle</span><span style="color:var(--muted);font-size:11px">Pokémon GO</span><span style="font-weight:700">₹1,299</span></div>
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:12.5px"><span style="flex:1">Shiny legendary trade</span><span style="color:var(--muted);font-size:11px">Pokémon GO</span><span style="font-weight:700">₹899</span></div>
+              </div>
+            </div>
+            <div class="cap">350ms debounce · typo-tolerant (“pokmon” still finds Pokémon GO) · public search key only (admin key never ships)</div>
+          </div>
+          <!-- facets -->
+          <div style="flex:1;min-width:220px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Faceted filters</h3>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12.5px">
+              <div style="font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Game</div>
+              <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px"><span>☑ Pokémon GO <span style="color:var(--muted)">(42)</span></span><span>☐ Clash of Clans <span style="color:var(--muted)">(18)</span></span><span>☐ Valorant <span style="color:var(--muted)">(11)</span></span></div>
+              <div style="font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Delivery</div>
+              <div style="display:flex;flex-direction:column;gap:5px"><span>☑ Instant <span style="color:var(--muted)">(17)</span></span><span>☐ Manual <span style="color:var(--muted)">(25)</span></span></div>
+            </div>
+            <div class="cap">Live facet counts · same URL contract (?game=&type=&sort=) — no link changes</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 28)</th></tr>
+          <tr><td class="before">Postgres ILIKE — slow at scale, no typo tolerance</td><td class="after">Algolia: sub-100ms, typo-tolerant, ranked by trust + rating</td></tr>
+          <tr><td class="before">No live suggestions — submit to see results</td><td class="after">Instant dropdown suggestions as you type</td></tr>
+          <tr><td class="before">—</td><td class="after">Listings auto-sync to the index on create/edit/sold; nightly reconcile cron</td></tr>
+          <tr><td class="before">—</td><td class="after">Postgres stays the zero-config fallback — flip Algolia on with keys only</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Risk-free upgrade:</b> with no Algolia keys everything falls back to Postgres exactly as before; the admin key is server-only (never in the browser bundle); index sync is fire-and-forget (never blocks a listing save). QA: qa-step28.ts <b>15/15</b>. Go-live: set the 4 keys + run the one-off setup script.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 29 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 29 · Sumsub Automated KYC</span>
+        <h2 style="margin-top:10px">Instant ID verification in an embedded modal — manual upload stays the fallback</h2>
+        <p class="lede">Manual KYC is slow (1–2 days) and admin-heavy. Sumsub runs liveness + document checks inside an embedded flow and a signed webhook flips the seller to <b style="color:var(--success)">Verified</b> automatically. It's <b>dormant until keys are set</b> — until then sellers use the existing manual ID upload, no dead screens.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <!-- automated -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">With Sumsub (keys set)</h3>
+            <div class="phone" style="width:240px"><div class="screen" style="height:330px;padding:0">
+              <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:12px;font-family:Poppins;font-weight:700;font-size:13px">Verify your identity</div>
+              <div style="padding:18px;text-align:center">
+                <div style="width:54px;height:54px;border-radius:14px;background:rgba(77,124,254,.12);color:var(--primary);display:grid;place-items:center;margin:0 auto 14px;font-size:22px">🪪</div>
+                <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Scan your ID and take a selfie — verified in seconds.</div>
+                <div style="background:var(--primary-strong);color:#fff;border-radius:6px;padding:10px;font-family:Poppins;font-weight:700;font-size:12px">Start verification</div>
+                <div style="margin-top:14px;font-size:11px;color:var(--success);display:inline-flex;gap:5px;align-items:center">⏳ Verifying your identity…</div>
+              </div>
+            </div></div>
+            <div class="cap">Embedded SDK → signed webhook auto-flips kycStatus → live polling shows the result</div>
+          </div>
+          <!-- fallback -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Without keys (graceful fallback)</h3>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
+              <div style="display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(224,168,0,.3);background:rgba(224,168,0,.06);border-radius:8px;padding:10px;font-size:11.5px;color:var(--muted);margin-bottom:12px"><span style="color:var(--warning)">ℹ</span><span>Automated verification is unavailable. Upload your ID for manual review (1–2 business days).</span></div>
+              <div style="border:1px dashed var(--border);border-radius:8px;padding:18px;text-align:center;font-size:12px;color:var(--faint)">⬆ Upload government ID</div>
+            </div>
+            <div class="cap">Step-12 manual R2 upload + admin review — unchanged, always available</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 29)</th></tr>
+          <tr><td class="before">Manual ID upload + 1–2 day admin review</td><td class="after">Embedded liveness + doc check, instant auto-verdict</td></tr>
+          <tr><td class="before">Admin manually approves every seller</td><td class="after">Signed webhook auto-sets APPROVED/REJECTED (override still available)</td></tr>
+          <tr><td class="before">—</td><td class="after">Admin “View in Sumsub Cockpit ↗” deep-link per applicant</td></tr>
+          <tr><td class="before">—</td><td class="after">Graceful: no keys → manual flow, zero dead screens</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Fail-closed + idempotent:</b> the webhook rejects any unsigned/mis-signed event (401); KYC transitions are guarded so a duplicate or a webhook-vs-poll race flips the status (and writes the audit) at most once. Admin manual override works regardless of Sumsub state. QA: qa-step29.ts <b>19/19</b>.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 31 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 31 · Observability</span>
+        <h2 style="margin-top:10px">See the errors (Sentry) and measure the funnel (PostHog) — privacy-first</h2>
+        <p class="lede">You can't fix what you can't see. Sentry catches every error with a branded fallback; PostHog tracks the buyer funnel (view → checkout → pay → complete) with <b>IDs + amounts only — zero PII</b>. Both stay dormant until keys are set.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <!-- error fallback -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Branded error fallback</h3>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 18px;text-align:center">
+              <div style="width:46px;height:46px;border-radius:99px;background:rgba(77,124,254,.12);display:grid;place-items:center;margin:0 auto 12px;font-size:20px">⚠️</div>
+              <div style="font-family:Poppins;font-weight:800;font-size:16px">Something went wrong</div>
+              <div style="font-size:11.5px;color:var(--muted);margin:8px 0 14px">An unexpected error occurred and our team has been notified.</div>
+              <div style="background:var(--primary-strong);color:#fff;border-radius:6px;padding:9px 18px;display:inline-block;font-family:Poppins;font-weight:700;font-size:12px">Try again</div>
+            </div>
+            <div class="cap">Wraps dashboard + (via error.tsx) every route · no order/payment details leaked in the fallback</div>
+          </div>
+          <!-- funnel events -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">6 funnel events (server-truth)</h3>
+            <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:12px">
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">👁 <b>listing_viewed</b> <span style="color:var(--faint)">listingId · gameSlug · priceMinor</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">🛒 <b>checkout_started</b> <span style="color:var(--faint)">orderId · listingId</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">💳 <b>payment_initiated</b> <span style="color:var(--faint)">orderId · provider</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">✅ <b>order_completed</b> <span style="color:var(--faint)">orderId · sellerId · amountMinor</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">🏪 <b>seller_onboarded</b> <span style="color:var(--faint)">sellerId</span></div>
+              <div style="padding:8px 12px">🔎 <b>search_performed</b> <span style="color:var(--faint)">query(≤100) · resultCount</span></div>
+            </div>
+            <div class="cap">No name / email / phone / IP — ever. order_completed fires server-side, never trusts the client.</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 31)</th></tr>
+          <tr><td class="before">Errors were invisible (Sentry capturing, no boundaries/user context)</td><td class="after">Error boundaries + branded fallback + user context + admin test endpoint</td></tr>
+          <tr><td class="before">No product analytics — funnel was a black box</td><td class="after">PostHog pageviews + 6 funnel events, PII-free</td></tr>
+          <tr><td class="before">—</td><td class="after">order_completed is server-truth (never client-fired)</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Env-safe + private:</b> no keys → no analytics, no provider, all events no-op (zero overhead, zero crashes); event properties are IDs + amounts only, IP stripped. QA: qa-step31.ts <b>12/12</b> + money-path regressions (08/21/28) green.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Steps 32–34 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Steps 32 · 33 · 34 · Hardening, Performance &amp; Tests</span>
+        <h2 style="margin-top:10px">The launch-readiness pass — lock it down, keep it fast, prove it works</h2>
+        <p class="lede">Three back-end steps, mostly invisible to buyers — but the foundation a money marketplace ships on. Every new control is <b>env-safe / dormant</b> until its key is set, exactly like the rest of the build.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <!-- Step 32 security -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">🔒 Step 32 · Security</h3>
+            <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:12px">
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">🛡 <b>Distributed rate-limit</b> <span style="color:var(--faint)">Upstash on login/register/pay — falls back to in-memory</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">📜 <b>Content-Security-Policy</b> <span style="color:var(--faint)">strong static policy on every route; nonce mode dormant</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">🔑 <b>Session revocation</b> <span style="color:var(--faint)">ban / role-change / password-reset sign you out ≤60s</span></div>
+              <div style="padding:8px 12px">🌐 <b>Webhook IP allowlist</b> <span style="color:var(--faint)">Razorpay + CoinGate, open-by-default until set</span></div>
+            </div>
+            <div class="cap">qa-step32.ts 31/31 · npm audit 0 high/critical</div>
+          </div>
+          <!-- Step 33 + 34 -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">⚡ Step 33 · Perf &nbsp;·&nbsp; 🧪 Step 34 · Tests</h3>
+            <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:12px">
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">🖼 <b>AVIF / WebP images</b> <span style="color:var(--faint)">smaller payloads, better LCP</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">📄 <b>Static marketing pages</b> <span style="color:var(--faint)">about + how-it-works cached forever</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">✅ <b>39 unit tests</b> <span style="color:var(--faint)">fees · encryption · trust · orders · loyalty — 100% on the money math</span></div>
+              <div style="padding:8px 12px">🤖 <b>CI + E2E ready</b> <span style="color:var(--faint)">GitHub Actions, Playwright, ephemeral Postgres</span></div>
+            </div>
+            <div class="cap">qa-step33.ts 19/19 · vitest 39/39 · map found the app already ~90% optimized</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Steps 32–34)</th></tr>
+          <tr><td class="before">Rate-limit was per-lambda in-memory only (effective limit = N×)</td><td class="after">Global Upstash limiter on the brute-force surface; degrades to in-memory</td></tr>
+          <tr><td class="before">CSP was a partial header; no session kill-switch</td><td class="after">Strong CSP on every route + sessionVersion revocation (ban kills sessions ≤60s)</td></tr>
+          <tr><td class="before">No automated tests — only the qa-step*.ts harnesses</td><td class="after">Vitest + Playwright + a CI pipeline with a real coverage gate</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Env-safe to the end:</b> no Upstash key → in-memory limiter; CSP nonce stays OFF until checkout is verified; webhook IP check is open until the provider IPs are set; integration tests skip without a disposable test DB. Nothing here can break a live page or a payout.</p>
+      </div>
+    </section>
+
+    <section class="block" style="border-bottom:none">
+      <div class="wrap">
+        <p class="note">Updated through <b>Step 34 (Testing)</b> · 2026-06-11. This session shipped <b>16 · 20 · 21 · 24 · 26 · 27 · 28 · 29 · 31 · 32 · 33 · 34</b> and verified <b>17/18/19/22</b> (real <b>Step 17 bug fixed</b>). ROADMAP: 01–22, 24, 26–29, 31–34 done. Remaining: 25 AI Dispute Judge · 23 i18n · 30 more games · 35–36 (deploy/golive). External accounts (Upstash, Algolia, Sumsub, Anthropic, PostHog, Sentry, Resend, test DB) provisioned at launch — every feature dormant-but-ready until its keys are set.</p>
+      </div>
+    </section>
+  </body>
+</html>

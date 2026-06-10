@@ -1,15 +1,12 @@
-import { ShieldCheckIcon, BadgeCheckIcon, PackageCheckIcon } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheckIcon, PackageCheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { trustTone, formatReplyTime } from "@/lib/trust";
 import { Rating } from "@/components/shared/rating";
-import { TrustBadge } from "@/components/shared/trust-badge";
+import { VerifiedBadge } from "@/components/shared/verified-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { SellerLevelBadge } from "@/components/shared/seller-level-badge";
 import type { ListingDetail } from "@/server/services/marketplace";
-
-function trustTone(score: number): string {
-  if (score >= 90) return "text-success";
-  if (score >= 70) return "text-warning";
-  return "text-muted-foreground";
-}
 
 const memberSinceFmt = new Intl.DateTimeFormat("en-IN", {
   month: "short",
@@ -21,7 +18,13 @@ const memberSinceFmt = new Intl.DateTimeFormat("en-IN", {
  * seller is, their trust score, rating, sales count, verification badge, plus
  * the platform's escrow + money-back guarantees. Pure server component.
  */
-export function SellerTrustPanel({ seller }: { seller: ListingDetail["seller"] }) {
+export function SellerTrustPanel({
+  seller,
+  avgFirstReplyMinutes,
+}: {
+  seller: ListingDetail["seller"];
+  avgFirstReplyMinutes: number | null;
+}) {
   return (
     <section
       aria-labelledby="seller-panel-heading"
@@ -36,15 +39,22 @@ export function SellerTrustPanel({ seller }: { seller: ListingDetail["seller"] }
         <UserAvatar name={seller.displayName} image={seller.image} size="lg" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="truncate font-heading text-base font-bold">
+            <Link
+              href={`/sellers/${seller.id}`}
+              className="truncate rounded-sm font-heading text-base font-bold hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            >
               {seller.displayName}
-            </span>
-            {seller.kycVerified ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-success/12 px-2 py-0.5 text-[11px] font-semibold text-success">
-                <BadgeCheckIcon className="size-3.5" aria-hidden="true" />
-                ID Verified
+            </Link>
+            {seller.kycVerified ? <VerifiedBadge size="sm" /> : null}
+            {seller.proMember ? (
+              <span
+                className="inline-flex items-center rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary"
+                title="GETX Pro seller"
+              >
+                PRO
               </span>
             ) : null}
+            <SellerLevelBadge level={seller.sellerLevel} size="xs" />
           </div>
           <p className="mt-0.5 text-xs text-faint">
             Member since {memberSinceFmt.format(seller.memberSince)}
@@ -109,15 +119,23 @@ export function SellerTrustPanel({ seller }: { seller: ListingDetail["seller"] }
         </p>
       ) : null}
 
-      {/* platform guarantees */}
-      <div className="flex flex-col gap-2 border-t border-border pt-4">
-        <TrustBadge variant="escrow" size="sm" className="w-full justify-start" />
-        <TrustBadge
-          variant="moneyback"
-          size="sm"
-          className="w-full justify-start"
-        />
-      </div>
+      {avgFirstReplyMinutes !== null ? (
+        <p className="text-center text-[11px] text-faint">
+          Avg. response: {formatReplyTime(avgFirstReplyMinutes)}
+        </p>
+      ) : null}
+
+      {seller.totalSales === 0 && seller.ratingCount === 0 ? (
+        <p className="rounded-md border border-border bg-muted/40 px-3 py-2.5 text-[12.5px] text-muted-foreground">
+          <span className="font-semibold text-foreground">New seller.</span>{" "}
+          Every order is escrow-protected regardless of review count — your
+          money is held safely until you confirm delivery.
+        </p>
+      ) : null}
+
+      {/* Platform guarantees now live in EscrowProtectionPanel (rendered directly
+          above this panel on the listing page) — this panel stays focused on
+          seller signals only, avoiding duplicate escrow/money-back copy. */}
     </section>
   );
 }

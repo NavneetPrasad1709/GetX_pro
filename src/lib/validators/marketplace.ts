@@ -26,10 +26,16 @@ export const SORT_KEYS = [
   "price_desc",
   "rating",
   "trust",
+  "popular",
+  // `best_seller` (Prompt 12) is an accepted URL alias for `popular` — both rank
+  // by seller.totalSales. Kept as a valid key so /marketplace?sort=best_seller
+  // resolves; the dropdown shows the single canonical "Most popular" entry.
+  "best_seller",
 ] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 
 export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "popular", label: "Most popular" },
   { value: "newest", label: "Newest first" },
   { value: "price_asc", label: "Price: low to high" },
   { value: "price_desc", label: "Price: high to low" },
@@ -56,6 +62,12 @@ const KIND_TO_TYPE_PARAM: Record<CategoryKind, string> = {
 export const TRUST_TIERS = [70, 90] as const;
 /** Min-seller-rating tiers offered in the UI. */
 export const RATING_TIERS = [4, 4.5] as const;
+/** Min-seller-sales tiers offered in the UI (Prompt 08 "seller experience"). */
+export const MIN_SALES_OPTIONS = [
+  { value: 10, label: "10+ sales" },
+  { value: 50, label: "50+ sales" },
+  { value: 100, label: "100+ sales" },
+] as const;
 
 export type MarketplaceFilters = {
   q?: string;
@@ -66,6 +78,8 @@ export type MarketplaceFilters = {
   delivery?: DeliveryType;
   trust?: number; // min seller trustScore (0-100)
   rating?: number; // min seller ratingAvg (0-5)
+  minSales?: number; // min seller totalSales (inclusive lower bound)
+  verified?: boolean; // true → seller kycStatus must be APPROVED
   currency?: string; // ISO/crypto code, uppercased
   sort: SortKey;
   page: number;
@@ -172,6 +186,8 @@ export function parseMarketplaceSearchParams(sp: {
     delivery,
     trust: parseIntInRange(first(sp.trust), 1, 100),
     rating: parseFloatInRange(first(sp.rating), 0.5, 5),
+    minSales: parseIntInRange(first(sp.minSales), 0, 1_000_000),
+    verified: first(sp.verified) === "1" ? true : undefined,
     currency,
     sort,
     page,
@@ -189,7 +205,9 @@ export function hasActiveFilters(f: MarketplaceFilters): boolean {
       f.minPriceMinor !== undefined ||
       f.maxPriceMinor !== undefined ||
       f.trust !== undefined ||
-      f.rating !== undefined,
+      f.rating !== undefined ||
+      f.minSales !== undefined ||
+      f.verified === true,
   );
 }
 
@@ -221,6 +239,8 @@ export function buildMarketplaceParams(
     p.set("max", minorToMajorString(merged.maxPriceMinor, "INR"));
   if (merged.trust !== undefined) p.set("trust", String(merged.trust));
   if (merged.rating !== undefined) p.set("rating", String(merged.rating));
+  if (merged.minSales !== undefined) p.set("minSales", String(merged.minSales));
+  if (merged.verified) p.set("verified", "1");
   if (merged.currency) p.set("currency", merged.currency);
   if (merged.sort && merged.sort !== "newest") p.set("sort", merged.sort);
   if (merged.page > 1) p.set("page", String(merged.page));

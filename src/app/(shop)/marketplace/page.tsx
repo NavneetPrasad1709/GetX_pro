@@ -1,6 +1,10 @@
+// This page is intentionally dynamic: searchParams-driven filter state prevents
+// ISR. The getActiveGames() call is cache()-wrapped per request. A future
+// unstable_cache upgrade is tracked in Step 28 (Algolia search).
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getActiveGames } from "@/server/services/catalog";
+import { getFacetCounts } from "@/server/services/marketplace";
 import {
   buildMarketplaceParams,
   isIndexableView,
@@ -15,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ListingGridSkeleton } from "@/components/marketplace/listing-grid";
 import { MarketplaceFilters as MarketplaceFilterBar } from "@/components/marketplace/marketplace-filters";
 import { MarketplaceResults } from "@/components/marketplace/marketplace-results";
+import { InstantSearchBar } from "@/components/marketplace/instant-search-bar";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -91,10 +96,10 @@ function ResultsSkeleton() {
  */
 export default async function MarketplacePage({ searchParams }: Props) {
   const filters = parseMarketplaceSearchParams(await searchParams);
-  const games = (await getActiveGames()).map((g) => ({
-    slug: g.slug,
-    name: g.name,
-  }));
+  const [games, facets] = await Promise.all([
+    getActiveGames().then((gs) => gs.map((g) => ({ slug: g.slug, name: g.name }))),
+    getFacetCounts(filters),
+  ]);
 
   // A key that changes with ANY param so the grid re-suspends on filter change.
   const resultsKey = buildMarketplaceParams(filters).toString() || "all";
@@ -117,14 +122,18 @@ export default async function MarketplacePage({ searchParams }: Props) {
           </header>
         </div>
 
+        {/* Instant search (Step 28) — renders only when Algolia is configured; otherwise null
+            so the filter bar's server-side search remains the search UX. */}
+        <InstantSearchBar />
+
         {/* useSearchParams lives in the filter bar — Suspense satisfies the
             static-render boundary requirement and is a no-op when dynamic. */}
         <Suspense fallback={null}>
-          <MarketplaceFilterBar filters={filters} games={games} />
+          <MarketplaceFilterBar filters={filters} games={games} facets={facets} />
         </Suspense>
 
         <Suspense key={resultsKey} fallback={<ResultsSkeleton />}>
-          <MarketplaceResults filters={filters} games={games} />
+          <MarketplaceResults filters={filters} games={games} facets={facets} />
         </Suspense>
       </PageContainer>
     </main>

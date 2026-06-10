@@ -9,6 +9,8 @@ type Props = {
   title: string;
   /** Monogram fallback (game mono) shown when a listing has no images yet. */
   mono: string;
+  /** Optional game cover art, blurred behind the monogram fallback (static). */
+  gameImage: string | null;
 };
 
 /**
@@ -17,34 +19,71 @@ type Props = {
  * visual language as the card cover. When images exist, the main image is the
  * LCP element (priority) and thumbnails switch it client-side.
  */
-export function ListingGallery({ images, title, mono }: Props) {
+/**
+ * Branded "no photo yet" cover — shown when a listing has no images or one
+ * breaks. Uses the game's cover art (blurred + dimmed) behind the monogram when
+ * available, so it reads as intentional branding, not a broken/loading image.
+ */
+function MonoCover({ mono, gameImage }: { mono: string; gameImage: string | null }) {
+  return (
+    <div className="absolute inset-0 grid place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_top_left,rgba(77,124,254,0.16),transparent_55%)]">
+      {gameImage ? (
+        <Image
+          src={gameImage}
+          alt=""
+          fill
+          sizes="(max-width: 900px) 100vw, 640px"
+          className="scale-110 object-cover opacity-30 blur-sm"
+          aria-hidden="true"
+        />
+      ) : null}
+      <div className="relative z-10 flex flex-col items-center gap-1">
+        <span
+          className={cn(
+            "font-heading text-5xl font-extrabold tracking-tight select-none",
+            gameImage ? "text-foreground/60" : "text-foreground/20",
+          )}
+        >
+          {mono}
+        </span>
+        <span className="text-xs text-faint">No photo yet</span>
+      </div>
+    </div>
+  );
+}
+
+export function ListingGallery({ images, title, mono, gameImage }: Props) {
   const [active, setActive] = useState(0);
+  // Track URLs that 404/failed so a broken image degrades to the mono cover.
+  const [broken, setBroken] = useState<Record<string, true>>({});
 
   if (images.length === 0) {
     return (
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-secondary">
-        <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(ellipse_at_top_left,rgba(77,124,254,0.16),transparent_55%)]">
-          <span className="font-heading text-5xl font-extrabold tracking-tight text-foreground/10 select-none">
-            {mono}
-          </span>
-        </div>
+        <MonoCover mono={mono} gameImage={gameImage} />
       </div>
     );
   }
 
   const current = Math.min(active, images.length - 1);
+  const currentSrc = images[current];
 
   return (
     <div className="flex flex-col gap-3">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-secondary">
-        <Image
-          src={images[current]}
-          alt={`${title} — image ${current + 1} of ${images.length}`}
-          fill
-          sizes="(max-width: 900px) 100vw, 640px"
-          className="object-cover"
-          priority
-        />
+        {broken[currentSrc] ? (
+          <MonoCover mono={mono} gameImage={gameImage} />
+        ) : (
+          <Image
+            src={currentSrc}
+            alt={`${title} — image ${current + 1} of ${images.length}`}
+            fill
+            sizes="(max-width: 900px) 100vw, 640px"
+            className="object-cover"
+            priority
+            onError={() => setBroken((b) => ({ ...b, [currentSrc]: true }))}
+          />
+        )}
       </div>
 
       {images.length > 1 ? (
@@ -65,13 +104,20 @@ export function ListingGallery({ images, title, mono }: Props) {
                     : "border-border hover:border-primary/40",
                 )}
               >
-                <Image
-                  src={src}
-                  alt=""
-                  fill
-                  sizes="120px"
-                  className="object-cover"
-                />
+                {broken[src] ? (
+                  <span className="grid size-full place-items-center bg-secondary text-[10px] text-faint">
+                    ✕
+                  </span>
+                ) : (
+                  <Image
+                    src={src}
+                    alt=""
+                    fill
+                    sizes="120px"
+                    className="object-cover"
+                    onError={() => setBroken((b) => ({ ...b, [src]: true }))}
+                  />
+                )}
               </button>
             </li>
           ))}

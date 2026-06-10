@@ -6,6 +6,7 @@ import type { Role } from "@prisma/client";
 import {
   LayoutDashboardIcon,
   LogOutIcon,
+  MessageSquareIcon,
   ShieldIcon,
   StoreIcon,
 } from "lucide-react";
@@ -54,6 +55,10 @@ export function UserMenu({ user }: { user: MenuUser }) {
 
         <DropdownMenuItem render={<Link href="/dashboard" />}>
           <LayoutDashboardIcon /> Dashboard
+        </DropdownMenuItem>
+
+        <DropdownMenuItem render={<Link href="/messages" />}>
+          <MessageSquareIcon /> Messages
         </DropdownMenuItem>
 
         {user.role === "BUYER" ? (

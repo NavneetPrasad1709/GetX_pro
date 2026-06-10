@@ -32,10 +32,14 @@ export const CATEGORY_PAGE_SIZE = 24;
 export const listingCardInclude = {
   seller: {
     select: {
+      id: true,
       displayName: true,
       trustScore: true,
       ratingAvg: true,
       ratingCount: true,
+      kycStatus: true,
+      sellerLevel: true,
+      subscriptionTier: true,
       user: { select: { image: true } },
     },
   },
@@ -62,9 +66,13 @@ export function toListingCardData(listing: ListingForCard): ListingCardData {
     rating: listing.seller.ratingCount > 0 ? listing.seller.ratingAvg : null,
     reviews: listing.seller.ratingCount > 0 ? listing.seller.ratingCount : null,
     seller: {
+      id: listing.seller.id,
       name: listing.seller.displayName,
       image: listing.seller.user.image,
       trustScore: listing.seller.trustScore,
+      kycVerified: listing.seller.kycStatus === "APPROVED",
+      sellerLevel: listing.seller.sellerLevel,
+      proMember: listing.seller.subscriptionTier === "PRO",
     },
   };
 }
@@ -160,28 +168,38 @@ export const getGameBySlug = cache(
 
 /**
  * Latest ACTIVE listings per category (game landing previews).
- * Categories with zero listings are skipped — no wasted queries.
+ * Issues ONE batched query (categoryId IN [...]) instead of N parallel queries.
+ * Categories with zero listings produce empty arrays — no wasted rows.
  */
 export async function getCategoryPreviews(
   categories: CategorySummary[],
   perCategory = 4,
 ): Promise<Map<string, ListingCardData[]>> {
   const stocked = categories.filter((c) => c.listingCount > 0);
+  if (stocked.length === 0) return new Map();
 
-  const results = await Promise.all(
-    stocked.map((c) =>
-      db.listing.findMany({
-        where: { categoryId: c.id, ...ACTIVE_LISTING },
-        orderBy: { createdAt: "desc" },
-        take: perCategory,
-        include: listingCardInclude,
-      }),
-    ),
-  );
+  const categoryIds = stocked.map((c) => c.id);
 
-  return new Map(
-    stocked.map((c, i) => [c.id, results[i].map(toListingCardData)]),
-  );
+  // One round-trip: fetch up to perCategory * stocked.length rows ordered by
+  // (categoryId, createdAt DESC), then group in memory.
+  // Postgres window functions would be ideal but Prisma does not expose them.
+  const rows = await db.listing.findMany({
+    where: { categoryId: { in: categoryIds }, ...ACTIVE_LISTING },
+    orderBy: [{ categoryId: "asc" }, { createdAt: "desc" }],
+    take: perCategory * stocked.length,
+    include: listingCardInclude,
+  });
+
+  const grouped = new Map<string, ListingCardData[]>();
+  for (const row of rows) {
+    const existing = grouped.get(row.categoryId) ?? [];
+    if (existing.length < perCategory) {
+      existing.push(toListingCardData(row));
+      grouped.set(row.categoryId, existing);
+    }
+  }
+
+  return grouped;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,7 @@
+import { SearchIcon } from "lucide-react";
 import { HeaderSearch } from "@/components/layout/header-search";
 import { TrustBadge } from "@/components/shared/trust-badge";
+import { CtaLink } from "@/components/shared/cta-link";
 import { PageContainer } from "@/components/shared/page-container";
 import { siteConfig } from "@/config/site";
 
@@ -64,8 +66,15 @@ export function HomeHero() {
 
         <HeaderSearch className="mx-auto mt-[22px] max-w-[640px] min-[761px]:mt-8" />
 
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <CtaLink href="/marketplace" size="lg" className="w-full min-[761px]:w-auto">
+            <SearchIcon className="size-[17px]" aria-hidden="true" />
+            Browse listings
+          </CtaLink>
+        </div>
+
         {/* glass trust badges */}
-        <div className="mt-5 flex flex-wrap justify-center gap-2 min-[761px]:mt-6 min-[761px]:gap-2.5">
+        <div className="mt-4 flex flex-wrap justify-center gap-2 min-[761px]:mt-5 min-[761px]:gap-2.5">
           <TrustBadge variant="escrow" />
           <TrustBadge variant="verified" />
           <TrustBadge variant="moneyback" />

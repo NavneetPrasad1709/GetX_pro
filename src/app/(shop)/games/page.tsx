@@ -6,8 +6,12 @@ import { getGameCopy } from "@/config/games";
 import { siteConfig } from "@/config/site";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer } from "@/components/shared/page-container";
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { EmptyState } from "@/components/shared/empty-state";
 import { GameCard, type GameTileData } from "@/components/marketplace/game-card";
+
+// Game listing counts change slowly — ISR keeps the games index fresh for 5 min.
+export const revalidate = 300;
 
 const TITLE = "Browse games — buy accounts, top-ups & boosting";
 const DESCRIPTION =
@@ -104,6 +108,10 @@ export default function GamesPage() {
   return (
     <main className="flex-1 py-8 min-[761px]:py-12">
       <PageContainer>
+        <Breadcrumbs
+          items={[{ label: "Home", href: "/" }, { label: "Games" }]}
+          className="mb-4"
+        />
         <header className="mb-6 min-[761px]:mb-8">
           <span className="font-heading text-xs font-semibold tracking-[0.14em] text-primary uppercase">
             Marketplace

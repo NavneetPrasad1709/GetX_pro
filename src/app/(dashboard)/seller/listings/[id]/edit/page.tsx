@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getOwnedListing } from "@/server/services/listings";
 import { getCatalogForForm } from "@/server/services/catalog";
+import { getSellerDeliveryStock } from "@/server/services/delivery";
+import { isEncryptionAvailable } from "@/lib/encryption";
 import { minorToMajorString } from "@/lib/money";
 import { ListingStatusBadge } from "@/components/seller/listing-status-badge";
+import { DeliveryStockManager } from "@/components/seller/delivery-stock-manager";
 import {
   ListingForm,
   type ListingFormInitial,
@@ -66,9 +69,18 @@ export default async function EditListingPage({ params }: Props) {
       stock: listing.stock,
       deliveryType: listing.deliveryType,
       attributes,
+      images: listing.images ?? [],
       publish: false,
     },
   };
+
+  // Auto-delivery stock (Step 19) — only for INSTANT listings. Fail-closed: if no encryption key,
+  // hide the manager and show a neutral banner instead of crashing.
+  const instant = listing.deliveryType === "INSTANT";
+  const encryptionOn = isEncryptionAvailable();
+  const stock = instant && encryptionOn
+    ? await getSellerDeliveryStock(listing.id, session.user.id)
+    : null;
 
   return (
     <div className="flex flex-col gap-5">
@@ -82,6 +94,18 @@ export default async function EditListingPage({ params }: Props) {
         </p>
       </div>
       <ListingForm catalog={catalog} initial={initial} />
+
+      {stock ? (
+        <DeliveryStockManager
+          listingId={listing.id}
+          initialCount={stock.count}
+          initialItems={stock.items}
+        />
+      ) : instant && !encryptionOn ? (
+        <p className="rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+          Auto-delivery is unavailable right now — contact support to enable instant delivery.
+        </p>
+      ) : null}
     </div>
   );
 }

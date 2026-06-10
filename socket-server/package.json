@@ -1,0 +1,23 @@
+{
+  "name": "getx-socket-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GETX realtime chat relay (Socket.io). Standalone Node service that deploys to Railway, separate from the Vercel app (Vercel can't hold websockets). It authenticates sockets, relays room events, and persists via the GETX app's secured internal API — it holds NO business logic.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json",
+    "qa": "tsx test/relay.test.ts"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "socket.io-client": "^4.8.1",
+    "tsx": "^4.22.4",
+    "typescript": "^5"
+  }
+}

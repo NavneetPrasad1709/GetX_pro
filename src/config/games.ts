@@ -165,3 +165,93 @@ export const CATEGORY_KIND_COPY: Record<
       `Professional ${game} boosting and rank services with progress updates along the way.`,
   },
 };
+
+// ---------------------------------------------------------------------------
+// Per game × category SEO landing copy (Prompt 17)
+// ---------------------------------------------------------------------------
+
+export type GameCategoryCopy = {
+  intro: string; // 2-3 sentence intro under the H1
+  bodyParagraphs: string[]; // ~100-word paragraphs at the bottom of the page
+  faqs: { q: string; a: string }[]; // 3-5 FAQs → FAQPage JSON-LD
+};
+
+/** Hand-written copy for the highest-volume combos. Everything else uses a
+ *  genuine parameterized fallback (never spammy filler). */
+const GAME_CATEGORY_COPY: Record<string, GameCategoryCopy> = {
+  "pokemon-go/accounts": {
+    intro:
+      "Find hand-leveled Pokémon GO accounts with rare shinies, legendaries and maxed-out Pokédex entries — all listed by verified GETX sellers and protected by escrow from the moment you pay.",
+    bodyParagraphs: [
+      "Pokémon GO accounts on GETX range from mid-game profiles with a full regional collection to high-level accounts stacked with shiny legendaries and rare event Pokémon. Every listing shows the seller's rating, sales count and a detailed attribute table (level, candy counts, server) so you know exactly what you're buying before checkout.",
+      "Our escrow system holds your money until you confirm the account credentials and email have transferred correctly — you have a 3-day window (7 with Shield) to raise a dispute if anything is wrong. Sellers are ID-verified before listing and face an immediate payout hold if a dispute is opened against them.",
+      "Prices vary by level, shiny dex completion and event Pokémon — typical accounts run from ₹800 starter stacks to ₹15,000+ endgame profiles. Use the price filter and sort by seller rating to find the best value in seconds.",
+    ],
+    faqs: [
+      {
+        q: "Is it safe to buy a Pokémon GO account on GETX?",
+        a: "Yes — your payment is held in escrow and only released to the seller after you confirm the account works. If the login details are wrong or the account isn't as described, open a dispute before the deadline and our team reviews it.",
+      },
+      {
+        q: "How is the account handed over?",
+        a: "Sellers deliver the login credentials (and email, where included) through GETX's secure order chat after payment clears. Change the password and recovery email immediately once you have access.",
+      },
+      {
+        q: "What if the account gets recovered by the original owner?",
+        a: "Choose listings with full email ownership transfer for the strongest protection, and confirm the handover before the escrow window closes. Any access issue inside the window is covered by a dispute.",
+      },
+    ],
+  },
+  "pokemon-go/pokecoins": {
+    intro:
+      "Top up Pokémon GO PokéCoins at competitive prices with fast, escrow-protected delivery from verified GETX sellers — no account login required for most top-up methods.",
+    bodyParagraphs: [
+      "PokéCoin top-ups on GETX are delivered to your account quickly after payment, with most sellers offering instant or same-hour fulfilment. Each listing states the exact amount, delivery method and region so there are no surprises at checkout.",
+      "Because top-ups compete on price and speed, use the sort options to surface the fastest, best-rated sellers. Your payment stays in escrow until the coins land — if a delivery fails, you're covered by a dispute, not left out of pocket.",
+    ],
+    faqs: [
+      {
+        q: "How fast are PokéCoin top-ups delivered?",
+        a: "Most sellers deliver within the hour; instant-delivery listings are marked with a ⚡ badge. Delivery time is shown on every listing.",
+      },
+      {
+        q: "Do I need to share my password for a top-up?",
+        a: "Usually not — many top-up methods only need your trainer code or player ID. Never share more than a listing's stated requirements; ask the seller in order chat if unsure.",
+      },
+    ],
+  },
+};
+
+/**
+ * SEO landing copy for a game × category page (Prompt 17). Falls back to genuine,
+ * helpful parameterized copy for any combo without a hand-written entry.
+ */
+export function getGameCategoryCopy(
+  gameSlug: string,
+  categorySlug: string,
+  categoryName: string,
+  kind: "ACCOUNT" | "ITEM" | "CURRENCY" | "BOOSTING",
+): GameCategoryCopy {
+  const hand = GAME_CATEGORY_COPY[`${gameSlug}/${categorySlug}`];
+  if (hand) return hand;
+
+  const game = getGameCopy(gameSlug).name;
+  const cat = categoryName.toLowerCase();
+  return {
+    intro: `${CATEGORY_KIND_COPY[kind].blurb(game)} Every order on GETX is escrow-protected — your payment is held safely until you confirm delivery.`,
+    bodyParagraphs: [
+      `Browse ${game} ${cat} from verified GETX sellers, each with a public rating, sales history and a clear attribute table so you know exactly what you're buying. Filter by price, delivery speed and seller experience to find the right listing in seconds.`,
+      `Your money is held in escrow until you confirm the order is as described — a 3-day buyer-protection window (7 days with Shield) backs every purchase. Sellers are reputation-scored and face an automatic payout hold if a dispute is opened, so the incentive is always to deliver exactly what was promised.`,
+    ],
+    faqs: [
+      {
+        q: `Is it safe to buy ${game} ${cat} on GETX?`,
+        a: "Yes — escrow holds your payment until you confirm delivery. If anything's wrong, open a dispute before the deadline and our team resolves it fairly.",
+      },
+      {
+        q: "How does delivery work?",
+        a: "After payment clears, the seller delivers through GETX's secure order chat (instant for top-ups, usually within a few hours for manual handovers). The delivery method is shown on each listing.",
+      },
+    ],
+  };
+}

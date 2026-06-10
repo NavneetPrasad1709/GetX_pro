@@ -15,7 +15,12 @@ export const metadata: Metadata = {
     "Join GETX — buy and sell game accounts, items and currency with escrow protection.",
 };
 
-export default function RegisterPage() {
+type Props = { searchParams: Promise<{ ref?: string | string[] }> };
+
+export default async function RegisterPage({ searchParams }: Props) {
+  const sp = await searchParams;
+  const ref = Array.isArray(sp.ref) ? sp.ref[0] : sp.ref;
+
   return (
     <Card>
       <CardHeader>
@@ -26,7 +31,7 @@ export default function RegisterPage() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <OAuthButtons />
-        <RegisterForm />
+        <RegisterForm referralCode={ref?.slice(0, 16)} />
       </CardContent>
     </Card>
   );

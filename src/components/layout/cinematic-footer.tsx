@@ -195,9 +195,8 @@ export function CinematicFooter() {
               Ready to level up?
             </h2>
             <p className="mx-auto mt-3.5 max-w-[48ch] text-[clamp(15px,1.8vw,18px)] text-muted-foreground">
-              Join 12,400+ gamers buying and selling accounts, items &amp;
-              top-ups — safe, instant, and escrow-protected from start to
-              finish.
+              Buy and sell game accounts, items &amp; top-ups — safe, instant,
+              and escrow-protected from start to finish.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
@@ -220,7 +219,7 @@ export function CinematicFooter() {
         {/* detailed link columns — glass card */}
         <div className="relative mx-auto w-full max-w-[1120px] px-[22px]">
           <div className="rounded-[18px] border border-white/[0.07] bg-[linear-gradient(180deg,rgba(18,20,24,.34),rgba(11,12,15,.6))] p-5 shadow-[0_34px_70px_-34px_rgba(0,0,0,.72),inset_0_1px_0_rgba(255,255,255,.05)] backdrop-blur-[16px] backdrop-saturate-[1.18] min-[761px]:rounded-[22px] min-[761px]:p-[30px]">
-            <div className="grid grid-cols-2 gap-5 min-[561px]:grid-cols-3 min-[761px]:gap-[26px] min-[901px]:grid-cols-[1.8fr_1fr_1fr_1fr_1fr]">
+            <div className="grid grid-cols-2 gap-5 min-[561px]:grid-cols-3 min-[761px]:gap-[26px] min-[901px]:grid-cols-[1.6fr_1fr_1fr_1fr_1fr_1fr]">
               {/* brand column */}
               <div className="col-span-2 min-[561px]:col-span-3 min-[901px]:col-span-1">
                 <Link

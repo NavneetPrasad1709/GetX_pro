@@ -28,5 +28,9 @@ declare module "next-auth/jwt" {
     role: Role;
     /** ISO string (JWTs only carry JSON-serializable values) */
     emailVerified: string | null;
+    /** Session-revocation stamp (Step 32); must match User.sessionVersion. */
+    sessionVersion?: number;
+    /** Epoch ms of the last sessionVersion DB re-check (bounds DB load). */
+    svCheckedAt?: number;
   }
 }

@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth";
 import { getCatalogForForm } from "@/server/services/catalog";
+import { getSellerStats } from "@/server/services/listings";
+import { getMyKycStatus } from "@/server/services/kyc";
 import { ListingForm } from "@/components/seller/listing-form";
 
 export const metadata: Metadata = { title: "New listing" };
 
-/** Create listing — the catalog tree feeds the game/category selects. */
+/** Create listing — the catalog tree feeds the game/category selects.
+ *  Prompt 14: first-listing guidance + KYC payout warning. */
 export default async function NewListingPage() {
-  const catalog = await getCatalogForForm();
+  const session = await requireUser();
+  const [catalog, stats, kyc] = await Promise.all([
+    getCatalogForForm(),
+    getSellerStats(session.user.id),
+    getMyKycStatus(session.user.id),
+  ]);
+  const isFirstListing = stats.activeListings + stats.draftListings === 0;
 
   return (
     <div className="flex flex-col gap-5">
@@ -17,7 +27,11 @@ export default async function NewListingPage() {
           listing is free.
         </p>
       </div>
-      <ListingForm catalog={catalog} />
+      <ListingForm
+        catalog={catalog}
+        isFirstListing={isFirstListing}
+        kycStatus={kyc.status}
+      />
     </div>
   );
 }

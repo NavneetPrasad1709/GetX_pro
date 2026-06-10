@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { mainNav } from "@/config/nav";
+import { GamesMegaNav } from "@/components/layout/games-mega-nav";
 import { cn } from "@/lib/utils";
 
 /**
  * Desktop header nav with active state (v10 ".nav") — tiny client island so
- * the rest of the header stays a server component.
+ * the rest of the header stays a server component. The "Games" item renders
+ * the games mega-nav (Prompt 02); all others are plain links.
  */
 export function NavLinks() {
   const pathname = usePathname();
@@ -21,6 +23,9 @@ export function NavLinks() {
       className="hidden items-center gap-1.5 min-[901px]:flex"
     >
       {mainNav.map((item) => {
+        if (item.title === "Games") {
+          return <GamesMegaNav key={item.href} />;
+        }
         const active = isActive(item.href);
         return (
           <Link

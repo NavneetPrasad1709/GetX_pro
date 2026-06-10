@@ -1,21 +1,33 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { PackagePlusIcon, ZapIcon, PackageIcon } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { getSellerListings } from "@/server/services/listings";
+import { MarketPulse } from "@/components/seller/market-pulse";
 import { formatMoney } from "@/lib/money";
 import { LISTING_TYPE_LABEL } from "@/config/games";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ListingActions } from "@/components/seller/listing-actions";
 import { ListingStatusBadge } from "@/components/seller/listing-status-badge";
+import { BoostListingButton } from "@/components/seller/boost-listing-button";
+import { BumpListingButton } from "@/components/seller/bump-listing-button";
 
 export const metadata: Metadata = { title: "My listings" };
 
 /** Manage listings — status, price, stock and actions per row. */
 export default async function SellerListingsPage() {
   const session = await requireUser();
-  const listings = await getSellerListings(session.user.id);
+  const [listings, profile] = await Promise.all([
+    getSellerListings(session.user.id),
+    db.sellerProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    }),
+  ]);
+  const now = new Date();
 
   return (
     <div className="flex flex-col gap-4">
@@ -28,11 +40,17 @@ export default async function SellerListingsPage() {
         </p>
       </div>
 
+      {profile && listings.length > 0 ? (
+        <Suspense fallback={null}>
+          <MarketPulse sellerId={profile.id} />
+        </Suspense>
+      ) : null}
+
       {listings.length === 0 ? (
         <EmptyState
           icon={<PackagePlusIcon />}
-          title="No listings yet — your first one is free!"
-          description="List an account, items, top-ups or boosting in under 2 minutes."
+          title="Your shop is empty — your first listing is free"
+          description="List a game account, items, top-ups or boosting in under 2 minutes. You keep 90–95% of every sale."
           headingLevel="h2"
           action={
             <Button render={<Link href="/seller/listings/new" />}>
@@ -72,6 +90,20 @@ export default async function SellerListingsPage() {
                   </span>{" "}
                   · stock {listing.stock}
                 </p>
+                {/* boost control for live listings (Prompt 15) */}
+                {listing.status === "ACTIVE" ? (
+                  <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                    <BoostListingButton
+                      listingId={listing.id}
+                      active={
+                        listing.isFeatured &&
+                        listing.boostExpiresAt != null &&
+                        listing.boostExpiresAt > now
+                      }
+                    />
+                    <BumpListingButton listingId={listing.id} />
+                  </div>
+                ) : null}
               </div>
 
               <ListingActions listingId={listing.id} status={listing.status} />

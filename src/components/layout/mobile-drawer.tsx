@@ -3,6 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { MenuIcon } from "lucide-react";
+import type { Role } from "@prisma/client";
 
 // Base UI Dialog is heavy and mobile-only — load it on first tap, not on boot.
 const DrawerDialog = dynamic(
@@ -11,7 +12,13 @@ const DrawerDialog = dynamic(
 );
 
 /** Hamburger button (always present) that lazily mounts the drawer panel. */
-export function MobileDrawer({ authed }: { authed: boolean }) {
+export function MobileDrawer({
+  authed,
+  role,
+}: {
+  authed: boolean;
+  role?: Role | null;
+}) {
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -32,7 +39,12 @@ export function MobileDrawer({ authed }: { authed: boolean }) {
       </button>
 
       {mounted ? (
-        <DrawerDialog authed={authed} open={open} onOpenChange={setOpen} />
+        <DrawerDialog
+          authed={authed}
+          role={role}
+          open={open}
+          onOpenChange={setOpen}
+        />
       ) : null}
     </>
   );

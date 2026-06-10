@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { XIcon } from "lucide-react";
-import { searchListings } from "@/server/services/marketplace";
+import { searchListings, type FacetCounts } from "@/server/services/marketplace";
 import {
   buildMarketplaceParams,
   hasActiveFilters,
@@ -75,6 +75,18 @@ function buildChips(f: MarketplaceFilters, games: GameOption[]): Chip[] {
       href: marketplaceHref(f, { rating: undefined }),
     });
   }
+  if (f.minSales !== undefined) {
+    chips.push({
+      label: `${f.minSales}+ sales`,
+      href: marketplaceHref(f, { minSales: undefined }),
+    });
+  }
+  if (f.verified) {
+    chips.push({
+      label: "Verified seller",
+      href: marketplaceHref(f, { verified: undefined }),
+    });
+  }
   if (f.currency) {
     chips.push({
       label: f.currency,
@@ -98,8 +110,10 @@ export async function MarketplaceResults({
 }: {
   filters: MarketplaceFilters;
   games: GameOption[];
+  /** Forward-compatible: accepted so the page can pass it; not used yet. */
+  facets?: FacetCounts;
 }) {
-  const { items, total, page, pageCount } = await searchListings(filters);
+  const { items, featured, total, page, pageCount } = await searchListings(filters);
   const filtered = hasActiveFilters(filters);
   const chips = buildChips(filters, games);
 
@@ -145,15 +159,47 @@ export async function MarketplaceResults({
         ) : null}
       </div>
 
+      {/* Promoted band (Prompt 15) — paid placement, FTC-labeled, page 1 only */}
+      {featured.length > 0 ? (
+        <section aria-label="Promoted listings" className="flex flex-col gap-3">
+          <ListingGrid>
+            {featured.map((listing) => (
+              <ListingCard key={`promoted-${listing.id}`} listing={listing} isPromoted />
+            ))}
+          </ListingGrid>
+        </section>
+      ) : null}
+
       {items.length === 0 ? (
         filtered ? (
-          <ListingGridEmpty
-            title="No listings match your filters"
-            description="Try widening your price range, switching the game, or clearing a filter."
-            action={
-              <CtaLink href="/marketplace">Clear all filters</CtaLink>
-            }
-          />
+          // When a buyer narrowed to a single game and found nothing, point them
+          // at that game's page — every empty category there has a demand-capture
+          // "notify me" form (Prompt 12), so the intent isn't lost.
+          filters.game ? (
+            <ListingGridEmpty
+              title={`No ${games.find((g) => g.slug === filters.game)?.name ?? "listings"} listings yet`}
+              description="Be the first to know when a verified seller lists here — leave your email on the game page, or clear your filters to browse everything."
+              action={
+                <div className="flex flex-wrap items-center justify-center gap-2.5">
+                  <CtaLink href={`/games/${filters.game}`}>
+                    Request a seller
+                  </CtaLink>
+                  <Link
+                    href="/marketplace"
+                    className="rounded-sm px-2 text-sm font-semibold text-primary hover:text-primary-hover focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                  >
+                    Clear all filters
+                  </Link>
+                </div>
+              }
+            />
+          ) : (
+            <ListingGridEmpty
+              title="No listings match your filters"
+              description="Try widening your price range, switching the game, or clearing a filter."
+              action={<CtaLink href="/marketplace">Clear all filters</CtaLink>}
+            />
+          )
         ) : (
           <ListingGridEmpty
             title="No listings yet — be the first seller!"

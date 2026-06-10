@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The Socket.io server is a separate package with its own tooling (Step 11).
+    "socket-server/**",
+    // Generated test artifacts (Step 34) — never lint these.
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

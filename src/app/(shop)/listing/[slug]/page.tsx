@@ -1,18 +1,42 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getListingBySlug, type ListingDetail } from "@/server/services/marketplace";
+import {
+  getListingBySlug,
+  getMoreFromSeller,
+  getMoreInCategory,
+  type ListingDetail,
+} from "@/server/services/marketplace";
+import { getSellerReviews, getSellerResponseStats } from "@/server/services/reviews";
+import { recordListingView } from "@/server/services/liquidity";
+import { captureServerEvent } from "@/lib/posthog";
+import {
+  ListingGrid,
+} from "@/components/marketplace/listing-grid";
+import {
+  ListingCard,
+  type ListingCardData,
+} from "@/components/marketplace/listing-card";
 import {
   getGameCopy,
   LISTING_TYPE_LABEL,
   LISTING_ATTRIBUTE_LABELS,
 } from "@/config/games";
 import { siteConfig } from "@/config/site";
+import { auth } from "@/lib/auth";
 import { minorToMajorString } from "@/lib/money";
 import { PageContainer } from "@/components/shared/page-container";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { ListingGallery } from "@/components/marketplace/listing-gallery";
 import { BuyBox } from "@/components/marketplace/buy-box";
 import { SellerTrustPanel } from "@/components/marketplace/seller-trust-panel";
+import { EscrowProtectionPanel } from "@/components/shared/escrow-protection-panel";
+import { ChatWithSellerButton } from "@/components/chat/chat-with-seller-button";
+import { Rating } from "@/components/shared/rating";
+import { ReviewList } from "@/components/reviews/review-list";
+
+// Listing detail: price/stock can change — revalidate every 60s for freshness.
+export const revalidate = 60;
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -31,17 +55,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const canonical = `/listing/${listing.slug}`;
   const description = metaDescription(listing.description);
-  // images[0] is typed `string` (non-null), so an empty array must be handled
-  // explicitly — otherwise the fallback object branch becomes unreachable.
-  const shareImage =
-    listing.images.length > 0
-      ? listing.images[0]
-      : ({
-          url: "/getx-mark.webp",
-          width: 1254,
-          height: 1254,
-          alt: listing.title,
-        } as const);
+  // Dynamic branded 1200×630 share card (Prompt 17) — renders rich previews in
+  // Discord/WhatsApp/Twitter (gaming audiences share listings constantly).
+  const ogImage = {
+    url: `/og/listing/${listing.slug}`,
+    width: 1200,
+    height: 630,
+    alt: listing.title,
+  };
 
   return {
     title: listing.title,
@@ -53,13 +74,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonical,
       siteName: siteConfig.name,
       type: "website",
-      images: [shareImage],
+      images: [ogImage],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: `${listing.title} · ${siteConfig.name}`,
       description,
-      images: [typeof shareImage === "string" ? shareImage : shareImage.url],
+      images: [ogImage.url],
     },
   };
 }
@@ -79,7 +100,7 @@ function productJsonLd(listing: ListingDetail): string {
       ? listing.images
       : [`${siteConfig.url}/getx-mark.webp`];
 
-  const data = {
+  const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: listing.title,
@@ -100,6 +121,19 @@ function productJsonLd(listing: ListingDetail): string {
       seller: { "@type": "Organization", name: listing.seller.displayName },
     },
   };
+
+  // AggregateRating (Prompt 17) — the seller's aggregate, shown only at ≥3 reviews
+  // (Google's minimum; emitting fewer risks a structured-data manual action).
+  if (listing.seller.ratingCount >= 3) {
+    data.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: listing.seller.ratingAvg.toFixed(1),
+      reviewCount: String(listing.seller.ratingCount),
+      bestRating: "5",
+      worstRating: "1",
+    };
+  }
+
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
@@ -109,13 +143,72 @@ function humanizeKey(key: string): string {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1).toLowerCase();
 }
 
+/** A related-listings rail (Prompt 17) — title + "See all" link + a card grid. */
+function RelatedSection({
+  title,
+  href,
+  listings,
+}: {
+  title: string;
+  href: string;
+  listings: ListingCardData[];
+}) {
+  return (
+    <section aria-label={title} className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-heading text-lg font-bold">{title}</h2>
+        <Link
+          href={href}
+          className="text-sm font-semibold text-primary hover:text-primary-hover focus-visible:outline-none"
+        >
+          See all →
+        </Link>
+      </div>
+      <ListingGrid>
+        {listings.map((l) => (
+          <ListingCard key={l.id} listing={l} />
+        ))}
+      </ListingGrid>
+    </section>
+  );
+}
+
 export default async function ListingPage({ params }: Props) {
   const { slug } = await params;
   const listing = await getListingBySlug(slug);
   if (!listing) notFound();
 
+  // Fire-and-forget view counter (Prompt 12) — never blocks/breaks the render.
+  // NOTE: this page is ISR (revalidate=60), so the body runs at most once per
+  // 60s per slug; the count is a coarse popularity signal, not exact hits.
+  void recordListingView(listing.id);
+
+  // Logged-in non-owners can DM the seller (Step 11). Anon/owner see no button.
+  const session = await auth();
+  const canChat = Boolean(session?.user) && session!.user.id !== listing.seller.userId;
+
+  // Analytics (Step 31): structured listing view — IDs + amount only, no PII. (ISR-cached page, so
+  // this fires per cache-miss; PostHog autocapture $pageview covers the per-user view separately.)
+  captureServerEvent("listing_viewed", session?.user?.id ?? "anonymous", {
+    listingId: listing.id,
+    gameSlug: listing.game.slug,
+    categoryKind: listing.type,
+    priceMinor: listing.priceMinor,
+  });
+
   const copy = getGameCopy(listing.game.slug, listing.game.name);
   const instant = listing.deliveryType === "INSTANT";
+
+  // Reviews are seller-level (tied to completed orders). Show the latest few on
+  // the listing; the full paginated feed lives on the seller's public profile.
+  const [reviewPage, responseStats, moreFromSeller, moreInCategory] =
+    await Promise.all([
+      getSellerReviews(listing.seller.id, { limit: 5 }),
+      getSellerResponseStats(listing.seller.id),
+      // Related rails (Prompt 17) — parallel, no added waterfall.
+      getMoreFromSeller(listing.seller.id, listing.slug, 4),
+      getMoreInCategory(listing.game.slug, listing.category.slug, listing.slug, 4),
+    ]);
 
   const labels = LISTING_ATTRIBUTE_LABELS[listing.type] ?? {};
   const attributes = Object.entries(listing.attributes).map(([key, value]) => ({
@@ -162,12 +255,13 @@ export default async function ListingPage({ params }: Props) {
               images={listing.images}
               title={listing.title}
               mono={copy.mono}
+              gameImage={copy.image}
             />
           </div>
 
           {/* buy box + seller panel (right column, spans both rows on desktop;
               on mobile it sits right after the gallery — above the fold) */}
-          <aside className="flex flex-col gap-4 min-[901px]:col-start-2 min-[901px]:row-span-2 min-[901px]:row-start-1 min-[901px]:self-start">
+          <aside className="flex flex-col gap-4 min-[901px]:sticky min-[901px]:top-20 min-[901px]:col-start-2 min-[901px]:row-span-2 min-[901px]:row-start-1 min-[901px]:self-start">
             <BuyBox
               slug={listing.slug}
               priceMinor={listing.priceMinor}
@@ -175,7 +269,14 @@ export default async function ListingPage({ params }: Props) {
               stock={listing.stock}
               deliveryType={listing.deliveryType}
             />
-            <SellerTrustPanel seller={listing.seller} />
+            <EscrowProtectionPanel variant="full" />
+            <SellerTrustPanel
+              seller={listing.seller}
+              avgFirstReplyMinutes={responseStats.avgFirstReplyMinutes}
+            />
+            {canChat ? (
+              <ChatWithSellerButton sellerProfileId={listing.seller.id} />
+            ) : null}
           </aside>
 
           {/* description + details (left, row 2) */}
@@ -233,11 +334,81 @@ export default async function ListingPage({ params }: Props) {
                   ? "Delivered automatically right after your payment is confirmed."
                   : "The seller delivers via secure chat once your payment is confirmed — usually within a few hours."}{" "}
                 Your money stays in escrow until you confirm everything is as
-                described.
+                described — or {siteConfig.escrow.autoReleaseDays} days pass and
+                it auto-releases.{" "}
+                <span className="font-semibold text-foreground">
+                  Not happy? Open a dispute
+                </span>{" "}
+                — our team reviews within 48 hours.
               </p>
             </section>
           </div>
         </div>
+
+        {/* reviews — seller-level, every one tied to a completed order */}
+        <section aria-labelledby="reviews-heading" className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="reviews-heading" className="font-heading text-lg font-bold">
+              Reviews of {listing.seller.displayName}
+            </h2>
+            {listing.seller.ratingCount > 0 ? (
+              <Rating
+                value={listing.seller.ratingAvg}
+                count={listing.seller.ratingCount}
+                size="md"
+              />
+            ) : null}
+          </div>
+
+          {/* Make it unambiguous these are SELLER-level (not listing-level) ratings */}
+          <p className="-mt-1 text-xs text-faint">
+            Ratings left by buyers across all of {listing.seller.displayName}
+            &apos;s completed orders{" · "}
+            <Link
+              href={`/sellers/${listing.seller.id}`}
+              className="underline underline-offset-2 hover:text-primary"
+            >
+              Full seller profile
+            </Link>
+          </p>
+
+          {reviewPage.reviews.length > 0 ? (
+            <>
+              <ReviewList reviews={reviewPage.reviews} />
+              <Link
+                href={`/sellers/${listing.seller.id}`}
+                className="text-sm font-semibold text-primary hover:text-primary-hover"
+              >
+                See the seller&apos;s full profile &amp; all reviews →
+              </Link>
+            </>
+          ) : (
+            <div className="rounded-lg border border-border bg-card/40 p-4 flex flex-col gap-1.5">
+              <p className="text-sm font-semibold text-foreground">No reviews yet for this seller.</p>
+              <p className="text-[13px] text-muted-foreground">
+                Every order on GETX is escrow-protected — your payment is held
+                safely until you confirm delivery, regardless of the seller&apos;s
+                review count.
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* related discovery (Prompt 17) — only when ≥2 results (a 1-item rail looks broken) */}
+        {moreFromSeller.length >= 2 ? (
+          <RelatedSection
+            title={`More from ${listing.seller.displayName}`}
+            href={`/sellers/${listing.seller.id}`}
+            listings={moreFromSeller}
+          />
+        ) : null}
+        {moreInCategory.length >= 2 ? (
+          <RelatedSection
+            title={`More in ${listing.category.name}`}
+            href={`/games/${listing.game.slug}/${listing.category.slug}`}
+            listings={moreInCategory}
+          />
+        ) : null}
       </PageContainer>
 
       <script

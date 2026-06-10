@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { parsePriceToMinor } from "@/lib/money";
+import { MAX_LISTING_IMAGES } from "@/lib/validators/upload";
 
 /**
  * Listing input schemas (Step 06) — ONE schema, used by BOTH the client form
@@ -141,6 +142,12 @@ export const listingFormSchema = z
     ),
     deliveryType: z.enum(["MANUAL", "INSTANT"]),
     attributes: z.record(z.string(), z.unknown()).default({}),
+    // Image URLs (already uploaded to R2 by the client). Shape-checked here; the
+    // listing service re-verifies each is a public URL WE issued (anti-injection).
+    images: z
+      .array(z.string().trim().min(1).max(2048))
+      .max(MAX_LISTING_IMAGES, `You can add up to ${MAX_LISTING_IMAGES} images`)
+      .default([]),
     publish: z.boolean().default(false),
   })
   .superRefine((data, ctx) => {

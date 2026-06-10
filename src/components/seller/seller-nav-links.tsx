@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/seller", label: "Overview" },
+  { href: "/seller/orders", label: "Orders" },
+  { href: "/seller/wallet", label: "Wallet" },
   { href: "/seller/listings", label: "Listings" },
+  { href: "/seller/verify", label: "Verify" },
 ];
 
 /** Seller sub-nav with active state (tiny client island). */

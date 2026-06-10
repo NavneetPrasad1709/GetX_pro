@@ -8,7 +8,7 @@ import { randomBytes } from "crypto";
 import { redirect } from "next/navigation";
 import type { Role } from "@prisma/client";
 import { db } from "@/lib/db";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitDistributed } from "@/lib/rate-limit";
 import { credentialsSchema } from "@/lib/validators/auth";
 
 /**
@@ -30,6 +30,13 @@ function getDummyHash(): string {
   return dummyHash;
 }
 
+/**
+ * How often a live session re-checks its sessionVersion against the DB (Step
+ * 32). Bounds DB load to ≤1 query/min per active session while keeping
+ * revocation latency (ban / role change / password reset) under a minute.
+ */
+const SESSION_REVOCATION_CHECK_MS = 60_000;
+
 const providers: NextAuthConfig["providers"] = [
   Credentials({
     credentials: {
@@ -43,7 +50,7 @@ const providers: NextAuthConfig["providers"] = [
       const ip =
         request.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         "unknown";
-      const rl = rateLimit(`authorize:${ip}`, {
+      const rl = await rateLimitDistributed(`authorize:${ip}`, {
         limit: 10,
         windowMs: 60_000,
       });
@@ -61,6 +68,8 @@ const providers: NextAuthConfig["providers"] = [
       );
       // Generic failure — never reveal whether the email or the password was wrong.
       if (!user?.passwordHash || !passwordOk) return null;
+      // Banned users can never sign in (Step 15). Generic failure — no hint why.
+      if (user.bannedAt) return null;
 
       return {
         id: user.id,
@@ -153,6 +162,16 @@ export const {
     // OAuth sign-ins are only accepted from provider-VERIFIED emails. This is
     // what makes allowDangerousEmailAccountLinking safe (no email squatting).
     async signIn({ account, profile }) {
+      // Banned users can never sign in via OAuth either (Step 15). Credentials
+      // are blocked inside authorize(); this covers the Google/Discord paths.
+      const email = profile?.email?.toLowerCase();
+      if (email) {
+        const existing = await db.user.findUnique({
+          where: { email },
+          select: { bannedAt: true },
+        });
+        if (existing?.bannedAt) return false;
+      }
       if (account?.provider === "google") {
         return profile?.email_verified === true;
       }
@@ -162,26 +181,70 @@ export const {
       return true; // credentials are fully checked in authorize()
     },
     async jwt({ token, user, trigger }) {
-      // Initial sign-in: copy our domain fields onto the token.
+      const now = Date.now();
+
+      // Initial sign-in: copy our domain fields onto the token + stamp the
+      // current sessionVersion so we can revoke this token later if it's bumped.
       if (user?.id) {
         token.id = user.id;
         token.role = user.role;
         token.emailVerified = user.emailVerified?.toISOString() ?? null;
+        const fresh = await db.user.findUnique({
+          where: { id: user.id },
+          select: { sessionVersion: true },
+        });
+        token.sessionVersion = fresh?.sessionVersion ?? 0;
+        token.svCheckedAt = now;
+        return token;
       }
-      // Session refresh requested (e.g. after "become a seller" or email
-      // verification) → re-read fresh values from the DB.
+
+      // Explicit refresh (e.g. after "become a seller" or email verification)
+      // → re-read fresh values from the DB, including sessionVersion.
       if (trigger === "update" && token.id) {
         const fresh = await db.user.findUnique({
           where: { id: token.id },
-          select: { role: true, emailVerified: true, name: true, image: true },
+          select: {
+            role: true,
+            emailVerified: true,
+            name: true,
+            image: true,
+            sessionVersion: true,
+          },
         });
         if (fresh) {
           token.role = fresh.role;
           token.emailVerified = fresh.emailVerified?.toISOString() ?? null;
           token.name = fresh.name;
           token.picture = fresh.image;
+          token.sessionVersion = fresh.sessionVersion;
+          token.svCheckedAt = now;
+        }
+        return token;
+      }
+
+      // Periodic revocation check (Step 32): at most once per interval per
+      // active session. If sessionVersion was bumped (ban / role change /
+      // password reset) the token no longer matches → reject it (sign out).
+      if (
+        token.id &&
+        now - (token.svCheckedAt ?? 0) > SESSION_REVOCATION_CHECK_MS
+      ) {
+        try {
+          const fresh = await db.user.findUnique({
+            where: { id: token.id },
+            select: { sessionVersion: true },
+          });
+          if (!fresh || fresh.sessionVersion !== (token.sessionVersion ?? 0)) {
+            return null; // user gone or session revoked → kill it
+          }
+          token.svCheckedAt = now;
+        } catch (err) {
+          // Transient DB error → fail OPEN (keep the session) rather than mass
+          // logout on a blip; leave svCheckedAt so the next call retries.
+          console.error("[auth] sessionVersion check failed", err);
         }
       }
+
       return token;
     },
     session({ session, token }) {

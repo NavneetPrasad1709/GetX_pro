@@ -3,7 +3,8 @@
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitDistributed } from "@/lib/rate-limit";
+import { captureServerEvent } from "@/lib/posthog";
 import {
   createChargeForOrder,
   PaymentGatewayError,
@@ -42,7 +43,10 @@ export async function startPaymentAction(
 
   // Gateway calls are expensive — keep the per-user lid tight (userId only,
   // never the attacker-controlled IP).
-  const rl = rateLimit(`pay-start:${user.id}`, { limit: 10, windowMs: 60_000 });
+  const rl = await rateLimitDistributed(`pay-start:${user.id}`, {
+    limit: 10,
+    windowMs: 60_000,
+  });
   if (!rl.ok) {
     return { ok: false, error: `Too many attempts. Try again in ${rl.retryAfterSec}s.` };
   }
@@ -58,6 +62,11 @@ export async function startPaymentAction(
       parsed.data.orderId,
       parsed.data.provider,
     );
+    // Analytics (Step 31): payment funnel event — IDs + provider only, no PII.
+    captureServerEvent("payment_initiated", user.id, {
+      orderId: parsed.data.orderId,
+      provider: parsed.data.provider.toLowerCase(),
+    });
     return { ok: true, charge };
   } catch (err) {
     if (err instanceof PaymentGatewayError) {

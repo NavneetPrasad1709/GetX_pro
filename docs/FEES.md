@@ -68,3 +68,33 @@ Rules:
 1. Items commission % (proposed 8%) and Currency commission % (proposed 7%).
 2. On approved refund, who absorbs the gateway processing fee — GETX (goodwill) or buyer?
 3. Minimum platform fee for very small orders? (proposed: none / 0)
+
+## Opt-in monetization (Prompt 15 — additive, never raises the base take)
+
+Base blended take-rate stays ~13% (5% buyer + 6–8% seller). These are OPT-IN value-adds, labeled and capped to protect buyer trust.
+
+| Stream | Price (config: `siteConfig.fees.*`) | Notes |
+|---|---|---|
+| **Featured / "Promoted" listing** (boost) | `boost.dailyFeeMinor` ₹200/day · `boost.weeklyFeeMinor` ₹1,000/7d | FTC-labeled "Promoted" chip (mandatory). Capped at `maxFeaturedPerPage` (2) per page; `maxActiveFeaturedPerSeller` (3) at once. Homepage placement gated at `homepageMinRating` (4.0★). Cleared on pause/remove/expiry (cron) or by admin. |
+| **GETX Pro subscription** | `subscription.proMonthlyFeeMinor` ₹499/mo | −`proCommissionDiscount` (2pp) on every new order (floored at 1%, snapshotted at order creation); listing cap `proMaxListings` (15) vs `freeMaxListings` (10); PRO badge. Renewal cron downgrades lapsed PRO→FREE (no silent auto-charge — re-subscribe manually). |
+
+All fees are deducted from the seller's **available** wallet balance (escrow-held money is never spendable), DEBIT on the seller wallet + CREDIT FEE on the PLATFORM wallet, in one transaction with the wallet row locked (`SELECT … FOR UPDATE`). Non-order fees carry `orderId = null` on the ledger. New `LedgerReason`: `BOOST_FEE`, `SUBSCRIPTION_FEE`.
+
+### Take-rate impact model (Phase 2: ~200 active sellers, ~1,000 orders/mo)
+- Boost: 20% of sellers boost 1 listing/week → meaningful recurring revenue, zero base-rate change.
+- PRO: 15% convert → ₹499/mo each; self-funding (a ₹50k/mo-GMV seller saves ₹1,000 commission for ₹499).
+- **Combined effective take-rate uplift: +1.5–3% on GMV (→ ~14.5–16% blended).**
+
+### Streams 3/5/6/7 (Prompt 15b — now live)
+
+| Stream | Price | Notes |
+|---|---|---|
+| **Spotlight sponsorship** (3) | `sponsorship.weeklyFeeMinor` ₹2,500/week | Only 3 slots; gated (4.0★, 5+ sales, KYC, no open disputes). Homepage "Sponsored" rail; expiry cron clears it. |
+| **Shield protection** (5) | `shield.feePercent` 1% (min ₹20) | Buyer add-on at checkout; extends escrow 3→7 days; `hasShield`/`shieldFeeMinor` snapshotted (immutable). |
+| **Instant payout** (6) | `payouts.instant` 1% (min ₹50) | Seller fast-track; fee DEBITed on top of amount + CREDIT FEE platform, same payout tx; `INSTANT_PAYOUT_FEE`; admin INSTANT badge. |
+| **Listing bump** (7) | `boost.bumpFeeMinor` ₹99 | Recency reset (`COALESCE(bumpedAt,createdAt)`); max 3/listing/24h (AuditLog-counted); BOOST_FEE. |
+
+Stream 3/7 charges use the shared `chargeSellerToPlatform` primitive (lock wallet → check available → DEBIT seller + CREDIT FEE platform).
+
+### Deferred (Phase 3)
+- Stream 8 Display ads + affiliate — reserved (no live ad slots injected; `?ref=` attribution is the Step 21 referral foundation).

@@ -1,0 +1,26 @@
+{
+  "name": "GETX — Gaming Marketplace",
+  "short_name": "GETX",
+  "description": "Buy and sell game accounts, items, and currency — fast, secure, AI-powered.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0b0d",
+  "theme_color": "#4d7cfe",
+  "categories": ["games", "shopping"],
+  "lang": "en",
+  "icons": [
+    { "src": "/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "/screenshots/home-mobile.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow" },
+    { "src": "/screenshots/listing-mobile.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow" }
+  ],
+  "shortcuts": [
+    { "name": "Browse Listings", "url": "/marketplace", "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }] },
+    { "name": "My Orders", "url": "/orders", "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }] }
+  ]
+}

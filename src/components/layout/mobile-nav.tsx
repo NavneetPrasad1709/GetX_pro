@@ -5,28 +5,61 @@ import { usePathname } from "next/navigation";
 import {
   HomeIcon,
   SearchIcon,
-  PlusIcon,
   FileTextIcon,
   UserIcon,
+  LayoutDashboardIcon,
+  MessageSquareIcon,
+  StoreIcon,
+  ShieldIcon,
   type LucideIcon,
 } from "lucide-react";
-import { mobileNav, type MobileNavItem } from "@/config/nav";
+import type { Role } from "@prisma/client";
+import { mobileNav, appNav } from "@/config/nav";
 import { cn } from "@/lib/utils";
 
-const ICONS: Record<MobileNavItem["icon"], LucideIcon> = {
+const ICONS: Record<string, LucideIcon> = {
+  // marketing
   home: HomeIcon,
   search: SearchIcon,
-  sell: PlusIcon,
   orders: FileTextIcon,
   account: UserIcon,
+  // app + messages
+  dashboard: LayoutDashboardIcon,
+  messages: MessageSquareIcon,
+  store: StoreIcon,
+  shield: ShieldIcon,
 };
 
-/** Fixed bottom app nav (v10 ".mobilenav") — phones + tablets (≤900px). */
-export function MobileNav() {
+type Variant = "marketing" | "app";
+type NavTab = { title: string; href: string; icon: string };
+
+/**
+ * Fixed bottom app nav (v10 ".mobilenav") — phones + tablets (≤900px).
+ * `variant="marketing"` (default) shows Home/Browse/Messages/Orders/Account;
+ * `variant="app"` shows role-aware app tabs from `appNav`. No Sell FAB (Prompt 07).
+ */
+export function MobileNav({
+  variant = "marketing",
+  role,
+  ordersBadge = 0,
+  unreadMessages = 0,
+}: {
+  variant?: Variant;
+  role?: Role;
+  /** Action-required count shown on the Orders tab. */
+  ordersBadge?: number;
+  /** Unread chat count shown on the Messages tab. */
+  unreadMessages?: number;
+}) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  const items: NavTab[] =
+    variant === "app"
+      ? appNav.filter((item) => !item.roles || (role ? item.roles.includes(role) : false))
+      : mobileNav;
 
   return (
     <nav
@@ -35,25 +68,8 @@ export function MobileNav() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="flex items-center justify-around px-1.5 pt-2 pb-3">
-        {mobileNav.map((item) => {
+        {items.map((item) => {
           const Icon = ICONS[item.icon];
-
-          if (item.icon === "sell") {
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="flex flex-col items-center gap-[3px] rounded-lg font-heading text-[10px] font-medium text-faint focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-                >
-                  <span className="-mt-[18px] grid size-11 place-items-center rounded-full bg-primary-strong text-primary-foreground">
-                    <Icon className="size-[22px]" strokeWidth={2.5} aria-hidden="true" />
-                  </span>
-                  {item.title}
-                </Link>
-              </li>
-            );
-          }
-
           const active = isActive(item.href);
           return (
             <li key={item.href}>
@@ -65,7 +81,22 @@ export function MobileNav() {
                   active ? "text-primary" : "text-faint hover:text-foreground",
                 )}
               >
-                <Icon className="size-[22px]" aria-hidden="true" />
+                <span className="relative">
+                  <Icon className="size-[22px]" aria-hidden="true" />
+                  {item.icon === "orders" && ordersBadge > 0 ? (
+                    <span className="absolute -top-1 -right-1.5 grid min-w-4 place-items-center rounded-full bg-primary-strong px-1 text-[10px] font-bold text-primary-foreground">
+                      {ordersBadge > 9 ? "9+" : ordersBadge}
+                    </span>
+                  ) : null}
+                  {item.icon === "messages" && unreadMessages > 0 ? (
+                    <span
+                      aria-label={`${unreadMessages} unread messages`}
+                      className="absolute -top-1 -right-1.5 grid min-w-4 place-items-center rounded-full bg-primary-strong px-1 text-[10px] font-bold text-primary-foreground"
+                    >
+                      {unreadMessages > 9 ? "9+" : unreadMessages}
+                    </span>
+                  ) : null}
+                </span>
                 {item.title}
               </Link>
             </li>

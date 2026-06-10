@@ -2,7 +2,18 @@ import { randomBytes } from "crypto";
 import { Prisma, type Listing, type ListingStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { assertOwner, ForbiddenError } from "@/lib/auth";
+import { siteConfig } from "@/config/site";
 import { getWalletBalances } from "@/server/services/wallet";
+import { isAllowedListingImageUrl } from "@/lib/r2";
+import { MAX_LISTING_IMAGES } from "@/lib/validators/upload";
+import { syncListingToAlgolia } from "@/server/services/search-sync";
+import { SELLER_LEVELS } from "@/server/services/trust-score";
+import { fireFraudSignal } from "@/server/services/fraud/dispatch";
+import {
+  checkListingScamPhrases,
+  checkListingPriceAnomaly,
+  checkNewSellerHighValue,
+} from "@/server/services/fraud/signals";
 import type { Role } from "@prisma/client";
 import {
   ATTRIBUTE_SCHEMAS,
@@ -120,6 +131,30 @@ function parseAttributesForKind(
   return cleanAttributes(parsed.data);
 }
 
+/**
+ * Never trust client-sent image URLs: each MUST be a public URL WE issued for a
+ * listing image (R2 public bucket, /listings/ prefix). Blocks an attacker from
+ * parking an arbitrary off-host URL on a listing (next/image content injection).
+ * De-dupes and caps at MAX_LISTING_IMAGES; order is the seller's chosen order
+ * (index 0 = primary/cover).
+ */
+function validateListingImages(urls: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const url of urls) {
+    if (seen.has(url)) continue;
+    if (!isAllowedListingImageUrl(url)) {
+      throw new ListingServiceError(
+        "One of the images couldn't be verified — please re-upload it.",
+      );
+    }
+    seen.add(url);
+    out.push(url);
+    if (out.length >= MAX_LISTING_IMAGES) break;
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Create
 // ---------------------------------------------------------------------------
@@ -130,10 +165,49 @@ export async function createListing(
 ): Promise<Listing> {
   const sellerId = await getSellerProfileId(user.id);
 
-  return db.$transaction(async (tx) => {
-    const category = await resolveCategory(tx, input.gameId, input.categoryId);
+  const created = await db.$transaction(async (tx) => {
+    // Listing cap: ACTIVE count must not exceed the seller's allowance. The cap
+    // is the HIGHER of the trust-level cap (Prompt 11) and the subscription cap
+    // (Prompt 15) — GETX Pro lifts a Bronze seller from 10 → 15, while higher
+    // levels already exceed that.
+    const [category, profile, activeCount] = await Promise.all([
+      resolveCategory(tx, input.gameId, input.categoryId),
+      tx.sellerProfile.findUniqueOrThrow({
+        where: { id: sellerId },
+        select: { sellerLevel: true, totalSales: true, subscriptionTier: true },
+      }),
+      tx.listing.count({ where: { sellerId, status: "ACTIVE" } }),
+    ]);
+    const levelConfig =
+      SELLER_LEVELS.find((l) => l.id === profile.sellerLevel) ??
+      SELLER_LEVELS[0];
+    const { proMaxListings, freeMaxListings } = siteConfig.fees.subscription;
+    const subscriptionCap =
+      profile.subscriptionTier === "PRO" ? proMaxListings : freeMaxListings;
+    const maxActiveListings = Math.max(
+      levelConfig.perks.maxActiveListings,
+      subscriptionCap,
+    );
+    if (input.publish && activeCount >= maxActiveListings) {
+      throw new ListingServiceError(
+        `You can have up to ${maxActiveListings} active listings on your current plan. ` +
+          `Upgrade your seller level or GETX Pro to list more.`,
+      );
+    }
 
-    return tx.listing.create({
+    const now = new Date();
+    const { staleListingDays, newSellerBoostDays, newSellerBoostMaxSales } =
+      siteConfig.liquidity;
+    // New-seller visibility boost (Prompt 12): display-only search-rank perk for
+    // sellers with almost no sales — never touches money/escrow/fees.
+    const newSellerBoostUntil =
+      profile.totalSales < newSellerBoostMaxSales
+        ? new Date(now.getTime() + newSellerBoostDays * 86_400_000)
+        : null;
+    // Auto-expiry feeds the stale-pause cron; bumped on every edit/reactivation.
+    const expiresAt = new Date(now.getTime() + staleListingDays * 86_400_000);
+
+    const listing = await tx.listing.create({
       data: {
         sellerId,
         gameId: category.gameId,
@@ -148,10 +222,34 @@ export async function createListing(
         deliveryType: input.deliveryType,
         attributes: parseAttributesForKind(category.kind, input.attributes),
         status: input.publish ? "ACTIVE" : "DRAFT",
-        images: [], // real uploads land in Step 12 (R2)
+        images: validateListingImages(input.images),
+        lastActivityAt: now,
+        expiresAt,
+        newSellerBoostUntil,
       },
     });
+
+    // Activation milestone (Prompt 14): first ACTIVE listing only.
+    if (input.publish) {
+      await tx.sellerProfile.updateMany({
+        where: { id: sellerId, firstListingAt: null },
+        data: { firstListingAt: now },
+      });
+    }
+
+    return listing;
   });
+
+  runListingFraudSignals(created.id);
+  void syncListingToAlgolia(created.id); // Step 28: fire-and-forget index sync (no-op without keys)
+  return created;
+}
+
+/** Fire the listing-integrity signals (S5/S6/S7) fire-and-forget post-commit. */
+function runListingFraudSignals(listingId: string): void {
+  fireFraudSignal("scam_phrase_content", checkListingScamPhrases(listingId));
+  fireFraudSignal("new_seller_price_anomaly", checkListingPriceAnomaly(listingId));
+  fireFraudSignal("new_seller_high_value", checkNewSellerHighValue(listingId));
 }
 
 // ---------------------------------------------------------------------------
@@ -178,7 +276,7 @@ export async function updateListing(
   listingId: string,
   input: ListingFormParsed,
 ): Promise<Listing> {
-  return db.$transaction(async (tx) => {
+  const updated = await db.$transaction(async (tx) => {
     const listing = await getOwnedListingForUpdate(tx, listingId, user);
     if (!EDITABLE_STATUSES.includes(listing.status)) {
       throw new ListingServiceError(
@@ -201,6 +299,9 @@ export async function updateListing(
         stock: input.stock,
         deliveryType: input.deliveryType,
         attributes: parseAttributesForKind(category.kind, input.attributes),
+        images: validateListingImages(input.images),
+        // Edit = activity → resets the 60-day stale-pause clock (Prompt 12).
+        lastActivityAt: new Date(),
         // publish=true from the edit form promotes a DRAFT; never demotes.
         ...(input.publish && listing.status === "DRAFT"
           ? { status: "ACTIVE" as const }
@@ -208,6 +309,10 @@ export async function updateListing(
       },
     });
   });
+
+  runListingFraudSignals(updated.id);
+  void syncListingToAlgolia(updated.id); // Step 28
+  return updated;
 }
 
 const STATUS_TRANSITIONS: Record<
@@ -223,7 +328,7 @@ export async function setListingStatus(
   listingId: string,
   action: "activate" | "pause",
 ): Promise<Listing> {
-  return db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     const listing = await getOwnedListingForUpdate(tx, listingId, user);
     const transition = STATUS_TRANSITIONS[action];
 
@@ -233,11 +338,38 @@ export async function setListingStatus(
       );
     }
 
-    return tx.listing.update({
+    const updated = await tx.listing.update({
       where: { id: listingId },
-      data: { status: transition.to },
+      data: {
+        status: transition.to,
+        // Re-activation counts as activity → reset the stale-pause clock and
+        // extend expiry so a freshly-revived listing isn't paused next sweep.
+        ...(action === "activate"
+          ? {
+              lastActivityAt: new Date(),
+              expiresAt: new Date(
+                Date.now() + siteConfig.liquidity.staleListingDays * 86_400_000,
+              ),
+            }
+          : // Pausing kills any paid feature (Prompt 15): a hidden listing must
+            // never keep a Promoted slot the seller is no longer showing.
+            { isFeatured: false, boostExpiresAt: null }),
+      },
     });
+
+    // Activation milestone (Prompt 14): publishing a DRAFT via activate counts
+    // as the seller's first listing if not already stamped.
+    if (action === "activate") {
+      await tx.sellerProfile.updateMany({
+        where: { id: listing.sellerId, firstListingAt: null },
+        data: { firstListingAt: new Date() },
+      });
+    }
+
+    return updated;
   });
+  void syncListingToAlgolia(result.id); // Step 28: re-index (or remove if paused)
+  return result;
 }
 
 /** Soft delete: status → REMOVED. The row stays (order history needs it). */
@@ -245,7 +377,7 @@ export async function removeListing(
   user: SessionUser,
   listingId: string,
 ): Promise<Listing> {
-  return db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     const listing = await getOwnedListingForUpdate(tx, listingId, user);
     if (listing.status === "SOLD" || listing.status === "REMOVED") {
       throw new ListingServiceError(
@@ -255,9 +387,12 @@ export async function removeListing(
 
     return tx.listing.update({
       where: { id: listingId },
-      data: { status: "REMOVED" },
+      // Removing also clears any paid feature (Prompt 15).
+      data: { status: "REMOVED", isFeatured: false, boostExpiresAt: null },
     });
   });
+  void syncListingToAlgolia(result.id); // Step 28: drop from the index
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -277,6 +412,9 @@ export type SellerListingRow = {
   gameName: string;
   categoryName: string;
   updatedAt: Date;
+  /** active paid boost? (Prompt 15) */
+  isFeatured: boolean;
+  boostExpiresAt: Date | null;
 };
 
 /** All of the seller's listings except REMOVED (those are "deleted" to them). */
@@ -299,6 +437,8 @@ export async function getSellerListings(
       stock: true,
       deliveryType: true,
       updatedAt: true,
+      isFeatured: true,
+      boostExpiresAt: true,
       game: { select: { name: true } },
       category: { select: { name: true } },
     },

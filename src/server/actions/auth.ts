@@ -2,7 +2,7 @@
 
 import { AuthError } from "next-auth";
 import { auth, signIn, signOut, updateSession } from "@/lib/auth";
-import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { getClientIp, rateLimit, rateLimitDistributed } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import {
   becomeSellerSchema,
@@ -21,6 +21,8 @@ import {
   resetPassword,
   UserServiceError,
 } from "@/server/services/users";
+import { attributeReferralAtSignup } from "@/server/services/referral";
+import { awardSignupBonus } from "@/server/services/loyalty";
 
 /**
  * Auth server actions. Every mutation here re-validates input with Zod,
@@ -59,7 +61,12 @@ export async function registerAction(raw: unknown): Promise<ActionResult> {
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
 
   const ip = await getClientIp();
-  const rl = rateLimit(`register:${ip}`, { limit: 5, windowMs: 10 * 60_000 });
+  // Distributed (Upstash) limiter on this brute-force surface — global across
+  // every serverless instance. Falls back to in-memory when Upstash is unset.
+  const rl = await rateLimitDistributed(`register:${ip}`, {
+    limit: 5,
+    windowMs: 10 * 60_000,
+  });
   if (!rl.ok) {
     return {
       ok: false,
@@ -71,7 +78,11 @@ export async function registerAction(raw: unknown): Promise<ActionResult> {
   if (!bot.ok) return { ok: false, error: bot.error };
 
   try {
-    const { verifyUrl } = await registerUser(parsed.data);
+    const { userId, verifyUrl } = await registerUser(parsed.data);
+    // Prompt 22: attribute the signup to a referrer (never throws; best-effort).
+    await attributeReferralAtSignup(userId, parsed.data.ref);
+    // Step 21: 50-point welcome bonus (idempotent; never throws).
+    await awardSignupBonus(userId);
     return { ok: true, devLink: isDev ? verifyUrl : null };
   } catch (err) {
     return toSafeError(err, "registerAction");
@@ -90,11 +101,15 @@ export async function loginAction(raw: unknown): Promise<ActionResult> {
   const ip = await getClientIp();
 
   // Two windows: per IP (botnet-ish bursts) + per IP+account (targeted guessing).
-  const perIp = rateLimit(`login:${ip}`, { limit: 10, windowMs: 60_000 });
-  const perAccount = rateLimit(`login:${ip}:${email}`, {
-    limit: 5,
-    windowMs: 5 * 60_000,
-  });
+  // Distributed (Upstash) so the cap holds across all serverless instances;
+  // env-safe fallback to in-memory when Upstash creds are absent.
+  const [perIp, perAccount] = await Promise.all([
+    rateLimitDistributed(`login:${ip}`, { limit: 10, windowMs: 60_000 }),
+    rateLimitDistributed(`login:${ip}:${email}`, {
+      limit: 5,
+      windowMs: 5 * 60_000,
+    }),
+  ]);
   if (!perIp.ok || !perAccount.ok) {
     const retry = Math.max(
       perIp.ok ? 0 : perIp.retryAfterSec,
@@ -177,7 +192,7 @@ export async function forgotPasswordAction(raw: unknown): Promise<ActionResult> 
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
 
   const ip = await getClientIp();
-  const rl = rateLimit(`forgot-password:${ip}`, {
+  const rl = await rateLimitDistributed(`forgot-password:${ip}`, {
     limit: 3,
     windowMs: 15 * 60_000,
   });
@@ -205,7 +220,7 @@ export async function resetPasswordAction(raw: unknown): Promise<ActionResult> {
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
 
   const ip = await getClientIp();
-  const rl = rateLimit(`reset-password:${ip}`, {
+  const rl = await rateLimitDistributed(`reset-password:${ip}`, {
     limit: 5,
     windowMs: 15 * 60_000,
   });

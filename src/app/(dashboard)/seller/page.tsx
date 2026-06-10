@@ -8,6 +8,8 @@ import {
   WalletIcon,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { siteConfig } from "@/config/site";
 import { getSellerStats } from "@/server/services/listings";
 import { formatMoney } from "@/lib/money";
 import {
@@ -17,16 +19,70 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  OnboardingChecklist,
+  type OnboardingState,
+} from "@/components/seller/onboarding-checklist";
+import { FirstSaleCelebration } from "@/components/seller/first-sale-celebration";
+import { SponsorButton } from "@/components/seller/sponsor-button";
 
 export const metadata: Metadata = { title: "Seller overview" };
 
 /**
  * Seller home — the CEO view starts simple (Step 06): live counts, money in
  * motion, wallet truth from the ledger. Charts/AI pricing arrive in Step 20.
+ * Prompt 14 adds the activation checklist + first-sale celebration.
  */
 export default async function SellerOverviewPage() {
   const session = await requireUser();
-  const stats = await getSellerStats(session.user.id);
+  // One extra query (Prompt 14) powers the checklist + celebration — no dup hit.
+  const [stats, account] = await Promise.all([
+    getSellerStats(session.user.id),
+    db.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        emailVerified: true,
+        sellerProfile: {
+          select: {
+            id: true,
+            kycStatus: true,
+            firstListingAt: true,
+            firstSaleAt: true,
+            subscriptionTier: true,
+            subscriptionExpiresAt: true,
+            isSponsored: true,
+            sponsorshipExpiresAt: true,
+            wallet: { select: { payoutMethodSet: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const sp = account?.sellerProfile;
+  const onboarding: OnboardingState = {
+    emailVerified: account?.emailVerified != null,
+    kycApproved: sp?.kycStatus === "APPROVED",
+    kycPending: sp?.kycStatus === "PENDING",
+    firstListingDone: sp?.firstListingAt != null,
+    payoutMethodSet: sp?.wallet?.payoutMethodSet ?? false,
+  };
+  const onboardingComplete =
+    onboarding.emailVerified &&
+    onboarding.kycApproved &&
+    onboarding.firstListingDone &&
+    onboarding.payoutMethodSet;
+
+  const now = new Date();
+  const isPro =
+    sp?.subscriptionTier === "PRO" &&
+    sp.subscriptionExpiresAt != null &&
+    sp.subscriptionExpiresAt > now;
+  const proDiscount = siteConfig.fees.subscription.proCommissionDiscount;
+  const isSpotlit =
+    sp?.isSponsored === true &&
+    sp.sponsorshipExpiresAt != null &&
+    sp.sponsorshipExpiresAt > now;
 
   const cards = [
     {
@@ -79,6 +135,16 @@ export default async function SellerOverviewPage() {
         </p>
       </div>
 
+      {/* one-time first-sale celebration (Prompt 14) */}
+      {sp?.firstSaleAt != null && sp.id ? (
+        <FirstSaleCelebration sellerId={sp.id} />
+      ) : null}
+
+      {/* activation checklist — only while a step is still incomplete */}
+      {!onboardingComplete ? (
+        <OnboardingChecklist state={onboarding} />
+      ) : null}
+
       <div className="grid grid-cols-1 gap-3 min-[521px]:grid-cols-2 min-[761px]:grid-cols-4">
         {cards.map((card) => (
           <Card key={card.label}>
@@ -97,6 +163,43 @@ export default async function SellerOverviewPage() {
           </Card>
         ))}
       </div>
+
+      {/* GETX Pro (Prompt 15) — upsell for FREE sellers, status for PRO */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {isPro ? "GETX Pro is active" : "Grow faster with GETX Pro"}
+          </CardTitle>
+          <CardDescription>
+            {isPro && sp?.subscriptionExpiresAt
+              ? `Lower commission + up to ${siteConfig.fees.subscription.proMaxListings} listings. Renews ${new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(sp.subscriptionExpiresAt)}.`
+              : `Cut your commission by ${proDiscount}% on every sale, list up to ${siteConfig.fees.subscription.proMaxListings} items, and get a Pro badge buyers trust.`}{" "}
+            <Link
+              href="/seller/subscription"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {isPro ? "Manage plan" : "See GETX Pro"}
+            </Link>
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      {/* Spotlight sponsorship (Prompt 15b, Stream 3) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {isSpotlit ? "You're in the Seller Spotlight" : "Get the Seller Spotlight"}
+          </CardTitle>
+          <CardDescription>
+            {isSpotlit && sp?.sponsorshipExpiresAt
+              ? `Featured on the homepage until ${new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(sp.sponsorshipExpiresAt)}.`
+              : `A scarce, homepage "Sponsored" slot (${formatMoney(siteConfig.fees.sponsorship.weeklyFeeMinor, "INR")}/week) — only ${siteConfig.fees.sponsorship.maxSponsoredSellers} sellers at a time. Needs ${siteConfig.fees.sponsorship.minSalesForSponsorship}+ sales, ${siteConfig.fees.sponsorship.minRatingForSponsorship}★+, and KYC.`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SponsorButton isActive={isSpotlit} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

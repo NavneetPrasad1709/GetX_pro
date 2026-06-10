@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Dialog } from "@base-ui/react/dialog";
 import {
@@ -8,8 +9,11 @@ import {
   LayoutDashboardIcon,
   LogInIcon,
   UserPlusIcon,
+  ChevronDownIcon,
+  ShieldIcon,
 } from "lucide-react";
-import { mainNav } from "@/config/nav";
+import type { Role } from "@prisma/client";
+import { mainNav, gamesNav } from "@/config/nav";
 import { Logo } from "@/components/shared/icons";
 import { HeaderSearch } from "@/components/layout/header-search";
 import { cn } from "@/lib/utils";
@@ -24,13 +28,17 @@ const linkClass =
  */
 export function DrawerDialog({
   authed,
+  role,
   open,
   onOpenChange,
 }: {
   authed: boolean;
+  role?: Role | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const [gamesOpen, setGamesOpen] = useState(false);
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -42,7 +50,11 @@ export function DrawerDialog({
           )}
         >
           <div className="flex items-center justify-between">
-            <Dialog.Close render={<Link href="/" />} aria-label="GETX home">
+            <Dialog.Close
+              render={<Link href="/" />}
+              nativeButton={false}
+              aria-label="GETX home"
+            >
               <Logo className="h-6" />
             </Dialog.Close>
             <Dialog.Close
@@ -55,36 +67,91 @@ export function DrawerDialog({
 
           <HeaderSearch />
 
+          {/* Browse by game (Prompt 02) — collapsed by default */}
+          <div className="border-b border-border pb-2">
+            <button
+              type="button"
+              onClick={() => setGamesOpen((v) => !v)}
+              aria-expanded={gamesOpen}
+              className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-[15px] font-medium text-foreground transition-colors hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            >
+              Games
+              <ChevronDownIcon
+                className={cn("size-5 transition-transform duration-150", gamesOpen && "rotate-180")}
+                aria-hidden="true"
+              />
+            </button>
+            {gamesOpen ? (
+              <ul className="mt-1 flex flex-col gap-0.5">
+                {gamesNav.map((game) => (
+                  <li key={game.slug}>
+                    <Dialog.Close render={<Link href={game.href} />} nativeButton={false}>
+                      <span className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] text-foreground transition-colors hover:bg-accent">
+                        <span className="grid size-7 shrink-0 place-items-center rounded bg-secondary font-mono text-[10px] font-bold text-foreground/40">
+                          {game.mono}
+                        </span>
+                        {game.name}
+                      </span>
+                    </Dialog.Close>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
           <nav className="flex flex-col gap-1" aria-label="Main">
-            {mainNav.map((item) => (
-              <Dialog.Close key={item.href} render={<Link href={item.href} />}>
-                <span className={linkClass}>{item.title}</span>
-              </Dialog.Close>
-            ))}
+            {mainNav
+              .filter((item) => item.title !== "Games")
+              .map((item) => (
+                <Dialog.Close
+                  key={item.href}
+                  render={<Link href={item.href} />}
+                  nativeButton={false}
+                >
+                  <span className={linkClass}>{item.title}</span>
+                </Dialog.Close>
+              ))}
           </nav>
 
           <div className="mt-auto flex flex-col gap-2 border-t border-border pt-4">
             {authed ? (
               <>
-                <Dialog.Close render={<Link href="/dashboard" />}>
+                <Dialog.Close render={<Link href="/dashboard" />} nativeButton={false}>
                   <span className={linkClass}>
                     <LayoutDashboardIcon className="size-5" /> Dashboard
                   </span>
                 </Dialog.Close>
-                <Dialog.Close render={<Link href="/become-seller" />}>
-                  <span className={linkClass}>
-                    <StoreIcon className="size-5" /> Start selling
-                  </span>
-                </Dialog.Close>
+
+                {role === "SELLER" || role === "ADMIN" ? (
+                  <Dialog.Close render={<Link href="/seller" />} nativeButton={false}>
+                    <span className={linkClass}>
+                      <StoreIcon className="size-5" /> Seller hub
+                    </span>
+                  </Dialog.Close>
+                ) : (
+                  <Dialog.Close render={<Link href="/become-seller" />} nativeButton={false}>
+                    <span className={linkClass}>
+                      <StoreIcon className="size-5" /> Start selling
+                    </span>
+                  </Dialog.Close>
+                )}
+
+                {role === "ADMIN" ? (
+                  <Dialog.Close render={<Link href="/admin" />} nativeButton={false}>
+                    <span className={linkClass}>
+                      <ShieldIcon className="size-5" /> Admin panel
+                    </span>
+                  </Dialog.Close>
+                ) : null}
               </>
             ) : (
               <>
-                <Dialog.Close render={<Link href="/login" />}>
+                <Dialog.Close render={<Link href="/login" />} nativeButton={false}>
                   <span className={linkClass}>
                     <LogInIcon className="size-5" /> Log in
                   </span>
                 </Dialog.Close>
-                <Dialog.Close render={<Link href="/register" />}>
+                <Dialog.Close render={<Link href="/register" />} nativeButton={false}>
                   <span className="flex items-center gap-3 rounded-lg bg-primary-strong px-3 py-2.5 text-[15px] font-semibold text-primary-foreground transition-colors hover:bg-primary-strong-hover">
                     <UserPlusIcon className="size-5" /> Sign up — it&apos;s free
                   </span>

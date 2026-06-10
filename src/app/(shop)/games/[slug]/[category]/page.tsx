@@ -5,18 +5,20 @@ import {
   getCategoryListingsPage,
   getGameBySlug,
 } from "@/server/services/catalog";
-import { CATEGORY_KIND_COPY } from "@/config/games";
+import { getFeaturedListings } from "@/server/services/marketplace";
+import { CATEGORY_KIND_COPY, getGameCategoryCopy } from "@/config/games";
 import { siteConfig } from "@/config/site";
 import { PageContainer } from "@/components/shared/page-container";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { CtaLink } from "@/components/shared/cta-link";
 import { Pagination } from "@/components/shared/pagination";
 import { ListingCard } from "@/components/marketplace/listing-card";
-import {
-  ListingGrid,
-  ListingGridEmpty,
-} from "@/components/marketplace/listing-grid";
+import { ListingGrid } from "@/components/marketplace/listing-grid";
+import { DemandCaptureCard } from "@/components/marketplace/demand-capture-card";
+import { FaqAccordion, faqPageJsonLd } from "@/components/seo/faq-accordion";
 import { formatListingCount } from "@/components/marketplace/game-card";
+
+// Category grid: listing counts change slowly — ISR cuts Neon load on every edge req.
+export const revalidate = 300;
 
 type Props = {
   params: Promise<{ slug: string; category: string }>;
@@ -103,16 +105,28 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if (!game || !category) notFound();
 
   const page = parsePage(sp.page);
-  const { items, total, pageCount } = await getCategoryListingsPage(
-    category.id,
-    page,
-  );
+  const [{ items, total, pageCount }, featured] = await Promise.all([
+    getCategoryListingsPage(category.id, page),
+    // Promoted row (Prompt 15) — scoped to this game + category kind, page 1 only.
+    page === 1
+      ? getFeaturedListings({ gameSlug: game.slug, type: category.kind, limit: 2 })
+      : Promise.resolve([]),
+  ]);
 
   // Beyond the last page (and not page 1) → soft 404 (noindex) instead of an
   // endless empty ?page= space for crawlers.
   if (page > 1 && page > pageCount) notFound();
 
   const basePath = `/games/${game.slug}/${category.slug}`;
+
+  // SEO landing copy + FAQs (Prompt 17) — only rendered on non-empty pages.
+  const copy = getGameCategoryCopy(
+    game.slug,
+    category.slug,
+    category.name,
+    category.kind,
+  );
+  const faqJson = items.length > 0 ? faqPageJsonLd(copy.faqs) : null;
 
   return (
     <main className="flex-1 pt-5 pb-10 min-[761px]:pb-14">
@@ -141,13 +155,34 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           </header>
         </div>
 
+        {/* Promoted row (Prompt 15) — FTC-labeled paid placement, page 1 only */}
+        {featured.length > 0 ? (
+          <section aria-label="Promoted listings">
+            <ListingGrid>
+              {featured.map((listing) => (
+                <ListingCard
+                  key={`cat-promoted-${listing.id}`}
+                  listing={listing}
+                  isPromoted
+                />
+              ))}
+            </ListingGrid>
+          </section>
+        ) : null}
+
         {items.length === 0 ? (
-          <ListingGridEmpty
-            headingLevel="h2"
-            title="No listings yet — be the first seller!"
-            description={`Nobody is selling ${game.name} ${category.name.toLowerCase()} yet. Set up your shop in 5 minutes and own this market.`}
-            action={<CtaLink href="/become-seller">Start selling</CtaLink>}
-          />
+          <section aria-labelledby="category-demand" className="max-w-xl">
+            <h2 id="category-demand" className="sr-only">
+              Request a {game.name} {category.name} seller
+            </h2>
+            <DemandCaptureCard
+              variant="full"
+              gameId={game.id}
+              categoryId={category.id}
+              gameName={game.name}
+              categoryName={category.name}
+            />
+          </section>
         ) : (
           <section aria-labelledby="category-listings">
             {/* sr-only h2: card titles are h3 — without this the outline
@@ -172,7 +207,37 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             />
           </section>
         )}
+
+        {/* SEO landing copy + FAQs (Prompt 17) — only on non-empty pages */}
+        {items.length > 0 ? (
+          <article className="mt-4 flex max-w-prose flex-col gap-4 border-t border-border pt-8">
+            <p className="text-[15px] leading-relaxed text-foreground">
+              {copy.intro}
+            </p>
+            {copy.bodyParagraphs.map((para) => (
+              <p key={para.slice(0, 32)} className="text-sm leading-relaxed text-muted-foreground">
+                {para}
+              </p>
+            ))}
+            {copy.faqs.length > 0 ? (
+              <div className="mt-2 flex flex-col gap-3">
+                <h2 className="font-heading text-lg font-bold">
+                  {game.name} {category.name} — FAQs
+                </h2>
+                <FaqAccordion faqs={copy.faqs} />
+              </div>
+            ) : null}
+          </article>
+        ) : null}
       </PageContainer>
+
+      {faqJson ? (
+        <script
+          type="application/ld+json"
+          // Admin-authored config copy, JSON-serialized + `<`-escaped.
+          dangerouslySetInnerHTML={{ __html: faqJson }}
+        />
+      ) : null}
     </main>
   );
 }

@@ -50,6 +50,13 @@ enum DeliveryType {
   INSTANT
 }
 
+// Auto/instant delivery (Step 19) — pre-loaded encrypted items handed out atomically at PAID.
+enum DeliveryItemStatus {
+  AVAILABLE // in stock, not yet assigned
+  RESERVED // (reserved for future async flows; unused at MVP)
+  DELIVERED // assigned to an order, handed to the buyer
+}
+
 enum ListingStatus {
   DRAFT
   ACTIVE
@@ -96,6 +103,50 @@ enum LedgerReason {
   PAYOUT
   ESCROW_HOLD
   ESCROW_RELEASE
+  BOOST_FEE // seller pays to feature a listing (Prompt 15)
+  SUBSCRIPTION_FEE // seller pays for GETX Pro (Prompt 15)
+  INSTANT_PAYOUT_FEE // seller pays to fast-track a payout (Prompt 15b)
+}
+
+enum SellerSubscriptionTier {
+  FREE
+  PRO
+}
+
+// --- Anti-fraud (Prompt 16) ---
+enum FraudTargetType {
+  USER
+  LISTING
+  ORDER
+  REVIEW
+  MESSAGE
+}
+
+enum FraudSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum FraudFlagStatus {
+  OPEN
+  REVIEWING
+  DISMISSED
+  ACTIONED
+}
+
+enum FraudAutoAction {
+  HOLD_PAYOUT
+  FREEZE_LISTING
+  FORCE_RE_KYC
+  BAN_USER
+  NONE
+}
+
+enum WalletKind {
+  SELLER // a SellerProfile's wallet (1:1)
+  PLATFORM // the single GETX revenue wallet (holds FEE entries; no sellerProfile)
 }
 
 enum PayoutMethod {
@@ -108,6 +159,26 @@ enum PayoutStatus {
   PROCESSING
   PAID
   FAILED
+}
+
+// Loyalty points (Step 21) — append-only event log; balance = ΣEARN − ΣREDEEM.
+enum LoyaltyPointType {
+  EARN
+  REDEEM
+}
+
+enum LoyaltyPointReason {
+  SIGNUP_BONUS // 50 pts on account creation
+  PURCHASE // buyer earns on a completed order
+  SALE // seller earns on a completed order
+  REDEMPTION // buyer spends points as a checkout discount
+  PURCHASE_REFUND // compensating EARN that restores redeemed points on refund
+}
+
+// Community badges (Step 27) — how a UserBadge was granted.
+enum BadgeAwardedBy {
+  SYSTEM
+  ADMIN
 }
 
 enum DisputeStatus {
@@ -123,36 +194,169 @@ enum KycSubmissionStatus {
   REJECTED
 }
 
+// Notification categories (Step 22). Drives bell grouping + which email template fires.
+enum NotificationType {
+  ORDER_UPDATE // payment, delivery, completion, refund
+  NEW_MESSAGE // a new chat message from the other party
+  DISPUTE // dispute opened or resolved
+  PAYOUT // payout paid or failed
+  REVIEW // a new review on the seller
+  SYSTEM // KYC decisions + platform announcements
+  REFERRAL // referral reward earned (Prompt 22)
+}
+
+// Referral engine (Prompt 22) — double-sided viral loop, fraud-gated at first completed order.
+enum ReferralStatus {
+  PENDING // referee signed up; first order not yet COMPLETED
+  COMPLETED // first order reached COMPLETED; referrer bonus awarded
+  VOIDED // referee banned or qualifying order reversed; no bonus
+}
+
+enum ReferralKind {
+  BUYER // buyer invites another buyer (demand-side growth)
+  SELLER // seller invites another seller (supply-side growth, higher reward)
+}
+
+enum ReferralRewardType {
+  LOYALTY_POINTS // via LoyaltyPoint once Step 21 is live
+  FEE_CREDIT // fallback: User.referralCreditMinor (Step 21 not built yet)
+}
+
+// Operations / work-queue (Prompt 24) — unified SLA-tracked ticket over disputes/KYC/fraud/payouts.
+enum TicketType {
+  DISPUTE
+  KYC
+  FRAUD_FLAG
+  PAYOUT_REVIEW
+  SUPPORT
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING_INFO
+  RESOLVED
+  CLOSED
+}
+
+// AI Support bot conversation that was escalated to a human (Step 16). Distinct from the
+// internal ops WorkTicket: this stores the raw buyer/guest chat transcript for an agent to read.
+enum SupportTicketStatus {
+  OPEN
+  CLOSED
+}
+
 // ---------------------------------------------------------------------------
 // Auth (Auth.js / NextAuth v5 + Prisma adapter) — real auth wired in Step 03
 // ---------------------------------------------------------------------------
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String? // bcrypt/argon2 hash — set when credentials auth is added (Step 03)
-  role          Role      @default(BUYER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  name                String?
+  email               String    @unique
+  emailVerified       DateTime?
+  image               String?
+  passwordHash        String? // bcrypt/argon2 hash — set when credentials auth is added (Step 03)
+  role                Role      @default(BUYER)
+  bannedAt            DateTime? // set by admin (Step 15); a banned user can't log in or act
+  // Session revocation (Step 32): bumped on ban / role-change / password-reset.
+  // Every JWT carries this number; on refresh the token is rejected if it no
+  // longer matches — so existing sessions are force-killed without DB sessions.
+  sessionVersion      Int       @default(0)
+  emailNotifications  Boolean   @default(true) // Step 22: global email opt-out toggle (in-app notifications unaffected)
+  // Referral engine (Prompt 22)
+  referralCode        String?   @unique // 8-char A-Z0-9, lazily generated; the user's own share code
+  referredBy          String? // referral code this user signed up with (nullable)
+  referralCreditMinor Int       @default(0) // fee-credit earned from referrals (FEE_CREDIT fallback for Step 21)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Anti-fraud (Prompt 16)
+  lastLoginIp String? // updated on every successful sign-in (internal only — never exposed)
+  lastLoginAt DateTime?
+  payoutHeld  Boolean   @default(false) // fraud auto-action blocks payout disbursement
+
+  // Sumsub automated KYC (Step 29) — set on first applicant create; reviewedAt on review completion
+  sumsubApplicantId String?
+  sumsubReviewedAt  DateTime?
 
   // Auth.js relations
   accounts Account[]
   sessions Session[]
 
   // Domain relations
-  sellerProfile  SellerProfile?
-  ordersAsBuyer  Order[]        @relation("BuyerOrders")
-  reviewsWritten Review[]       @relation("BuyerReviews")
-  conversations  Conversation[] @relation("BuyerConversations")
-  messages       Message[]
-  disputesOpened Dispute[]      @relation("DisputeOpenedBy")
-  notifications  Notification[]
-  auditLogs      AuditLog[]     @relation("AuditActor")
+  sellerProfile      SellerProfile?
+  ordersAsBuyer      Order[]             @relation("BuyerOrders")
+  reviewsWritten     Review[]            @relation("BuyerReviews")
+  conversations      Conversation[]      @relation("BuyerConversations")
+  messages           Message[]
+  disputesOpened     Dispute[]           @relation("DisputeOpenedBy")
+  notifications      Notification[]
+  auditLogs          AuditLog[]          @relation("AuditActor")
+  deviceFingerprints DeviceFingerprint[]
+  referralsGiven     Referral[]          @relation("ReferrerReferrals")
+  referralReceived   Referral?           @relation("RefereeReferral")
+  ticketsAssigned    WorkTicket[]        @relation("TicketAssignee")
+  ticketsCreated     WorkTicket[]        @relation("TicketCreator")
+  ticketNotes        TicketNote[]
+  supportTickets     SupportTicket[] // AI Support escalations raised by this user (Step 16)
+  loyaltyPoints      LoyaltyPoint[] // earn/redeem point ledger (Step 21)
+  guides             Guide[] // community guides authored (Step 27)
+  guideViews         GuideView[] // guides this user has viewed (Step 27)
+  guideLikes         GuideLike[] // guides this user has liked (Step 27)
+  badges             UserBadge[] // community badges earned (Step 27)
 
   @@index([role])
+  @@index([lastLoginIp]) // fraud: IP multi-account lookup (Prompt 16)
+  @@index([referralCode]) // signup attribution lookup (hot path, Prompt 22)
+  @@index([sumsubApplicantId]) // webhook lookup by Sumsub applicant id (Step 29)
+}
+
+// Anti-fraud flag (Prompt 16) — polymorphic target (targetType + targetId).
+model FraudFlag {
+  id           String          @id @default(cuid())
+  targetType   FraudTargetType
+  targetId     String
+  reason       String // e.g. "ip_multi_account", "suspected_wash_trade"
+  severity     FraudSeverity   @default(MEDIUM)
+  status       FraudFlagStatus @default(OPEN)
+  autoDetected Boolean         @default(true)
+  autoAction   FraudAutoAction @default(NONE)
+  riskScore    Int             @default(0) // 0-100 for this specific signal
+  metadata     Json            @default("{}")
+  reviewedBy   String? // admin User.id
+  reviewNote   String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@unique([targetId, reason]) // one flag per (target, signal) — upsert
+  @@index([status, severity, createdAt]) // admin queue: OPEN CRITICAL/HIGH first
+  @@index([targetId])
+  @@index([targetType, status])
+}
+
+// Device/browser fingerprint per user (Prompt 16) — cross-account graph.
+model DeviceFingerprint {
+  id          String   @id @default(cuid())
+  userId      String
+  fingerprint String // opaque hash of device signals
+  ipAddress   String
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, fingerprint]) // one row per (user, device); upsert refreshes
+  @@index([userId])
+  @@index([fingerprint]) // cross-account: same device
+  @@index([ipAddress]) // cross-account: same IP
 }
 
 model Account {
@@ -205,25 +409,65 @@ model SellerProfile {
   bio         String?
   country     String?
   kycStatus   KycStatus @default(NONE)
-  trustScore  Int       @default(0) // 0-100, recomputed by the trust service (Step 17)
+  trustScore  Int       @default(0) // 0-100, recomputed by trust-score.ts (Prompt 11)
   totalSales  Int       @default(0)
   ratingAvg   Float     @default(0) // average of 1-5 ratings (not money → Float is fine)
   ratingCount Int       @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // Trust score computation fields (Prompt 11)
+  trustScoreBreakdown Json?
+  trustScoreUpdatedAt DateTime?
+  trustScoreOverride  Boolean   @default(false) // admin-set; cron skips this seller
+
+  // Seller level (BRONZE..ELITE; String not enum — thresholds change without migration)
+  sellerLevel          String    @default("BRONZE")
+  sellerLevelUpdatedAt DateTime?
+
+  // Scam-risk sub-score (0-100; high = more risk; feeds Fraud Radar, Prompt 16)
+  riskScore          Int       @default(50) // 50 = neutral new seller
+  riskScoreUpdatedAt DateTime?
+
+  // Seller activation funnel milestones (Prompt 14; NULL = not yet reached).
+  // Set server-side only; power the onboarding checklist + founder funnel metrics.
+  kycSubmittedAt DateTime? // first KYC submission (any status)
+  firstListingAt DateTime? // first listing published (ACTIVE)
+  firstSaleAt    DateTime? // first order COMPLETED (escrow released)
+
+  // GETX Pro subscription (Prompt 15) — lower commission + higher listing cap.
+  subscriptionTier      SellerSubscriptionTier @default(FREE)
+  subscriptionExpiresAt DateTime? // renewal cron downgrades to FREE past this
+
+  // Anti-fraud (Prompt 16): non-null = payouts frozen pending review.
+  payoutHeldAt DateTime?
+
+  // Spotlight sponsorship (Prompt 15b, Stream 3) — paid homepage/game-page slot.
+  isSponsored          Boolean   @default(false)
+  sponsorshipExpiresAt DateTime?
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   wallet          Wallet?
   listings        Listing[]
+  deliveryItems   DeliveryItem[]
   ordersAsSeller  Order[]         @relation("SellerOrders")
   reviewsReceived Review[]        @relation("SellerReviews")
   conversations   Conversation[]  @relation("SellerConversations")
   kycSubmissions  KycSubmission[]
 
   @@index([kycStatus])
+  @@index([kycStatus, createdAt]) // seller funnel by signup cohort (Prompt 19)
   @@index([trustScore])
   @@index([ratingAvg]) // marketplace "top rated" sort + min-rating filter (Step 07)
+  @@index([totalSales]) // marketplace "most popular" sort + min-sales filter (Prompt 08)
+  @@index([sellerLevel]) // level filter / badge display
+  @@index([riskScore]) // Fraud Radar (Prompt 16)
+  @@index([kycSubmittedAt]) // seller activation funnel (Prompt 14)
+  @@index([firstListingAt]) // seller activation funnel (Prompt 14)
+  @@index([firstSaleAt]) // seller activation funnel (Prompt 14)
+  @@index([subscriptionTier, subscriptionExpiresAt]) // Pro renewal cron (Prompt 15)
+  @@index([isSponsored, sponsorshipExpiresAt]) // spotlight query + expiry cron (Prompt 15b)
 }
 
 // ---------------------------------------------------------------------------
@@ -240,8 +484,11 @@ model Game {
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 
-  categories Category[]
-  listings   Listing[]
+  categories    Category[]
+  listings      Listing[]
+  demandSignals DemandSignal[] // Prompt-12 demand-capture emails
+  marketSignals MarketSignal[] // Step 26 daily demand aggregation
+  guides        Guide[] // Step 27 community guides
 
   @@index([isActive, sortOrder])
 }
@@ -255,12 +502,30 @@ model Category {
   sortOrder Int          @default(0)
   createdAt DateTime     @default(now())
 
-  game     Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  listings Listing[]
+  game          Game           @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  listings      Listing[]
+  demandSignals DemandSignal[]
 
   @@unique([gameId, slug])
   @@index([gameId])
   @@index([kind])
+}
+
+// Demand capture for empty categories (Prompt 12) — anonymous, not linked to User.
+model DemandSignal {
+  id         String   @id @default(cuid())
+  email      String // may be an anonymous visitor email (not linked to User)
+  gameId     String
+  categoryId String
+  createdAt  DateTime @default(now())
+
+  game     Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([email, categoryId]) // one signal per person per category
+  @@index([categoryId])
+  @@index([gameId])
+  @@index([createdAt])
 }
 
 model Listing {
@@ -282,10 +547,26 @@ model Listing {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  seller   SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  game     Game          @relation(fields: [gameId], references: [id])
-  category Category      @relation(fields: [categoryId], references: [id])
-  orders   Order[]
+  // Liquidity metrics (Prompt 12)
+  viewCount           Int       @default(0) // incremented on each detail view (fire-and-forget)
+  lastActivityAt      DateTime  @default(now()) // bumped on price edit / re-activation / restock
+  expiresAt           DateTime? // NULL = no expiry; auto-set +60d at create
+  newSellerBoostUntil DateTime? // NULL = no boost; createdAt+7d when seller is new
+
+  // Paid featured placement (Prompt 15) — seller buys a "Promoted" slot.
+  isFeatured     Boolean   @default(false)
+  boostExpiresAt DateTime? // when the paid boost lapses (cron sweep clears isFeatured)
+
+  // Paid "bump" (Prompt 15b, Stream 7) — resets effective recency for the newest sort.
+  bumpedAt   DateTime?
+  bumpCount  Int       @default(0)
+  lastBumpAt DateTime?
+
+  seller        SellerProfile  @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  game          Game           @relation(fields: [gameId], references: [id])
+  category      Category       @relation(fields: [categoryId], references: [id])
+  orders        Order[]
+  deliveryItems DeliveryItem[]
 
   @@index([gameId])
   @@index([sellerId])
@@ -295,6 +576,9 @@ model Listing {
   @@index([gameId, status])
   @@index([sellerId, status]) // seller dashboard: per-status counts + manage list
   @@index([status, createdAt]) // marketplace default sort: ACTIVE listings, newest first (Step 07)
+  @@index([gameId, status, newSellerBoostUntil]) // new-seller boosted sort (Prompt 12)
+  @@index([status, lastActivityAt]) // stale-listing auto-pause sweep (Prompt 12)
+  @@index([isFeatured, boostExpiresAt]) // featured query + boost-expiry cron (Prompt 15)
 }
 
 // ---------------------------------------------------------------------------
@@ -316,6 +600,14 @@ model Order {
   paymentProvider PaymentProvider?
   deliveredAt     DateTime?
   autoReleaseAt   DateTime? // 3-day escrow auto-release deadline (Vercel Cron sweep)
+  buyerIp         String? // captured at checkout (Prompt 16) — cross-order/wash-trade analysis
+  // Shield buyer-protection add-on (Prompt 15b, Stream 5) — snapshotted at creation.
+  hasShield       Boolean          @default(false)
+  shieldFeeMinor  Int              @default(0)
+  // Loyalty redemption (Step 21) — points the buyer spent as a discount, snapshotted at
+  // creation. The discount comes out of the buyer platform fee (feeMinor), so the seller's
+  // take and the escrow reconciliation are unaffected.
+  loyaltyPointsRedeemed Int        @default(0)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
@@ -328,12 +620,17 @@ model Order {
   review        Review?
   conversation  Conversation?
   dispute       Dispute?
+  delivery      OrderDelivery?
+  deliveryItems DeliveryItem[]
+  loyaltyPoints LoyaltyPoint[]
 
   @@index([buyerId])
   @@index([sellerId])
   @@index([status])
   @@index([autoReleaseAt])
   @@index([listingId])
+  @@index([status, updatedAt]) // GMV-by-date aggregation + funnel (Prompt 19)
+  @@index([listingId, status, updatedAt]) // game/category revenue join (Prompt 19)
 }
 
 model Payment {
@@ -356,6 +653,21 @@ model Payment {
   @@index([status])
 }
 
+// What the seller hands over once an order is PAID (Step 10). 1:1 with an Order.
+model OrderDelivery {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  // Delivery payload: account credentials / redemption code / instructions.
+  // SENSITIVE — readable ONLY by the buyer, the order's seller, and admins
+  // (enforced in getOrder). Plaintext at MVP per the step scope; encryption at
+  // rest + R2 attachments are a documented follow-up. Never rendered as HTML.
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
 // Idempotency guard: a webhook event id is processed at most once.
 model ProcessedWebhook {
   id              String          @id @default(cuid())
@@ -371,16 +683,25 @@ model ProcessedWebhook {
 // ---------------------------------------------------------------------------
 
 model Wallet {
-  id                 String   @id @default(cuid())
-  sellerProfileId    String   @unique
-  cachedBalanceMinor Int      @default(0) // cache only — real balance = sum of ledger
-  currency           String   @default("INR")
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                 String     @id @default(cuid())
+  // NULL only for the singleton PLATFORM revenue wallet (kind = PLATFORM); every
+  // seller wallet is 1:1 with its SellerProfile. Postgres allows many NULLs, but
+  // the platform wallet is created/looked up by a FIXED id, so there is only one.
+  sellerProfileId    String?    @unique
+  kind               WalletKind @default(SELLER)
+  cachedBalanceMinor Int        @default(0) // cache only — real balance = sum of ledger
+  currency           String     @default("INR")
+  // Onboarding heuristic (Prompt 14): flipped true on the seller's first payout
+  // request — proxies "has a payout method" for the activation checklist.
+  payoutMethodSet    Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 
-  sellerProfile SellerProfile @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+  sellerProfile SellerProfile? @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
   ledgerEntries LedgerEntry[]
   payouts       Payout[]
+
+  @@index([kind])
 }
 
 model LedgerEntry {
@@ -399,17 +720,21 @@ model LedgerEntry {
   @@index([walletId])
   @@index([orderId])
   @@index([walletId, createdAt])
+  @@index([walletId, reason, type, createdAt]) // platform revenue aggregation (Prompt 19)
 }
 
 model Payout {
-  id          String       @id @default(cuid())
-  walletId    String
-  amountMinor Int
-  method      PayoutMethod
-  status      PayoutStatus @default(REQUESTED)
-  providerRef String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id              String       @id @default(cuid())
+  walletId        String
+  amountMinor     Int
+  method          PayoutMethod
+  status          PayoutStatus @default(REQUESTED)
+  providerRef     String?
+  // Instant payout (Prompt 15b, Stream 6) — priority flag + fee snapshot.
+  isInstant       Boolean      @default(false)
+  instantFeeMinor Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
@@ -422,13 +747,16 @@ model Payout {
 // ---------------------------------------------------------------------------
 
 model Review {
-  id        String   @id @default(cuid())
-  orderId   String   @unique
-  buyerId   String
-  sellerId  String
-  rating    Int // 1-5 (validated by Zod in the app layer)
-  comment   String?
-  createdAt DateTime @default(now())
+  id            String    @id @default(cuid())
+  orderId       String    @unique
+  buyerId       String
+  sellerId      String
+  rating        Int // 1-5 (validated by Zod in the app layer)
+  comment       String?
+  sellerReply   String? // optional one-time public reply from the seller (Step 13)
+  sellerReplyAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt // bumps when the buyer edits their review
 
   order  Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   buyer  User          @relation("BuyerReviews", fields: [buyerId], references: [id])
@@ -436,6 +764,7 @@ model Review {
 
   @@index([sellerId])
   @@index([buyerId])
+  @@index([sellerId, createdAt]) // seller profile / listing reviews, newest first
 }
 
 model Conversation {
@@ -509,18 +838,107 @@ model KycSubmission {
 }
 
 model Notification {
-  id        String    @id @default(cuid())
+  id        String           @id @default(cuid())
   userId    String
-  type      String
-  title     String
-  body      String
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
+  type      NotificationType
+  title     String           @db.VarChar(80)
+  body      String           @db.VarChar(200)
+  link      String? // relative GETX path (e.g. /orders/123) — validated server-side, never an external URL
+  read      Boolean          @default(false) // fast O(1) unread-count flag for the bell badge
+  readAt    DateTime? // audit: exact moment it was read (set alongside read=true)
+  createdAt DateTime         @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([userId, read]) // unread-count query
   @@index([userId, readAt])
+  @@index([userId, createdAt]) // feed pagination (ORDER BY createdAt DESC)
+}
+
+// Referral relationship (Prompt 22). refereeId @unique = a user is referred by at most ONE person.
+// bonusAwarded is the CAS guard that makes the referrer-reward grant idempotent across retries.
+model Referral {
+  id                   String             @id @default(cuid())
+  referrerId           String // User who shared the code
+  referrer             User               @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+  refereeId            String             @unique // User who signed up via the code
+  referee              User               @relation("RefereeReferral", fields: [refereeId], references: [id], onDelete: Cascade)
+  kind                 ReferralKind       @default(BUYER)
+  status               ReferralStatus     @default(PENDING)
+  bonusAwarded         Boolean            @default(false) // CAS: flips true exactly once when the referrer is rewarded
+  rewardType           ReferralRewardType @default(FEE_CREDIT)
+  referrerRewardAmount Int                @default(0) // minor units (FEE_CREDIT) or points
+  refereeRewardAmount  Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([referrerId])
+  @@index([status])
+  @@index([referrerId, status])
+}
+
+// Unified ops ticket (Prompt 24). Soft-references the source entity (entityType+entityId);
+// money mutations stay in escrow/payout services — this only manages ticket lifecycle + SLA.
+model WorkTicket {
+  id              String         @id @default(cuid())
+  type            TicketType
+  priority        TicketPriority @default(NORMAL)
+  status          TicketStatus   @default(OPEN)
+  title           String         @db.VarChar(160)
+  entityType      String // "Order" | "KycSubmission" | "FraudFlag" | "Payout" | "SupportTicket"
+  entityId        String // soft FK — joined in the service layer
+  assignedToId    String? // ops agent (User)
+  createdById     String? // who triggered (null = system-generated)
+  slaDeadlineAt   DateTime // createdAt + resolution-hours for this type
+  firstResponseAt DateTime? // first agent touch (assign or note)
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  assignedTo User?        @relation("TicketAssignee", fields: [assignedToId], references: [id])
+  createdBy  User?        @relation("TicketCreator", fields: [createdById], references: [id])
+  notes      TicketNote[]
+
+  @@index([type, status, priority, createdAt])
+  @@index([assignedToId, status])
+  @@index([entityType, entityId]) // idempotent lookup for an entity's open ticket
+  @@index([slaDeadlineAt, status]) // SLA breach sweep
+}
+
+model TicketNote {
+  id        String   @id @default(cuid())
+  ticketId  String
+  authorId  String
+  body      String   @db.VarChar(2000)
+  internal  Boolean  @default(true) // false = user-visible (future)
+  createdAt DateTime @default(now())
+
+  ticket WorkTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User       @relation(fields: [authorId], references: [id])
+
+  @@index([ticketId, createdAt])
+}
+
+// Pre-loaded encrypted delivery item (Step 19). One AVAILABLE item is atomically assigned to an
+// order the moment it is PAID (FOR UPDATE SKIP LOCKED). Content is AES-256-GCM encrypted at rest
+// (src/lib/encryption.ts) and only ever decrypted server-side for the order's buyer.
+model DeliveryItem {
+  id          String             @id @default(cuid())
+  listingId   String
+  listing     Listing            @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  sellerId    String // SellerProfile (matches Listing.sellerId)
+  seller      SellerProfile      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  content     String // AES-256-GCM encrypted JSON {iv,tag,ciphertext} — never plaintext at rest
+  status      DeliveryItemStatus @default(AVAILABLE)
+  orderId     String?
+  order       Order?             @relation(fields: [orderId], references: [id])
+  deliveredAt DateTime?
+  createdAt   DateTime           @default(now())
+
+  @@index([listingId, status]) // stock count + FOR UPDATE SKIP LOCKED pick
+  @@index([orderId])
 }
 
 model AuditLog {
@@ -536,4 +954,147 @@ model AuditLog {
 
   @@index([actorId])
   @@index([entity, entityId])
+}
+
+// AI Support escalation (Step 16). When the support bot can't answer confidently or the user asks
+// for a human, the full chat is persisted here for an admin to read + resolve. userId is nullable
+// because guest (unauthenticated) support is allowed. chatHistory is the serialised transcript.
+model SupportTicket {
+  id          String              @id @default(cuid())
+  userId      String? // null for guests; SetNull keeps the transcript if the user is deleted
+  subject     String              @db.VarChar(120)
+  chatHistory Json // [{ role: "user" | "assistant", content: string }]
+  status      SupportTicketStatus @default(OPEN)
+  adminNote   String?             @db.VarChar(2000)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt]) // admin queue: open first, newest first
+  @@index([userId, status]) // idempotent "does this user have an OPEN ticket with this subject?"
+}
+
+// Append-only loyalty points ledger (Step 21). Balance is ALWAYS derived (ΣEARN − ΣREDEEM);
+// never store a running total. The composite @@unique makes order-bound earns/redeems idempotent
+// (one PURCHASE/SALE/REDEMPTION/PURCHASE_REFUND per order). SIGNUP_BONUS has a null orderId
+// (Postgres treats NULLs as distinct, so app-level guards prevent a second signup bonus).
+model LoyaltyPoint {
+  id        String             @id @default(cuid())
+  userId    String
+  amount    Int // always POSITIVE; direction is in `type`
+  type      LoyaltyPointType
+  reason    LoyaltyPointReason
+  orderId   String?
+  createdAt DateTime           @default(now())
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order Order? @relation(fields: [orderId], references: [id])
+
+  @@unique([userId, orderId, reason, type]) // idempotent order-bound awards/redemptions
+  @@index([userId, createdAt]) // balance sum + history feed
+  @@index([orderId])
+}
+
+// Daily demand aggregation per (game, category-kind, day) — Step 26. Upserted by the demand-signals
+// cron from yesterday's COMPLETED orders + SearchLog. NAMED MarketSignal (not DemandSignal) because
+// that name is already taken by the Prompt-12 demand-capture email model — different feature.
+model MarketSignal {
+  id            String       @id @default(cuid())
+  gameId        String
+  game          Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  categoryKind  CategoryKind
+  date          DateTime // midnight UTC of the aggregated day
+  orderCount    Int          @default(0)
+  avgPriceMinor Int          @default(0) // integer minor units
+  searchCount   Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([gameId, categoryKind, date])
+  @@index([gameId, date])
+  @@index([categoryKind, date])
+}
+
+// Append-only, fire-and-forget log of marketplace search queries (Step 26). No userId (no PII).
+model SearchLog {
+  id        String   @id @default(cuid())
+  query     String   @db.VarChar(500)
+  gameId    String? // game slug context if present (soft — not an FK)
+  createdAt DateTime @default(now())
+
+  @@index([gameId, createdAt])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Community (Step 27) — guides, leaderboards, badges
+// ---------------------------------------------------------------------------
+
+model Guide {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id])
+  title     String   @db.VarChar(160)
+  slug      String   @unique
+  content   String // Markdown — stored raw, rendered safely (no rehype-raw)
+  published Boolean  @default(false)
+  viewCount Int      @default(0)
+  likeCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  views GuideView[]
+  likes GuideLike[]
+
+  @@index([gameId])
+  @@index([authorId])
+  @@index([published, createdAt])
+}
+
+model GuideView {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guideId   String
+  guide     Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, guideId]) // one counted view per user per guide
+  @@index([guideId])
+}
+
+model GuideLike {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guideId   String
+  guide     Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, guideId]) // one like per user per guide
+  @@index([guideId])
+}
+
+model Badge {
+  code        String      @id // e.g. "EARLY_SELLER"
+  name        String
+  description String
+  iconUrl     String
+  userBadges  UserBadge[]
+}
+
+model UserBadge {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeCode String
+  badge     Badge          @relation(fields: [badgeCode], references: [code])
+  awardedAt DateTime       @default(now())
+  awardedBy BadgeAwardedBy
+
+  @@unique([userId, badgeCode]) // idempotent — a badge is earned at most once
+  @@index([userId])
 }

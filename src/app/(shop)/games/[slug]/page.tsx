@@ -17,12 +17,16 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { CtaLink } from "@/components/shared/cta-link";
 import { CategoryCard } from "@/components/marketplace/category-card";
 import { ListingCard } from "@/components/marketplace/listing-card";
+import { DemandCaptureCard } from "@/components/marketplace/demand-capture-card";
 import {
   ListingGrid,
   ListingGridEmpty,
   ListingGridSkeleton,
 } from "@/components/marketplace/listing-grid";
 import { formatListingCount } from "@/components/marketplace/game-card";
+
+// Game landing: listing previews tolerate 5 min staleness — ISR cuts Neon load.
+export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -71,12 +75,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  */
 async function CategoryPreviews({ game }: { game: GameDetail }) {
   const previews = await getCategoryPreviews(game.categories, 4);
+  // Above-the-fold LCP priority goes to the FIRST category that actually has
+  // listings (empty ones render a demand card, not images).
+  const firstStockedId = game.categories.find(
+    (c) => (previews.get(c.id)?.length ?? 0) > 0,
+  )?.id;
 
   return (
     <>
-      {game.categories
-        .filter((category) => (previews.get(category.id)?.length ?? 0) > 0)
-        .map((category) => (
+      {game.categories.map((category) => {
+        const cards = previews.get(category.id) ?? [];
+
+        // Empty category → compact demand-capture (never a dead end / silent drop).
+        if (cards.length === 0) {
+          return (
+            <section key={category.id} aria-labelledby={`cat-${category.slug}`}>
+              <h2
+                id={`cat-${category.slug}`}
+                className="mb-3.5 font-heading text-lg font-bold min-[761px]:text-xl"
+              >
+                {category.name}
+              </h2>
+              <DemandCaptureCard
+                variant="compact"
+                gameId={game.id}
+                categoryId={category.id}
+                gameName={game.name}
+                categoryName={category.name}
+              />
+            </section>
+          );
+        }
+
+        return (
           <section key={category.id} aria-labelledby={`cat-${category.slug}`}>
             <div className="mb-3.5 flex items-center justify-between gap-3">
               <h2
@@ -94,12 +125,17 @@ async function CategoryPreviews({ game }: { game: GameDetail }) {
               </Link>
             </div>
             <ListingGrid>
-              {(previews.get(category.id) ?? []).map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
+              {cards.map((listing, cardIndex) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  priority={category.id === firstStockedId && cardIndex < 2}
+                />
               ))}
             </ListingGrid>
           </section>
-        ))}
+        );
+      })}
     </>
   );
 }
@@ -164,7 +200,7 @@ export default async function GamePage({ params }: Props) {
                 className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(77,124,254,0.16),transparent_55%)]"
                 aria-hidden="true"
               >
-                <span className="absolute right-6 bottom-2 font-heading text-[96px] leading-none font-extrabold tracking-tight text-white/[0.04] select-none min-[761px]:text-[140px]">
+                <span className="absolute right-6 bottom-2 font-heading text-[96px] leading-none font-extrabold tracking-tight text-white/4 select-none min-[761px]:text-[140px]">
                   {copy.mono}
                 </span>
               </div>
@@ -209,6 +245,7 @@ export default async function GamePage({ params }: Props) {
                 name={category.name}
                 kind={category.kind}
                 listingCount={category.listingCount}
+                hasSupply={category.listingCount > 0}
                 href={`/games/${game.slug}/${category.slug}`}
               />
             ))}
