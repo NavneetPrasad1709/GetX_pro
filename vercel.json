@@ -3,43 +3,11 @@
   "crons": [
     {
       "path": "/api/cron/auto-release",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/trust-score",
       "schedule": "0 2 * * *"
     },
     {
-      "path": "/api/cron/auto-pause-stale",
+      "path": "/api/cron/trust-score",
       "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/boost-expiry",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/subscription-renewal",
-      "schedule": "30 3 * * *"
-    },
-    {
-      "path": "/api/cron/sla-breach",
-      "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/demand-signals",
-      "schedule": "30 20 * * *"
-    },
-    {
-      "path": "/api/cron/award-top-sellers",
-      "schedule": "0 0 1 * *"
-    },
-    {
-      "path": "/api/cron/algolia-sync",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path": "/api/cron/judge-disputes",
-      "schedule": "*/10 * * * *"
     }
   ]
 }
