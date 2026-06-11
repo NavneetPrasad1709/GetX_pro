@@ -571,10 +571,15 @@ export type DisputeOutcome = "REFUND_BUYER" | "RELEASE_SELLER";
  * back — never a half-resolved dispute. Caller is responsible for admin auth.
  */
 export async function resolveDispute(
-  adminUserId: string,
+  // null = a system (AI Dispute Judge, Step 25) action — AuditLog.actorId is
+  // nullable, so a null actor records a non-human resolution cleanly.
+  adminUserId: string | null,
   orderId: string,
   outcome: DisputeOutcome,
   note: string,
+  // Step 25: when the AI auto-resolves, stamp judgeActorType="AI" ATOMICALLY in
+  // the same status CAS below so status + actor + money all move together.
+  judgeActorType?: "AI" | "HUMAN",
 ): Promise<DisputeOutcome> {
   const resolved = await db.$transaction(async (tx) => {
     const dispute = await tx.dispute.findUnique({
@@ -589,6 +594,7 @@ export async function resolveDispute(
       data: {
         status: outcome === "REFUND_BUYER" ? "RESOLVED_BUYER" : "RESOLVED_SELLER",
         resolutionNote: note,
+        ...(judgeActorType ? { judgeActorType } : {}),
       },
     });
     if (claimed.count === 0) {
@@ -615,7 +621,8 @@ export async function resolveDispute(
             : "DISPUTE_RESOLVED_SELLER",
         entity: "Order",
         entityId: orderId,
-        meta: { disputeId: dispute.id, note },
+        // actorType disambiguates a null-actor AI resolution from a human one.
+        meta: { disputeId: dispute.id, note, actorType: judgeActorType ?? "HUMAN" },
       },
     });
     return outcome;

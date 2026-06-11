@@ -1368,9 +1368,88 @@
       </div>
     </section>
 
+    <!-- ═══════════════════════════════════════════════════════ Step 25 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 25 · AI Dispute Judge</span>
+        <h2 style="margin-top:10px">An impartial first pass on every dispute — auto-resolves the clear ones, flags the rest</h2>
+        <p class="lede"><code>claude-opus-4-8</code> reads the full case (order, delivery proof, chat, reviews) and returns a verdict + confidence. <b>≥70% auto-resolves</b> through the same escrow ledger; below that an admin accepts or overrides in one click. Past cases are remembered as <b>pgvector</b> embeddings for few-shot recall. Fully dormant until the AI key is set.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <!-- AI Analysis card mock -->
+          <div style="flex:1;min-width:260px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Admin “AI Analysis” panel</h3>
+            <div style="background:rgba(77,124,254,.05);border:1px solid rgba(77,124,254,.3);border-radius:12px;padding:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-family:Poppins;font-weight:700;font-size:13px">✨ AI Analysis</span>
+                <span style="background:rgba(34,197,94,.15);color:#16a34a;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:700">Release to seller</span>
+              </div>
+              <div style="margin-top:12px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between"><span>Confidence</span><span style="font-weight:700;color:var(--text)">85%</span></div>
+              <div style="margin-top:4px;height:8px;border-radius:99px;background:var(--border);overflow:hidden"><div style="height:100%;width:85%;background:var(--primary);border-radius:99px"></div></div>
+              <p style="margin-top:10px;font-size:12px;color:var(--muted)">Seller provided valid delivery proof within the window; buyer’s claim is unsupported by the chat log. Policy favours release.</p>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <span style="background:var(--primary-strong);color:#fff;border-radius:6px;padding:7px 14px;font-size:11px;font-weight:700;font-family:Poppins">Accept</span>
+                <span style="border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:11px;font-weight:700">Override</span>
+              </div>
+            </div>
+            <div class="cap">Queue shows an “AI: Seller 85%” badge · low confidence adds a “Needs Review” pill</div>
+          </div>
+          <!-- how it decides -->
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">How a dispute flows</h3>
+            <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:12px">
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">📨 <b>Dispute opened</b> <span style="color:var(--faint)">judge runs in the background</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">🧠 <b>Reads the full case</b> <span style="color:var(--faint)">order · proof · chat · reviews · similar past cases</span></div>
+              <div style="padding:8px 12px;border-bottom:1px solid var(--border)">✅ <b>≥70% → auto-resolve</b> <span style="color:var(--faint)">via the escrow ledger (never a duplicate write)</span></div>
+              <div style="padding:8px 12px">🧑‍⚖️ <b>&lt;70% → admin decides</b> <span style="color:var(--faint)">1-click accept or override w/ reason</span></div>
+            </div>
+            <div class="cap">On any parse glitch it defaults to REFUND BUYER — never auto-pays a seller by mistake</div>
+          </div>
+        </div>
+
+        <table class="diff" style="margin-top:1.5rem">
+          <tr><th>Before</th><th>After (Step 25)</th></tr>
+          <tr><td class="before">Every dispute waited for a human, 100% of the time</td><td class="after">Clear-cut cases auto-resolve in seconds; humans focus on the genuinely ambiguous</td></tr>
+          <tr><td class="before">No memory — each dispute judged from scratch</td><td class="after">pgvector recalls similar past verdicts as few-shot context</td></tr>
+        </table>
+        <p class="note" style="margin-top:1rem"><b>Safety first:</b> money moves ONLY through the audited escrow service, a human is on every uncertain decision, and the whole feature is a no-op until <code>ANTHROPIC_API_KEY</code> is set. qa-step25.ts <b>29/29</b> + a 21-agent adversarial review (8 fixes — incl. a durable cron backstop for the background judge).</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ Step 23 (roadmap) -->
+    <section class="block">
+      <div class="wrap">
+        <span class="chip" style="background:rgba(77,124,254,.12);color:var(--primary);border-color:rgba(77,124,254,.25)">Step 23 · हिन्दी + English (foundation)</span>
+        <h2 style="margin-top:10px">Bilingual GETX — the translation foundation is in; URL routing activates post-deploy</h2>
+        <p class="lede">next-intl + <b>complete English &amp; Hindi catalogs</b> (12 namespaces, ~180 keys each, accurate Devanagari) + locale-aware ₹/date formatting + a ready language switcher. The app-wide <code>[locale]</code> route restructure (for <code>/hi/</code> URLs + hreflang SEO) is deferred to a focused, runtime-verified pass after deploy — a Windows file-lock blocked the move mid-session and the cookie-only alternative would have globally undone the Step 33 ISR right before launch.</p>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Language switcher (ready)</h3>
+            <div style="border:1px solid var(--border);border-radius:10px;padding:6px;max-width:200px;background:var(--card)">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--primary);font-weight:600">🇮🇳 हिन्दी <span>✓</span></div>
+              <div style="display:flex;align-items:center;padding:8px 10px;border-radius:6px;font-size:13px">🇬🇧 English</div>
+            </div>
+            <div class="cap">/  → English (clean)   ·   /hi/  → हिन्दी   (preserves path + query)</div>
+          </div>
+          <div style="flex:1;min-width:240px">
+            <h3 style="font-size:13px;font-weight:700;margin:0 0 8px;color:var(--text)">Sample translations</h3>
+            <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:12px">
+              <div style="padding:7px 12px;border-bottom:1px solid var(--border)">Buy now → <b>अभी खरीदें</b></div>
+              <div style="padding:7px 12px;border-bottom:1px solid var(--border)">Checkout → <b>चेकआउट</b></div>
+              <div style="padding:7px 12px;border-bottom:1px solid var(--border)">Order summary → <b>ऑर्डर सारांश</b></div>
+              <div style="padding:7px 12px">₹1,000 → <b>₹1,000</b> &nbsp;<span style="color:var(--faint)">(hi-IN aware)</span></div>
+            </div>
+            <div class="cap">Seller-entered content (titles, reviews) is never translated — only UI chrome</div>
+          </div>
+        </div>
+        <p class="note" style="margin-top:1rem"><b>Foundation only:</b> the durable ~80% (translations + config + formatting) is done; activation (route move → provider → middleware chaining → string conversion) is a documented post-deploy step. qa-step23.ts <b>13/13</b> (key parity, no-empty, Devanagari, ICU parity, formatting). See docs/DECISIONS.md for the activation checklist.</p>
+      </div>
+    </section>
+
     <section class="block" style="border-bottom:none">
       <div class="wrap">
-        <p class="note">Updated through <b>Step 34 (Testing)</b> · 2026-06-11. This session shipped <b>16 · 20 · 21 · 24 · 26 · 27 · 28 · 29 · 31 · 32 · 33 · 34</b> and verified <b>17/18/19/22</b> (real <b>Step 17 bug fixed</b>). ROADMAP: 01–22, 24, 26–29, 31–34 done. Remaining: 25 AI Dispute Judge · 23 i18n · 30 more games · 35–36 (deploy/golive). External accounts (Upstash, Algolia, Sumsub, Anthropic, PostHog, Sentry, Resend, test DB) provisioned at launch — every feature dormant-but-ready until its keys are set.</p>
+        <p class="note">Updated through <b>Step 23 (i18n foundation)</b> · 2026-06-11. This session shipped <b>16 · 20 · 21 · 24 · 25 · 26 · 27 · 28 · 29 · 31 · 32 · 33 · 34</b> + the <b>Step 23 i18n foundation</b> (en/hi catalogs + config + formatting; URL-routing activation deferred post-deploy) and verified <b>17/18/19/22</b>. ROADMAP: 01–22, 24–29, 31–34 done; 23 foundation built. Remaining: 23 activation · 30 more games · 35–36 (deploy/golive). External accounts (Upstash, Algolia, Sumsub, Anthropic, OpenAI, PostHog, Sentry, Resend, test DB) provisioned at launch — every feature dormant-but-ready until its keys are set.</p>
       </div>
     </section>
   </body>

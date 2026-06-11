@@ -38,6 +38,18 @@ export const resolveDisputeSchema = z.object({
     .max(500, "Keep the note under 500 characters"),
 });
 
+// AI Dispute Judge (Step 25)
+export const acceptAiVerdictSchema = z.object({ disputeId: id });
+export const overrideAiVerdictSchema = z.object({
+  disputeId: id,
+  verdict: z.enum(["BUYER", "SELLER"]),
+  reason: z
+    .string()
+    .trim()
+    .min(3, "Add a short reason for the override")
+    .max(500, "Keep the reason under 500 characters"),
+});
+
 export const overrideTrustScoreSchema = z.object({
   sellerId: id,
   trustScore: z.number().int().min(0).max(100),

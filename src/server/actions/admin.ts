@@ -5,14 +5,17 @@ import * as Sentry from "@sentry/nextjs";
 import { auth } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import {
+  acceptAiVerdictSchema,
   banUserSchema,
   kycUrlSchema,
+  overrideAiVerdictSchema,
   overrideTrustScoreSchema,
   removeListingSchema,
   resolveDisputeSchema,
   reviewKycSchema,
   setRoleSchema,
 } from "@/lib/validators/admin";
+import { acceptAiVerdict, overrideAiVerdict } from "@/server/services/dispute-judge";
 import {
   AdminServiceError,
   removeListingAsAdmin,
@@ -161,6 +164,46 @@ export async function resolveDisputeAction(raw: unknown): Promise<AdminActionRes
     console.error("[resolveDisputeAction]", err);
     return { ok: false, error: GENERIC };
   }
+}
+
+/** Admin accepts the AI Dispute Judge's suggested verdict on an OPEN dispute (Step 25). */
+export async function acceptAiVerdictAction(raw: unknown): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin) return { ok: false, error: "Forbidden." };
+  if (limited(admin.id)) return { ok: false, error: "Too many requests." };
+
+  const parsed = acceptAiVerdictSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "Invalid request." };
+  const result = await acceptAiVerdict(admin.id, parsed.data.disputeId);
+  if (!result.ok) return { ok: false, error: result.error };
+  // The dispute detail page is keyed by orderId; also refresh the order view.
+  revalidatePath("/admin/disputes");
+  revalidatePath(`/admin/disputes/${result.orderId}`);
+  revalidatePath(`/orders/${result.orderId}`);
+  return { ok: true };
+}
+
+/** Admin overrides the AI verdict, resolving with their chosen verdict + reason (Step 25). */
+export async function overrideAiVerdictAction(raw: unknown): Promise<AdminActionResult> {
+  const admin = await requireAdmin();
+  if (!admin) return { ok: false, error: "Forbidden." };
+  if (limited(admin.id)) return { ok: false, error: "Too many requests." };
+
+  const parsed = overrideAiVerdictSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid request." };
+  }
+  const result = await overrideAiVerdict(
+    admin.id,
+    parsed.data.disputeId,
+    parsed.data.verdict,
+    parsed.data.reason,
+  );
+  if (!result.ok) return { ok: false, error: result.error };
+  revalidatePath("/admin/disputes");
+  revalidatePath(`/admin/disputes/${result.orderId}`);
+  revalidatePath(`/orders/${result.orderId}`);
+  return { ok: true };
 }
 
 /**

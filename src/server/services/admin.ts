@@ -311,6 +311,8 @@ export type DisputeQueueItem = {
   currency: string;
   listingTitle: string;
   createdAt: string;
+  aiVerdict: "BUYER" | "SELLER" | null;
+  aiConfidence: number | null;
 };
 
 export async function listOpenDisputes(): Promise<DisputeQueueItem[]> {
@@ -321,6 +323,8 @@ export async function listOpenDisputes(): Promise<DisputeQueueItem[]> {
       orderId: true,
       reason: true,
       createdAt: true,
+      aiVerdict: true,
+      aiConfidence: true,
       openedBy: { select: { name: true } },
       order: {
         select: {
@@ -339,6 +343,9 @@ export async function listOpenDisputes(): Promise<DisputeQueueItem[]> {
     currency: r.order.currency,
     listingTitle: r.order.listing.title,
     createdAt: r.createdAt.toISOString(),
+    aiVerdict:
+      r.aiVerdict === "BUYER" || r.aiVerdict === "SELLER" ? r.aiVerdict : null,
+    aiConfidence: r.aiConfidence,
   }));
 }
 
@@ -346,6 +353,16 @@ export type DisputeMessage = {
   body: string;
   senderName: string;
   createdAt: string;
+};
+
+export type DisputeAi = {
+  disputeId: string;
+  verdict: "BUYER" | "SELLER" | null;
+  confidence: number | null;
+  reasoning: string | null;
+  keyFacts: string[];
+  judgeActorType: string;
+  judgedAt: string | null;
 };
 
 export type DisputeContext = {
@@ -361,6 +378,7 @@ export type DisputeContext = {
   resolutionNote: string | null;
   deliveryContent: string | null;
   messages: DisputeMessage[];
+  ai: DisputeAi;
 };
 
 /**
@@ -380,7 +398,20 @@ export async function getDisputeContext(orderId: string): Promise<DisputeContext
       seller: { select: { displayName: true } },
       listing: { select: { title: true } },
       delivery: { select: { content: true } },
-      dispute: { select: { reason: true, status: true, resolutionNote: true } },
+      dispute: {
+        select: {
+          id: true,
+          reason: true,
+          status: true,
+          resolutionNote: true,
+          aiVerdict: true,
+          aiConfidence: true,
+          aiReasoning: true,
+          aiKeyFacts: true,
+          judgeActorType: true,
+          judgedAt: true,
+        },
+      },
       conversation: {
         select: {
           messages: {
@@ -415,5 +446,19 @@ export async function getDisputeContext(orderId: string): Promise<DisputeContext
       senderName: m.sender.name ?? "User",
       createdAt: m.createdAt.toISOString(),
     })),
+    ai: {
+      disputeId: order.dispute.id,
+      verdict:
+        order.dispute.aiVerdict === "BUYER" || order.dispute.aiVerdict === "SELLER"
+          ? order.dispute.aiVerdict
+          : null,
+      confidence: order.dispute.aiConfidence,
+      reasoning: order.dispute.aiReasoning,
+      keyFacts: Array.isArray(order.dispute.aiKeyFacts)
+        ? (order.dispute.aiKeyFacts as string[])
+        : [],
+      judgeActorType: order.dispute.judgeActorType,
+      judgedAt: order.dispute.judgedAt?.toISOString() ?? null,
+    },
   };
 }

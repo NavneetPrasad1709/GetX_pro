@@ -6,6 +6,7 @@ import { getDisputeContext } from "@/server/services/admin";
 import { formatMoney } from "@/lib/money";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { DisputeResolveActions } from "@/components/admin/dispute-resolve-actions";
+import { AiDisputePanel } from "@/components/admin/ai-dispute-panel";
 
 export const metadata: Metadata = { title: "Dispute — Admin", robots: { index: false } };
 
@@ -108,6 +109,9 @@ export default async function AdminDisputeDetailPage({ params }: Props) {
           </ul>
         )}
       </section>
+
+      {/* AI Dispute Judge (Step 25) */}
+      <AiDisputePanel ai={ctx.ai} resolved={resolved} />
 
       {/* resolution */}
       {resolved ? (

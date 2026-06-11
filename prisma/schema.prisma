@@ -12,13 +12,17 @@
 // listings + trust score). "buyer" = a plain `User`. A SellerProfile is 1:1 with a User.
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  // pgvector support for the AI Dispute Judge's case memory (Step 25). Lets the
+  // datasource declare the `vector` extension + an Unsupported("vector(N)") column.
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL") // Neon POOLED connection (pgbouncer) — used by the app
-  directUrl = env("DIRECT_URL") // Neon DIRECT connection — used by migrations
+  provider   = "postgresql"
+  url        = env("DATABASE_URL") // Neon POOLED connection (pgbouncer) — used by the app
+  directUrl  = env("DIRECT_URL") // Neon DIRECT connection — used by migrations
+  extensions = [vector] // pgvector — enabled via CREATE EXTENSION in the Step 25 migration
 }
 
 // ---------------------------------------------------------------------------
@@ -810,11 +814,36 @@ model Dispute {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  order    Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  openedBy User  @relation("DisputeOpenedBy", fields: [openedById], references: [id])
+  // AI Dispute Judge (Step 25) — populated by the background judge regardless of
+  // confidence; only auto-resolves when aiConfidence >= the threshold.
+  aiVerdict      String? // "BUYER" | "SELLER" (AI suggestion; the actual money move is keyed off the order)
+  aiConfidence   Int? // 0-100
+  aiReasoning    String?
+  aiKeyFacts     Json? // string[] of the facts the verdict rested on
+  judgedAt       DateTime?
+  judgeActorType String        @default("HUMAN") // "HUMAN" | "AI" — who actually resolved it
+
+  order            Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  openedBy         User              @relation("DisputeOpenedBy", fields: [openedById], references: [id])
+  disputeEmbedding DisputeEmbedding?
 
   @@index([status])
   @@index([openedById])
+}
+
+// Resolved-dispute case memory (Step 25) — each resolved case stored as a vector
+// for few-shot retrieval by the AI Dispute Judge. The `embedding` column is a
+// pgvector type Prisma can't map natively, so it's Unsupported and is written /
+// queried via $executeRaw / $queryRaw with the `<=>` cosine operator.
+model DisputeEmbedding {
+  id        String                       @id @default(cuid())
+  disputeId String                       @unique
+  verdict   String // "BUYER" | "SELLER"
+  reasoning String
+  embedding Unsupported("vector(1536)")?
+  createdAt DateTime                      @default(now())
+
+  dispute Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
 }
 
 // ---------------------------------------------------------------------------

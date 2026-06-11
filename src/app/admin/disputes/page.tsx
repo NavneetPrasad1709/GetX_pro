@@ -36,9 +36,29 @@ export default async function AdminDisputesPage() {
                 className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary/40 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="line-clamp-1 text-sm font-semibold">
-                    {d.listingTitle}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="line-clamp-1 text-sm font-semibold">
+                      {d.listingTitle}
+                    </p>
+                    {d.aiVerdict ? (
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          d.aiVerdict === "SELLER"
+                            ? "bg-success/15 text-success"
+                            : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                        }`}
+                        title="AI Dispute Judge suggestion"
+                      >
+                        AI: {d.aiVerdict === "SELLER" ? "Seller" : "Buyer"}
+                        {d.aiConfidence != null ? ` ${d.aiConfidence}%` : ""}
+                      </span>
+                    ) : null}
+                    {d.aiConfidence != null && d.aiConfidence < 70 ? (
+                      <span className="shrink-0 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                        Needs Review
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
                     {d.openedByName} · {dateFmt.format(new Date(d.createdAt))} ·{" "}
                     {d.reason}

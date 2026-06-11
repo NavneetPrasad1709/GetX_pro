@@ -15,6 +15,7 @@ import {
   markDelivered,
   openDispute,
 } from "@/server/services/escrow";
+import { enqueueDisputeJudgeByOrder } from "@/server/services/dispute-judge";
 
 /**
  * Escrow/delivery server actions (Step 10). Standard mutation shape:
@@ -117,6 +118,9 @@ export async function openDisputeAction(
 
   try {
     await openDispute(userId, parsed.data.orderId, parsed.data.reason);
+    // Step 25: let the AI Dispute Judge analyse it in the background (no-op
+    // without a key). Fire-and-forget — never block dispute creation on it.
+    enqueueDisputeJudgeByOrder(parsed.data.orderId);
     revalidateOrderViews(parsed.data.orderId);
     return { ok: true };
   } catch (err) {
