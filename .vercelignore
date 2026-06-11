@@ -1,0 +1,12 @@
+# The Socket.io realtime server is a SEPARATE service deployed to Railway, not
+# part of the Vercel Next.js app. It has its own package.json + node_modules
+# (socket.io etc.), so excluding it here keeps it out of the Vercel build and
+# its type-check (otherwise `next build` tries to type-check it and fails on the
+# missing socket.io dependency).
+socket-server
+
+# Dev-only files not needed in the production app build.
+scripts
+e2e
+docs
+vercel.full.json
