@@ -171,10 +171,12 @@ async function main() {
       SELECT "verdict" FROM "DisputeEmbedding" WHERE "disputeId" = ${d.disputeId}`;
     ok("corrected embedding stored with verdict BUYER", ovrEmb.length === 1 && ovrEmb[0].verdict === "BUYER");
 
-    console.log("\n=== k. no API key → judgeDispute throws cleanly ===");
-    setJudgeModelOverride(null); // remove the test seam → real path requires a key
+    console.log("\n=== k. no AI provider → judgeDispute throws cleanly ===");
+    setJudgeModelOverride(null); // remove the test seam → real path requires a provider
     const savedKey = process.env.ANTHROPIC_API_KEY;
+    const savedGroq = process.env.GROQ_API_KEY; // ai.ts now also falls back to Groq
     delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.GROQ_API_KEY;
     resetAiCache();
     const e = await mkDisputedOrder(`qa25-e-${stamp}`);
     let threw = false;
@@ -183,8 +185,9 @@ async function main() {
     } catch {
       threw = true;
     }
-    ok("judgeDispute throws without ANTHROPIC_API_KEY", threw);
+    ok("judgeDispute throws with NO AI provider configured", threw);
     if (savedKey) process.env.ANTHROPIC_API_KEY = savedKey;
+    if (savedGroq) process.env.GROQ_API_KEY = savedGroq;
     resetAiCache();
   } finally {
     setJudgeModelOverride(null);
