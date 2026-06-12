@@ -60,7 +60,7 @@ export default async function GameLeaderboardPage({ params }: Props) {
               </span>
               <UserAvatar name={r.displayName} image={r.image} size="sm" />
               <div className="min-w-0 flex-1">
-                <Link href={`/sellers/${r.userId}`} className="block truncate font-semibold hover:text-primary">
+                <Link href={`/sellers/${r.sellerId}`} className="block truncate font-semibold hover:text-primary">
                   {r.displayName}
                 </Link>
                 <div className="flex items-center gap-1.5 text-xs">

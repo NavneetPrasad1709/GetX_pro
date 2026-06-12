@@ -30,12 +30,26 @@ function slugify(title: string): string {
 }
 
 export type GuideWithMeta = Guide & {
-  author: { id: string; name: string | null; image: string | null };
+  author: {
+    id: string;
+    name: string | null;
+    image: string | null;
+    sellerProfile: { id: string } | null;
+  };
   game: { name: string; slug: string };
 };
 
 const guideInclude = {
-  author: { select: { id: true, name: true, image: true } },
+  author: {
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      // SellerProfile.id powers the author→profile link (P1-T4); null when the
+      // author never opened a seller profile, in which case the link is hidden.
+      sellerProfile: { select: { id: true } },
+    },
+  },
   game: { select: { name: true, slug: true } },
 } satisfies Prisma.GuideInclude;
 

@@ -49,12 +49,11 @@ export const siteConfig = {
       bumpFeeMinor: 9_900, // ₹99 per bump
       maxBumpsPerDay: 3, // per listing, sliding 24h window
     },
-    // GETX Pro seller subscription (Stream 4).
+    // GETX Pro seller subscription (Stream 4). Listings are unlimited for all
+    // tiers (O-T5) — Pro sells commission discount + badge + support + analytics.
     subscription: {
       proMonthlyFeeMinor: 49_900, // ₹499/month
       proCommissionDiscount: 2, // percentage POINTS off base commission
-      proMaxListings: 15, // active-listing cap for PRO
-      freeMaxListings: 10, // active-listing cap for FREE
     },
     // Spotlight sponsorship (Stream 3) — scarce, quality-gated weekly slot.
     sponsorship: {

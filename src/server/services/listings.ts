@@ -7,7 +7,6 @@ import { getWalletBalances } from "@/server/services/wallet";
 import { isAllowedListingImageUrl } from "@/lib/r2";
 import { MAX_LISTING_IMAGES } from "@/lib/validators/upload";
 import { syncListingToAlgolia } from "@/server/services/search-sync";
-import { SELLER_LEVELS } from "@/server/services/trust-score";
 import { fireFraudSignal } from "@/server/services/fraud/dispatch";
 import {
   checkListingScamPhrases,
@@ -166,34 +165,15 @@ export async function createListing(
   const sellerId = await getSellerProfileId(user.id);
 
   const created = await db.$transaction(async (tx) => {
-    // Listing cap: ACTIVE count must not exceed the seller's allowance. The cap
-    // is the HIGHER of the trust-level cap (Prompt 11) and the subscription cap
-    // (Prompt 15) — GETX Pro lifts a Bronze seller from 10 → 15, while higher
-    // levels already exceed that.
-    const [category, profile, activeCount] = await Promise.all([
+    // Listings are unlimited for every tier (O-T5) — no active-listing cap.
+    // totalSales is still needed for the new-seller visibility boost below.
+    const [category, profile] = await Promise.all([
       resolveCategory(tx, input.gameId, input.categoryId),
       tx.sellerProfile.findUniqueOrThrow({
         where: { id: sellerId },
-        select: { sellerLevel: true, totalSales: true, subscriptionTier: true },
+        select: { totalSales: true },
       }),
-      tx.listing.count({ where: { sellerId, status: "ACTIVE" } }),
     ]);
-    const levelConfig =
-      SELLER_LEVELS.find((l) => l.id === profile.sellerLevel) ??
-      SELLER_LEVELS[0];
-    const { proMaxListings, freeMaxListings } = siteConfig.fees.subscription;
-    const subscriptionCap =
-      profile.subscriptionTier === "PRO" ? proMaxListings : freeMaxListings;
-    const maxActiveListings = Math.max(
-      levelConfig.perks.maxActiveListings,
-      subscriptionCap,
-    );
-    if (input.publish && activeCount >= maxActiveListings) {
-      throw new ListingServiceError(
-        `You can have up to ${maxActiveListings} active listings on your current plan. ` +
-          `Upgrade your seller level or GETX Pro to list more.`,
-      );
-    }
 
     const now = new Date();
     const { staleListingDays, newSellerBoostDays, newSellerBoostMaxSales } =

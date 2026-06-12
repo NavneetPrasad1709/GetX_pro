@@ -172,8 +172,8 @@ export default async function SellerOverviewPage() {
           </CardTitle>
           <CardDescription>
             {isPro && sp?.subscriptionExpiresAt
-              ? `Lower commission + up to ${siteConfig.fees.subscription.proMaxListings} listings. Renews ${new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(sp.subscriptionExpiresAt)}.`
-              : `Cut your commission by ${proDiscount}% on every sale, list up to ${siteConfig.fees.subscription.proMaxListings} items, and get a Pro badge buyers trust.`}{" "}
+              ? `Lower commission on every sale. Renews ${new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(sp.subscriptionExpiresAt)}.`
+              : `Cut your commission by ${proDiscount}% on every sale and get a Pro badge buyers trust.`}{" "}
             <Link
               href="/seller/subscription"
               className="font-medium text-primary underline-offset-4 hover:underline"

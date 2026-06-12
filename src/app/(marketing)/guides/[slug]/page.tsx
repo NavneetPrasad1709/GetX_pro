@@ -53,9 +53,18 @@ export default async function GuideDetailPage({ params }: Props) {
       <div className="mt-4 flex items-center gap-3 border-y border-border py-3">
         <UserAvatar name={guide.author.name} image={guide.author.image} size="sm" />
         <div className="min-w-0 flex-1">
-          <Link href={`/sellers/${guide.author.id}`} className="block truncate text-sm font-semibold hover:text-primary">
-            {guide.author.name ?? "GETX seller"}
-          </Link>
+          {guide.author.sellerProfile ? (
+            <Link
+              href={`/sellers/${guide.author.sellerProfile.id}`}
+              className="block truncate text-sm font-semibold hover:text-primary"
+            >
+              {guide.author.name ?? "GETX seller"}
+            </Link>
+          ) : (
+            <span className="block truncate text-sm font-semibold">
+              {guide.author.name ?? "GETX seller"}
+            </span>
+          )}
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
             {dateFmt.format(guide.createdAt)}
             <span className="inline-flex items-center gap-1">

@@ -18,7 +18,7 @@ export default async function SubscriptionPage() {
     select: { subscriptionTier: true, subscriptionExpiresAt: true },
   });
 
-  const { proMonthlyFeeMinor, proCommissionDiscount, proMaxListings, freeMaxListings } =
+  const { proMonthlyFeeMinor, proCommissionDiscount } =
     siteConfig.fees.subscription;
   const isPro =
     profile?.subscriptionTier === "PRO" &&
@@ -26,13 +26,12 @@ export default async function SubscriptionPage() {
     profile.subscriptionExpiresAt > new Date();
 
   const freeFeatures = [
-    `Up to ${freeMaxListings} active listings`,
+    "Unlimited active listings",
     "Standard commission rates",
     "Escrow-protected payouts",
   ];
   const proFeatures = [
     `${proCommissionDiscount}% lower commission on every sale`,
-    `Up to ${proMaxListings} active listings`,
     "Priority support queue",
     "GETX Pro badge on your listings",
     "Seller analytics (rolling out)",

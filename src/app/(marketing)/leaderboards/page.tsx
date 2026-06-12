@@ -16,7 +16,7 @@ export default async function LeaderboardsPage() {
       where: { totalSales: { gt: 0 } },
       orderBy: { totalSales: "desc" },
       take: 10,
-      select: { id: true, displayName: true, totalSales: true, ratingAvg: true, ratingCount: true, userId: true },
+      select: { id: true, displayName: true, totalSales: true, ratingAvg: true, ratingCount: true },
     }),
   ]);
 
@@ -59,7 +59,7 @@ export default async function LeaderboardsPage() {
               <span className="grid size-8 shrink-0 place-items-center rounded-full bg-muted font-heading text-sm font-bold tabular-nums">
                 {i + 1}
               </span>
-              <Link href={`/sellers/${s.userId}`} className="min-w-0 flex-1 truncate font-semibold hover:text-primary">
+              <Link href={`/sellers/${s.id}`} className="min-w-0 flex-1 truncate font-semibold hover:text-primary">
                 {s.displayName}
               </Link>
               {s.ratingCount > 0 ? (
