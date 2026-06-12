@@ -102,7 +102,7 @@ export function RequestPayoutForm({
             onChange={(e) => setMethod(e.target.value as "RAZORPAY" | "CRYPTO")}
             disabled={isPending}
           >
-            <option value="RAZORPAY">Bank / UPI (Razorpay)</option>
+            <option value="RAZORPAY">Bank / UPI</option>
             <option value="CRYPTO">Crypto (USDT)</option>
           </NativeSelect>
         </div>

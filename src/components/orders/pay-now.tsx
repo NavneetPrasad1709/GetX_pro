@@ -19,11 +19,11 @@ import { cn } from "@/lib/utils";
  */
 
 const PROVIDERS: { value: PaymentProvider; label: string; hint: string }[] = [
-  { value: "RAZORPAY", label: "UPI / Cards (Razorpay)", hint: "Pay in INR" },
+  { value: "RAZORPAY", label: "UPI / Cards", hint: "Cards & UPI" },
   {
     value: "COINGATE",
-    label: "Crypto (CoinGate)",
-    hint: "USDT, BTC, ETH — billed as the USD equivalent",
+    label: "Crypto",
+    hint: "USDT · BTC · ETH",
   },
 ];
 

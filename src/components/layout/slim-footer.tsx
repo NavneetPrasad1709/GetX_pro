@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "@/components/shared/icons";
-import { paymentMethods } from "@/config/nav";
 
 const LEGAL_LINKS = [
   { title: "Terms", href: "/terms" },
@@ -10,9 +9,9 @@ const LEGAL_LINKS = [
 ];
 
 /**
- * Slim shop footer (Prompt 01): a single thin row — copyright, legal links and
- * payment-method chips. No GSAP, no animations, pure RSC. The cinematic footer
- * is reserved for marketing routes only.
+ * Slim shop footer (Prompt 01): a single thin row — copyright + legal links.
+ * No GSAP, no animations, pure RSC. The cinematic footer is reserved for
+ * marketing routes only. (Payment-method chips removed — O-T10.)
  */
 export function SlimFooter() {
   const year = new Date().getFullYear();
@@ -35,17 +34,6 @@ export function SlimFooter() {
             </Link>
           ))}
         </nav>
-
-        <ul className="ml-auto flex flex-wrap items-center gap-2">
-          {paymentMethods.map((method) => (
-            <li
-              key={method}
-              className="rounded border border-border px-2 py-0.5 font-mono text-[11px] text-faint"
-            >
-              {method}
-            </li>
-          ))}
-        </ul>
       </div>
     </footer>
   );

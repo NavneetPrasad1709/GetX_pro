@@ -184,7 +184,7 @@ export default async function GamePage({ params }: Props) {
               <>
                 <Image
                   src={banner}
-                  alt=""
+                  alt={`${game.name} banner`}
                   fill
                   sizes="(max-width: 1120px) 100vw, 1076px"
                   className="object-cover"

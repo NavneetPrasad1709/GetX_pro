@@ -9,9 +9,11 @@ import {
   type BecomeSellerInput,
 } from "@/lib/validators/auth";
 import { becomeSellerAction } from "@/server/actions/auth";
+import { COUNTRIES } from "@/config/countries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export function BecomeSellerForm() {
   const router = useRouter();
@@ -92,19 +94,25 @@ export function BecomeSellerForm() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="seller-country">
-          Country{" "}
-          <span className="font-normal text-muted-foreground">(optional)</span>
-        </Label>
-        <Input
+        <Label htmlFor="seller-country">Country</Label>
+        <NativeSelect
           id="seller-country"
-          placeholder="e.g. India"
+          defaultValue=""
           autoComplete="country-name"
           aria-invalid={!!errors.country}
           aria-describedby={errors.country ? "seller-country-error" : undefined}
           disabled={isSubmitting}
           {...register("country")}
-        />
+        >
+          <option value="" disabled>
+            Select your country
+          </option>
+          {COUNTRIES.map((c) => (
+            <option key={c.code} value={c.name}>
+              {c.name}
+            </option>
+          ))}
+        </NativeSelect>
         {errors.country && (
           <p
             id="seller-country-error"

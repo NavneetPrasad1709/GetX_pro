@@ -217,9 +217,10 @@ export default async function ListingPage({ params }: Props) {
   }));
 
   // Extra bottom padding below 901px so the sticky mobile buy bar (rendered by
-  // BuyBox, sitting above the 74px bottom-nav) never covers the last content.
+  // BuyBox, now anchored to the screen bottom — P1-T5) never covers the last
+  // content. No mobile bottom-nav on this shop route, so pb-24 is enough.
   return (
-    <main className="flex-1 pt-5 pb-32 min-[901px]:pb-14">
+    <main className="flex-1 pt-5 pb-24 min-[901px]:pb-14">
       <PageContainer className="flex flex-col gap-5">
         <Breadcrumbs
           items={[

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidCountry } from "@/config/countries";
 
 /**
  * Auth input schemas — ONE schema per input, used by BOTH the client form
@@ -62,12 +63,13 @@ export const becomeSellerSchema = z.object({
       /^[a-zA-Z0-9_ .-]+$/,
       "Only letters, numbers, spaces, dots, dashes and underscores",
     ),
+  // Required + chosen from the ISO list (O-T6) — no free text, validated on the
+  // server too (becomeSellerAction re-runs this schema).
   country: z
     .string()
     .trim()
-    .max(56, "Country name is too long")
-    .optional()
-    .or(z.literal("")),
+    .min(1, "Select your country")
+    .refine(isValidCountry, "Select a valid country from the list"),
   bio: z.string().trim().max(500, "Bio must be at most 500 characters").optional(),
   // z.literal(true): the checkbox MUST be ticked; false/undefined both fail.
   agreeTerms: z.literal(true, "You must accept the seller terms to continue"),

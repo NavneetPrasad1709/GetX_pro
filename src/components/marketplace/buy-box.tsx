@@ -208,10 +208,11 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
     </div>
 
       {/* Sticky mobile buy bar — app-like persistent CTA, shares qty/total with
-          the box above. Sits just above the fixed mobile bottom-nav (74px) and
-          is hidden on desktop where the sidebar box is always in view. */}
+          the box above. Anchored to the true screen bottom: the shop layout has
+          no mobile bottom-nav here, so it hugs the edge (P1-T5). Hidden on
+          desktop where the sidebar box is always in view. */}
       <div
-        className="fixed inset-x-0 bottom-[74px] z-40 border-t border-border bg-card/95 backdrop-blur-md min-[901px]:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur-md min-[901px]:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="mx-auto flex max-w-[1120px] items-center justify-between gap-3 px-[22px] py-2.5">

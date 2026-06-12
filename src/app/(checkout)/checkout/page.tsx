@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   ShieldCheckIcon,
   ZapIcon,
@@ -37,13 +38,27 @@ function parseQty(raw: string | string[] | undefined): number {
 
 /**
  * Checkout (Step 08) — order summary per docs/FEES.md, then place the order.
- * Auth is enforced by the (checkout) layout (requireUser). The order is
- * created server-side in AWAITING_PAYMENT with money recomputed from the DB;
- * payment is wired in Step 09.
+ * Auth is enforced at the top of this page with a listing-aware login callback
+ * (P1-T2). The order is created server-side in AWAITING_PAYMENT with money
+ * recomputed from the DB; payment is wired in Step 09.
  */
 export default async function CheckoutPage({ searchParams }: Props) {
   const sp = await searchParams;
   const slug = (Array.isArray(sp.listing) ? sp.listing[0] : sp.listing)?.trim();
+
+  // Auth gate (P1-T2): a logged-out buyer must return to THIS checkout after
+  // login, not a generic dashboard. Build the callback from the live params —
+  // a layout can't (it never receives searchParams).
+  const session = await auth();
+  if (!session?.user?.id) {
+    const shieldFlag =
+      (Array.isArray(sp.shield) ? sp.shield[0] : sp.shield) === "1";
+    const dest = slug
+      ? `/checkout?listing=${encodeURIComponent(slug)}&qty=${parseQty(sp.qty)}${shieldFlag ? "&shield=1" : ""}`
+      : "/checkout";
+    redirect(`/login?callbackUrl=${encodeURIComponent(dest)}`);
+  }
+
   const listing = slug ? await getListingBySlug(slug) : null;
 
   if (!listing) {
@@ -70,8 +85,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
   // Loyalty (Step 21): how many points this buyer can redeem here. Capped by the 20% rule, the
   // platform fee (so the discount is platform-funded), and the buyer's balance. The server
   // re-clamps on order creation; this is the display/affordance only.
-  const session = await auth();
-  const loyaltyBalance = session?.user?.id ? await getLoyaltyBalance(session.user.id) : 0;
+  const loyaltyBalance = await getLoyaltyBalance(session.user.id);
   const maxRedeemablePoints = Math.max(
     0,
     Math.min(computeRedemptionCap(subtotalMinor), minorUnitsToPoints(platformFeeMinor), loyaltyBalance),

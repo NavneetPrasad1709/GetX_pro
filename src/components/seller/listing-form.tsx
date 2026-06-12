@@ -88,8 +88,8 @@ const ATTRIBUTE_FIELDS: Record<
     { key: "desiredRank", label: "To rank", placeholder: "e.g. Immortal" },
     {
       key: "estimatedDays",
-      label: "Estimated days",
-      placeholder: "e.g. 7",
+      label: "Estimated time (hours)",
+      placeholder: "e.g. 6",
       inputMode: "numeric",
     },
   ],
@@ -191,6 +191,8 @@ export function ListingForm({
       setValue("categoryId", nextCategory.id);
       setValue("type", nextCategory.kind);
       setValue("attributes", {}); // stale type-specific fields must not leak
+      // Boosting is always hands-on — never auto-delivered (O-T14).
+      if (nextCategory.kind === "BOOSTING") setValue("deliveryType", "MANUAL");
     }
   }
 
@@ -200,6 +202,8 @@ export function ListingForm({
     if (nextCategory) {
       setValue("type", nextCategory.kind);
       setValue("attributes", {});
+      // Boosting is always hands-on — never auto-delivered (O-T14).
+      if (nextCategory.kind === "BOOSTING") setValue("deliveryType", "MANUAL");
     }
   }
 
@@ -442,10 +446,13 @@ export function ListingForm({
                 value: "INSTANT",
                 icon: ZapIcon,
                 title: "Instant",
-                blurb: "Auto-delivered codes/top-ups (Step 19)",
+                blurb: "Auto-delivered codes & top-ups",
               },
             ] as const
-          ).map((opt) => (
+          )
+            // Boosting is always hands-on work — it can never be "Instant" (O-T14).
+            .filter((opt) => !(kind === "BOOSTING" && opt.value === "INSTANT"))
+            .map((opt) => (
             <label
               key={opt.value}
               className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 transition-colors has-checked:border-primary/60 has-checked:bg-primary/5 has-focus-visible:ring-3 has-focus-visible:ring-ring/50"

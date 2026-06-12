@@ -60,6 +60,12 @@ function r2RemotePatterns(): NonNullable<NextConfig["images"]>["remotePatterns"]
 }
 
 const nextConfig: NextConfig = {
+  // Barrel-file tree-shaking (P8-T2): only the icons/charts/util fns actually
+  // imported are bundled, instead of the whole package barrel. Pure build-time
+  // win on every route that touches these libraries.
+  experimental: {
+    optimizePackageImports: ["lucide-react", "recharts", "posthog-js", "date-fns"],
+  },
   images: {
     remotePatterns: r2RemotePatterns(),
     // Serve modern formats (Step 33) — AVIF/WebP are far smaller than JPEG/PNG,

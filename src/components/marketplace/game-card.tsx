@@ -44,7 +44,7 @@ export function GameCard({ game, className, priority = false }: Props) {
         {game.image ? (
           <Image
             src={game.image}
-            alt=""
+            alt={`${game.name} listings`}
             fill
             sizes="(max-width: 520px) 50vw, (max-width: 940px) 33vw, 20vw"
             className="object-cover transition-transform duration-300 group-hover/game:scale-[1.03]"

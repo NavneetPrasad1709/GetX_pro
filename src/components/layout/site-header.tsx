@@ -96,10 +96,15 @@ export async function SiteHeader() {
               </Link>
             )}
 
-            <CtaLink href="/become-seller" className="whitespace-nowrap">
-              <ShoppingBagIcon className="size-[17px]" aria-hidden="true" />
-              Sell
-            </CtaLink>
+            {/* "Sell" is an acquisition CTA for non-sellers only — once a user
+                has a seller account (role SELLER/ADMIN) it's redundant, so hide
+                it and let them reach selling via the user menu / seller hub. */}
+            {user?.role !== "SELLER" && user?.role !== "ADMIN" ? (
+              <CtaLink href="/become-seller" className="whitespace-nowrap">
+                <ShoppingBagIcon className="size-[17px]" aria-hidden="true" />
+                Sell
+              </CtaLink>
+            ) : null}
           </div>
         </div>
       </header>

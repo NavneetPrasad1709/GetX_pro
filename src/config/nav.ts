@@ -55,24 +55,6 @@ export const gamesNav: GameNavItem[] = GAME_COPY.map((g) => ({
  *  equity from EVERY page to the catalog — footer renders site-wide. */
 export const footerNav: { heading: string; items: NavItem[] }[] = [
   {
-    heading: "Games",
-    items: [
-      { title: "All games", href: "/games" },
-      ...GAME_COPY.map((g) => ({ title: g.name, href: `/games/${g.slug}` })),
-    ],
-  },
-  {
-    heading: "Top categories",
-    items: [
-      { title: "Pokémon GO accounts", href: "/games/pokemon-go/accounts" },
-      { title: "Pokémon GO PokéCoins", href: "/games/pokemon-go/pokecoins" },
-      { title: "Clash of Clans gems", href: "/games/clash-of-clans/gems" },
-      { title: "Valorant accounts", href: "/games/valorant/accounts" },
-      { title: "Free Fire diamonds", href: "/games/free-fire/diamonds" },
-      { title: "PUBG Mobile UC", href: "/games/pubg-mobile/uc" },
-    ],
-  },
-  {
     heading: "Sell",
     items: [
       { title: "Start selling", href: "/become-seller" },
@@ -96,7 +78,7 @@ export const footerNav: { heading: string; items: NavItem[] }[] = [
     heading: "Support",
     items: [
       { title: "Help center", href: "/help" },
-      { title: "Open a dispute", href: "/disputes" },
+      { title: "How disputes work", href: "/trust-safety#disputes" },
       { title: "Contact us", href: "/contact" },
       { title: "Terms", href: "/terms" },
       { title: "Privacy", href: "/privacy" },
@@ -142,6 +124,3 @@ export const socials: { label: string; href: string; icon: "discord" | "x" | "te
   { label: "Telegram", href: "https://t.me/getx", icon: "telegram" },
   { label: "Instagram", href: "https://instagram.com/getx", icon: "instagram" },
 ];
-
-/** Accepted payment methods shown in the footer. */
-export const paymentMethods = ["UPI", "Razorpay", "USDT", "BTC", "ETH"] as const;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { LockIcon, SearchIcon, ShoppingBagIcon } from "lucide-react";
 import { Logo, socialIcons } from "@/components/shared/icons";
-import { footerNav, socials, paymentMethods } from "@/config/nav";
+import { footerNav, socials } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -122,7 +122,7 @@ function Magnetic({
 const MARQUEE = [
   "Escrow on every order",
   "Instant delivery",
-  "ID-verified sellers",
+  "Money-back guarantee",
   "AI Dispute Judge",
   "Lowest fees",
   "100% Buyer Protection",
@@ -267,20 +267,9 @@ export function CinematicFooter() {
               ))}
             </div>
 
-            {/* payments row */}
+            {/* security assurance row — payment-method advertising removed (O-T10) */}
             <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-border pt-[18px]">
-              <span className="mr-0.5 font-heading text-[11px] font-semibold tracking-[0.1em] text-faint uppercase">
-                We accept
-              </span>
-              {paymentMethods.map((p) => (
-                <span
-                  key={p}
-                  className="rounded-[7px] border border-white/[0.09] bg-white/[0.04] px-2.5 py-1.5 font-mono text-[11px] font-semibold text-muted-foreground"
-                >
-                  {p}
-                </span>
-              ))}
-              <span className="inline-flex items-center gap-[7px] rounded-full border border-success/40 bg-success/15 px-3 py-1.5 font-heading text-[11.5px] font-semibold text-[#bfe6d4] min-[561px]:ml-auto">
+              <span className="inline-flex items-center gap-[7px] rounded-full border border-success/40 bg-success/15 px-3 py-1.5 font-heading text-[11.5px] font-semibold text-[#bfe6d4]">
                 <LockIcon className="size-3.5 text-success" aria-hidden="true" />
                 256-bit secure checkout
               </span>
