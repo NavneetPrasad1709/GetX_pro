@@ -1,17 +1,17 @@
 /**
  * Locale-aware formatting (Step 23). Use in components that render prices/dates
  * so Hindi pages get `hi-IN` grouping/numerals where the platform applies them.
- * Money is integer minor units (paisa) everywhere — divide by 100 only for display.
+ * Money is integer minor units (cents) everywhere — divide by 100 only for display.
  */
 type Locale = "en" | "hi";
 
-const intlLocale = (locale: string): string => (locale === "hi" ? "hi-IN" : "en-IN");
+const intlLocale = (locale: string): string => (locale === "hi" ? "hi-IN" : "en-US");
 
-/** Integer minor units (paisa) → localised ₹ string, no decimals. */
+/** Integer minor units (cents) → localised $ string, no decimals. */
 export function formatCurrency(amountMinor: number, locale: Locale | string): string {
   return new Intl.NumberFormat(intlLocale(locale), {
     style: "currency",
-    currency: "INR",
+    currency: "USD",
     maximumFractionDigits: 0,
   }).format(amountMinor / 100);
 }

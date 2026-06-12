@@ -39,10 +39,10 @@ export default async function AdminPage() {
   const funnelTop = funnel.totalRegistered;
 
   const stats = [
-    { label: "Users", value: d.users.toLocaleString("en-IN") },
-    { label: "Sellers", value: d.sellers.toLocaleString("en-IN") },
-    { label: "Active listings", value: d.activeListings.toLocaleString("en-IN") },
-    { label: "Orders", value: d.orders.toLocaleString("en-IN") },
+    { label: "Users", value: d.users.toLocaleString("en-US") },
+    { label: "Sellers", value: d.sellers.toLocaleString("en-US") },
+    { label: "Active listings", value: d.activeListings.toLocaleString("en-US") },
+    { label: "Orders", value: d.orders.toLocaleString("en-US") },
     { label: "GMV (completed)", value: formatMoney(d.gmvMinor) },
   ];
 

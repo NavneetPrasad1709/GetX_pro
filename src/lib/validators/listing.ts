@@ -20,15 +20,15 @@ export const LISTING_TYPES = [
 ] as const;
 export type ListingType = (typeof LISTING_TYPES)[number];
 
-/** Max listing price: ₹10,00,000 (in paise). Sanity cap against typos. */
-export const MAX_PRICE_MINOR = 1_000_000_00;
+/** Max listing price: $100,000 (in cents). Sanity cap against typos. */
+export const MAX_PRICE_MINOR = 10_000_000;
 
 const priceField = z
   .string()
   .trim()
   .min(1, "Enter a price")
   .transform((raw, ctx) => {
-    const minor = parsePriceToMinor(raw, "INR");
+    const minor = parsePriceToMinor(raw, "USD");
     if (minor === null) {
       ctx.addIssue({
         code: "custom",
@@ -41,7 +41,7 @@ const priceField = z
   .refine((minor) => minor > 0, "Price must be greater than zero")
   .refine(
     (minor) => minor <= MAX_PRICE_MINOR,
-    "Price cannot exceed ₹10,00,000",
+    "Price cannot exceed $100,000",
   );
 
 // ---------------------------------------------------------------------------

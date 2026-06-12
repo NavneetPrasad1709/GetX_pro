@@ -121,7 +121,7 @@ export function computeSellerCommissionMinorForLevel(
   return percentOfMinorHalfUp(subtotalMinor, effective);
 }
 
-/** Instant-payout fee = max(1% of amount, ₹50). Pure, minor units (Stream 6). */
+/** Instant-payout fee = max(1% of amount, $50). Pure, minor units (Stream 6). */
 export function computeInstantPayoutFeeMinor(payoutAmountMinor: number): number {
   const { feePercent, minFeeMinor } = siteConfig.payouts.instant;
   return Math.max(percentOfMinorHalfUp(payoutAmountMinor, feePercent), minFeeMinor);

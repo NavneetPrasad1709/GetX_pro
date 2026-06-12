@@ -29,7 +29,7 @@ import { getUserBadges } from "@/server/services/badges";
 
 type Props = { params: Promise<{ id: string }> };
 
-const memberSinceFmt = new Intl.DateTimeFormat("en-IN", {
+const memberSinceFmt = new Intl.DateTimeFormat("en-US", {
   month: "short",
   year: "numeric",
 });
@@ -110,7 +110,7 @@ export default async function SellerProfilePage({ params }: Props) {
     {
       icon: PackageCheckIcon,
       label: "Sales",
-      value: seller.totalSales.toLocaleString("en-IN"),
+      value: seller.totalSales.toLocaleString("en-US"),
       tone: "text-foreground",
     },
     {

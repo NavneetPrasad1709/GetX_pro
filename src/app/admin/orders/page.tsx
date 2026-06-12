@@ -8,7 +8,7 @@ import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 
 export const metadata: Metadata = { title: "Orders — Admin" };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 export default async function AdminOrdersPage() {
   await requireRole("ADMIN");

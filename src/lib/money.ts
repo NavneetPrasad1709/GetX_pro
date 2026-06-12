@@ -26,16 +26,18 @@ export function currencyDecimals(currency: string): number {
 
 /**
  * Format integer minor units → human currency string.
- * @example formatMoney(49900) -> "₹499.00"
+ * @example formatMoney(59900) -> "$599.00"
  * @example formatMoney(1500, "USDT") -> "$15.00"
  */
-export function formatMoney(amountMinor: number, currency = "INR"): string {
+export function formatMoney(amountMinor: number, currency = "USD"): string {
   const code = currency.toUpperCase();
   const decimals = currencyDecimals(code);
   const major = amountMinor / 10 ** decimals;
 
   if (code === "INR" || code === "USD") {
-    return new Intl.NumberFormat(code === "INR" ? "en-IN" : "en-US", {
+    // `currency: code` gives the right symbol ($ for USD, ₹ for the internal
+    // Razorpay INR charge); the locale is en-US in both cases (O-T1).
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: code,
       minimumFractionDigits: 2,
@@ -69,7 +71,7 @@ export function formatCompact(n: number): string {
  */
 export function parsePriceToMinor(
   input: string,
-  currency = "INR",
+  currency = "USD",
 ): number | null {
   const decimals = currencyDecimals(currency);
   const cleaned = input.trim().replace(/,/g, ""); // allow "1,499.00"
@@ -90,10 +92,29 @@ export function parsePriceToMinor(
  * ("49999" -> "499.99", trailing ".00" trimmed). Display-only counterpart
  * of parsePriceToMinor — string math, no floats.
  */
-export function minorToMajorString(amountMinor: number, currency = "INR"): string {
+export function minorToMajorString(amountMinor: number, currency = "USD"): string {
   const decimals = currencyDecimals(currency);
   const s = Math.abs(amountMinor).toString().padStart(decimals + 1, "0");
   const whole = s.slice(0, -decimals) || "0";
   const fraction = s.slice(-decimals).replace(/0+$/, "");
   return `${amountMinor < 0 ? "-" : ""}${whole}${fraction ? `.${fraction}` : ""}`;
+}
+
+/**
+ * USD→INR rate used ONLY at the Razorpay charge step (O-T1). Orders, the ledger
+ * and escrow all stay in the order's stored currency (USD); this converts just
+ * the gateway charge to INR, the only currency Razorpay settles. Override via
+ * the FX_USD_INR env var; falls back to a conservative recent rate.
+ */
+export function usdInrRate(): number {
+  const raw = Number(process.env.FX_USD_INR);
+  return Number.isFinite(raw) && raw > 0 ? raw : 90;
+}
+
+/**
+ * USD minor units (cents) → INR minor units (paise) at the current rate.
+ * 1 cent = $0.01 = `rate` paise. Floored at 100 paise (Razorpay's ₹1 minimum).
+ */
+export function usdMinorToInrMinor(usdMinor: number): number {
+  return Math.max(100, Math.round(usdMinor * usdInrRate()));
 }

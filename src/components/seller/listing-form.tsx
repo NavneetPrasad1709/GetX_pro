@@ -374,7 +374,7 @@ export function ListingForm({
       {/* price + stock */}
       <div className="grid grid-cols-1 gap-4 min-[521px]:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="listing-price">Price (₹ INR)</Label>
+          <Label htmlFor="listing-price">Price (USD)</Label>
           <Input
             id="listing-price"
             inputMode="decimal"

@@ -142,7 +142,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
         <StatCard label={`GMV (${days}d)`} value={formatMoney(totalGmv)} />
         <StatCard label={`Revenue (${days}d)`} value={formatMoney(totalRevenue)} />
         <StatCard label="Effective take-rate" value={`${effectiveTakeRate}%`} />
-        <StatCard label="Orders completed" value={funnel.completed.toLocaleString("en-IN")} />
+        <StatCard label="Orders completed" value={funnel.completed.toLocaleString("en-US")} />
         <StatCard label="Completion rate" value={`${funnel.completionRate}%`} />
         <StatCard
           label="Dispute rate"
@@ -199,8 +199,8 @@ export default async function AnalyticsPage({ searchParams }: Props) {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Avg seller rating" value={`${trust.avgSellerRating.toFixed(2)} ★`} />
         <StatCard label="KYC-verified sellers" value={`${trust.kycVerifiedPercent}%`} />
-        <StatCard label="Active sellers (30d)" value={trust.activeSellersLast30d.toLocaleString("en-IN")} />
-        <StatCard label="Sellers with 0 sales" value={trust.sellersWith0Sales.toLocaleString("en-IN")} />
+        <StatCard label="Active sellers (30d)" value={trust.activeSellersLast30d.toLocaleString("en-US")} />
+        <StatCard label="Sellers with 0 sales" value={trust.sellersWith0Sales.toLocaleString("en-US")} />
       </div>
 
       {/* Section 5 — seller funnel */}

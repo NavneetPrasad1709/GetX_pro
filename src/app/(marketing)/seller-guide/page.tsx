@@ -104,8 +104,8 @@ export default function SellerGuidePage() {
             <p>
               After an order is completed (buyer confirms delivery or the{" "}
               {siteConfig.escrow.autoReleaseDays}-day auto-release passes), your earnings are
-              credited to your GETX wallet. Withdraw anytime the balance exceeds ₹
-              {(payouts.minPayoutMinor / 100).toLocaleString("en-IN")} via UPI or crypto. See the{" "}
+              credited to your GETX wallet. Withdraw anytime the balance exceeds $
+              {(payouts.minPayoutMinor / 100).toLocaleString("en-US")} via UPI or crypto. See the{" "}
               <a href="/payouts" className="text-primary hover:underline">Payouts page</a> for
               full details.
             </p>

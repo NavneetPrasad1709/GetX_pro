@@ -144,7 +144,7 @@ function SummaryTile({
     <div className="rounded-lg border border-border bg-card p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className={`mt-1 font-heading text-2xl font-bold tabular-nums ${tone}`}>
-        {value.toLocaleString("en-IN")}
+        {value.toLocaleString("en-US")}
       </p>
     </div>
   );

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 const PAGE_SIZE = 12;
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 type Props = { searchParams: Promise<{ game?: string; page?: string }> };
 

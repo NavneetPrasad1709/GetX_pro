@@ -66,11 +66,11 @@ export function MarketplaceFilters({ filters, games, facets }: Props) {
   const urlQ = filters.q ?? "";
   const urlMin =
     filters.minPriceMinor !== undefined
-      ? minorToMajorString(filters.minPriceMinor, "INR")
+      ? minorToMajorString(filters.minPriceMinor, "USD")
       : "";
   const urlMax =
     filters.maxPriceMinor !== undefined
-      ? minorToMajorString(filters.maxPriceMinor, "INR")
+      ? minorToMajorString(filters.maxPriceMinor, "USD")
       : "";
 
   // Local state only for the debounced text inputs; selects read the URL.

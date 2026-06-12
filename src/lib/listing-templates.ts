@@ -34,7 +34,7 @@ export const LISTING_TEMPLATES: Record<ListingType, ListingTemplate> = {
       "**Is the account safe?** [Your answer]",
     ].join("\n"),
     priceHint:
-      "Level 40 accounts typically sell for ₹1,500–₹8,000 depending on shiny/legendary count.",
+      "Level 40 accounts typically sell for $1,500–$8,000 depending on shiny/legendary count.",
     photoTips: [
       "Screenshot the trainer profile (level + team clearly visible)",
       "Screenshot your collection with the shiny counter",

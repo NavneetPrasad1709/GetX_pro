@@ -10,7 +10,7 @@ import { FraudFlagActions } from "@/components/admin/fraud-flag-actions";
 
 export const metadata: Metadata = { title: "Fraud — Admin" };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", {
+const dateFmt = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 });

@@ -106,13 +106,13 @@ export default function FeesPage() {
                   <tr>
                     <td className="px-4 py-3">Minimum withdrawal</td>
                     <td className="px-4 py-3 font-semibold text-foreground">
-                      ₹{(payouts.minPayoutMinor / 100).toLocaleString("en-IN")}
+                      ${(payouts.minPayoutMinor / 100).toLocaleString("en-US")}
                     </td>
                   </tr>
                   <tr className="border-t border-border">
                     <td className="px-4 py-3">Maximum per request</td>
                     <td className="px-4 py-3 font-semibold text-foreground">
-                      ₹{(payouts.maxPayoutMinor / 100).toLocaleString("en-IN")}
+                      ${(payouts.maxPayoutMinor / 100).toLocaleString("en-US")}
                     </td>
                   </tr>
                   <tr className="border-t border-border">

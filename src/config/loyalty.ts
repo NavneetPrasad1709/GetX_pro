@@ -4,10 +4,10 @@
  * out of the buyer platform fee (so the seller's take + escrow reconciliation never change).
  */
 export const LOYALTY_CONFIG = {
-  BUYER_POINTS_PER_RUPEE: 0.1, // buyer earns 1 pt per ₹10 of subtotal
-  SELLER_POINTS_PER_RUPEE: 0.05, // seller earns 1 pt per ₹20 of net received (after commission)
+  BUYER_POINTS_PER_DOLLAR: 1, // buyer earns 1 pt per $1 of subtotal
+  SELLER_POINTS_PER_DOLLAR: 0.5, // seller earns 1 pt per $2 of net received (after commission)
   SIGNUP_BONUS_POINTS: 50, // every new account
-  POINT_VALUE_MINOR: 10, // 1 pt = 10 paise (₹0.10) → 100 pts = ₹10 discount
+  POINT_VALUE_MINOR: 1, // 1 pt = 1 cent ($0.01) → 100 pts = $1 discount
   MAX_REDEMPTION_PCT: 0.2, // ≤20% of subtotal (further capped by the platform fee at checkout)
 } as const;
 
@@ -21,14 +21,14 @@ export function minorUnitsToPoints(minor: number): number {
   return Math.max(0, Math.floor(minor / LOYALTY_CONFIG.POINT_VALUE_MINOR));
 }
 
-/** Buyer earn on a completed order: floor(subtotal_paise * 0.1 / 100) = 1 pt per ₹10. */
+/** Buyer earn on a completed order: floor(subtotal_cents * 1 / 100) = 1 pt per $1. */
 export function buyerEarnPoints(subtotalMinor: number): number {
-  return Math.floor((Math.max(0, subtotalMinor) * LOYALTY_CONFIG.BUYER_POINTS_PER_RUPEE) / 100);
+  return Math.floor((Math.max(0, subtotalMinor) * LOYALTY_CONFIG.BUYER_POINTS_PER_DOLLAR) / 100);
 }
 
-/** Seller earn on a completed order: floor(net_paise * 0.05 / 100) = 1 pt per ₹20. */
+/** Seller earn on a completed order: floor(net_cents * 0.5 / 100) = 1 pt per $2. */
 export function sellerEarnPoints(netMinor: number): number {
-  return Math.floor((Math.max(0, netMinor) * LOYALTY_CONFIG.SELLER_POINTS_PER_RUPEE) / 100);
+  return Math.floor((Math.max(0, netMinor) * LOYALTY_CONFIG.SELLER_POINTS_PER_DOLLAR) / 100);
 }
 
 /** Max points redeemable against a subtotal under the 20% cap (before the platform-fee cap). */

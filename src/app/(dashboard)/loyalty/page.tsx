@@ -42,14 +42,14 @@ export default async function LoyaltyPage() {
         <CardHeader>
           <CardDescription>Your points balance</CardDescription>
           <CardTitle className="text-4xl font-extrabold tabular-nums">
-            {balance.toLocaleString("en-IN")}
+            {balance.toLocaleString("en-US")}
             <span className="ml-2 text-base font-medium text-muted-foreground">pts</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
             Worth up to{" "}
-            <span className="font-semibold text-foreground">{formatMoney(worthMinor, "INR")}</span>{" "}
+            <span className="font-semibold text-foreground">{formatMoney(worthMinor, "USD")}</span>{" "}
             off your next orders. Points are non-transferable and can&apos;t be cashed out.
           </p>
         </CardContent>
@@ -64,7 +64,7 @@ export default async function LoyaltyPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            Spend points on the checkout page for an instant discount — 100 pts = ₹10. The discount
+            Spend points on the checkout page for an instant discount — 100 pts = $1. The discount
             is capped per order; the rest stays in your balance.
           </CardContent>
         </Card>

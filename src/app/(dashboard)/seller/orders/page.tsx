@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 // Seller status → filter mapping (Prompt 06). Sellers never see AWAITING_PAYMENT.
 const SELLER_FILTER: Record<Exclude<OrderFilter, "all">, OrderStatus[]> = {

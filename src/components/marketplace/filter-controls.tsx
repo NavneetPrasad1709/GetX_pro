@@ -185,7 +185,7 @@ export function FilterControls({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={id("min")}>Min price (₹)</Label>
+        <Label htmlFor={id("min")}>Min price ($)</Label>
         <Input
           id={id("min")}
           inputMode="decimal"
@@ -196,7 +196,7 @@ export function FilterControls({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={id("max")}>Max price (₹)</Label>
+        <Label htmlFor={id("max")}>Max price ($)</Label>
         <Input
           id={id("max")}
           inputMode="decimal"

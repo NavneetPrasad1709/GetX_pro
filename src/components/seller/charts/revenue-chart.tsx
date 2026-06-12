@@ -18,7 +18,7 @@ const GRID = "#262a33";
 const AXIS = "#9aa4b2";
 
 function shortDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-IN", {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     timeZone: "UTC",
@@ -35,7 +35,7 @@ function RevenueTooltip({ active, payload }: TooltipContentProps) {
     <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold">{row.label}</p>
       <p className="mt-1 text-primary">
-        ₹{row.rupees.toLocaleString("en-IN")} revenue
+        ${row.rupees.toLocaleString("en-US")} revenue
       </p>
       <p className="text-muted-foreground">
         {row.orders} sale{row.orders === 1 ? "" : "s"}
@@ -44,7 +44,7 @@ function RevenueTooltip({ active, payload }: TooltipContentProps) {
   );
 }
 
-/** Daily revenue line chart (Step 20). Data is gap-filled server-side; minor units → ₹ here. */
+/** Daily revenue line chart (Step 20). Data is gap-filled server-side; minor units → $ here. */
 export function RevenueChart({ data }: { data: RevenuePoint[] }) {
   const chart: Row[] = data.map((p) => ({
     ...p,
@@ -70,7 +70,7 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
               tickLine={false}
               axisLine={false}
               width={56}
-              tickFormatter={(v: number) => `₹${v.toLocaleString("en-IN")}`}
+              tickFormatter={(v: number) => `$${v.toLocaleString("en-US")}`}
             />
             <Tooltip content={RevenueTooltip} cursor={{ stroke: GRID }} />
             <Line

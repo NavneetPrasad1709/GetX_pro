@@ -14,7 +14,7 @@ import { PayoutStatusBadge } from "@/components/wallet/payout-status-badge";
 
 export const metadata: Metadata = { title: "Wallet", robots: { index: false } };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 const METHOD_LABEL: Record<string, string> = {
   RAZORPAY: "Bank / UPI",
   CRYPTO: "Crypto",

@@ -114,9 +114,9 @@ async function StatCards({ sellerId, days }: { sellerId: string; days: number })
     getOrderCount(sellerId, days),
   ]);
   const cards = [
-    { icon: BanknoteIcon, label: "Total earned", value: formatMoney(wallet.totalEarnedMinor, "INR"), tone: "text-success" },
-    { icon: WalletIcon, label: "Available", value: formatMoney(wallet.availableMinor, "INR"), tone: "text-foreground" },
-    { icon: LockIcon, label: "In escrow", value: formatMoney(wallet.heldMinor, "INR"), tone: "text-warning" },
+    { icon: BanknoteIcon, label: "Total earned", value: formatMoney(wallet.totalEarnedMinor, "USD"), tone: "text-success" },
+    { icon: WalletIcon, label: "Available", value: formatMoney(wallet.availableMinor, "USD"), tone: "text-foreground" },
+    { icon: LockIcon, label: "In escrow", value: formatMoney(wallet.heldMinor, "USD"), tone: "text-warning" },
     { icon: ShoppingBagIcon, label: `Orders (${days}d)`, value: String(orders), tone: "text-foreground" },
   ];
   return (
@@ -148,7 +148,7 @@ async function FunnelSection({ sellerId, days }: { sellerId: string; days: numbe
 
 async function TopListingsSection({ sellerId, days }: { sellerId: string; days: number }) {
   const data = await getTopListings(sellerId, days);
-  return <TopListingsTable listings={data} currency="INR" />;
+  return <TopListingsTable listings={data} currency="USD" />;
 }
 
 // --- Skeletons ---

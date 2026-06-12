@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 /**
  * Seller identity verification (Step 12 manual · Step 29 automated). When Sumsub is configured the

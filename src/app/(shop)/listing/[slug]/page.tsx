@@ -213,7 +213,7 @@ export default async function ListingPage({ params }: Props) {
   const labels = LISTING_ATTRIBUTE_LABELS[listing.type] ?? {};
   const attributes = Object.entries(listing.attributes).map(([key, value]) => ({
     label: labels[key] ?? humanizeKey(key),
-    value: typeof value === "number" ? value.toLocaleString("en-IN") : value,
+    value: typeof value === "number" ? value.toLocaleString("en-US") : value,
   }));
 
   // Extra bottom padding below 901px so the sticky mobile buy bar (rendered by

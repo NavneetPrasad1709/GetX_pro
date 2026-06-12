@@ -17,7 +17,7 @@ const TABS = [
   { key: "closed", label: "Closed" },
 ] as const;
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", {
+const dateFmt = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 });

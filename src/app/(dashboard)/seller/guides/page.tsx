@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 export const metadata: Metadata = { title: "My guides", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 export default async function SellerGuidesPage() {
   const session = await requireUser();

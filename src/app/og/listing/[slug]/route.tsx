@@ -73,7 +73,7 @@ export async function GET(
     );
   }
 
-  const price = `₹${minorToMajorString(listing.priceMinor, listing.currency)}`;
+  const price = `$${minorToMajorString(listing.priceMinor, listing.currency)}`;
   const rating =
     listing.seller.ratingCount > 0
       ? `${listing.seller.ratingAvg.toFixed(1)}★ (${listing.seller.ratingCount})`

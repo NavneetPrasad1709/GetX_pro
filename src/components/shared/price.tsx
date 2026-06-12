@@ -16,8 +16,8 @@ const SIZES = {
   xl: "text-2xl",
 } as const;
 
-/** Renders a money amount from minor units (e.g. 49900 → ₹499.00). */
-export function Price({ amountMinor, currency = "INR", size = "md", className }: Props) {
+/** Renders a money amount from minor units (e.g. 49900 → $499.00). */
+export function Price({ amountMinor, currency = "USD", size = "md", className }: Props) {
   return (
     <span
       className={cn(

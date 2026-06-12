@@ -33,7 +33,7 @@ export default async function SellerLoyaltyPage() {
           Seller rewards
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          You earn 1 point per ₹20 received (after commission) on every completed sale.
+          You earn 1 point per $2 received (after commission) on every completed sale.
         </p>
       </div>
 
@@ -41,14 +41,14 @@ export default async function SellerLoyaltyPage() {
         <CardHeader>
           <CardDescription>Your points balance</CardDescription>
           <CardTitle className="text-4xl font-extrabold tabular-nums">
-            {balance.toLocaleString("en-IN")}
+            {balance.toLocaleString("en-US")}
             <span className="ml-2 text-base font-medium text-muted-foreground">pts</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
             Worth up to{" "}
-            <span className="font-semibold text-foreground">{formatMoney(worthMinor, "INR")}</span>{" "}
+            <span className="font-semibold text-foreground">{formatMoney(worthMinor, "USD")}</span>{" "}
             when you buy on GETX. Points can&apos;t be cashed out.
           </p>
         </CardContent>

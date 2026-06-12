@@ -35,7 +35,7 @@ import { captureServerEvent } from "@/lib/posthog";
  * DELIVERED → COMPLETED, so the seller is paid EXACTLY ONCE even under a double
  * buyer-confirm or a cron sweep that fires twice.
  *
- * Money split on completion (docs/FEES.md "Escrow money flow"), ₹1,000 sale:
+ * Money split on completion (docs/FEES.md "Escrow money flow"), $1,000 sale:
  *   at PAID (Step 09)       CREDIT ESCROW_HOLD   1050   seller wallet (held)
  *   at COMPLETED — ONE transaction:
  *     DEBIT  ESCROW_RELEASE  1050   seller wallet  (clears the hold)

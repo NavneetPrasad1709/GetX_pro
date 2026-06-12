@@ -11,7 +11,7 @@ import { minorToMajorString, parsePriceToMinor } from "@/lib/money";
  *   • result chips / pagination (serialize filters back to a shareable URL)
  *
  * Everything lives in the URL so results are shareable + SEO-friendly. Prices
- * travel as human MAJOR units (₹) in the URL (`?min=500`) and become integer
+ * travel as human MAJOR units ($) in the URL (`?min=500`) and become integer
  * minor units here (string math, never floats — see lib/money.ts).
  */
 
@@ -97,7 +97,7 @@ const currencyLike = z.string().regex(/^[A-Za-z]{3,5}$/);
 
 function parsePriceParam(raw: string | undefined): number | undefined {
   if (raw === undefined) return undefined;
-  const minor = parsePriceToMinor(raw, "INR");
+  const minor = parsePriceToMinor(raw, "USD");
   return minor === null || minor < 0 ? undefined : minor;
 }
 
@@ -234,9 +234,9 @@ export function buildMarketplaceParams(
   if (merged.type) p.set("type", KIND_TO_TYPE_PARAM[merged.type]);
   if (merged.delivery) p.set("delivery", merged.delivery.toLowerCase());
   if (merged.minPriceMinor !== undefined)
-    p.set("min", minorToMajorString(merged.minPriceMinor, "INR"));
+    p.set("min", minorToMajorString(merged.minPriceMinor, "USD"));
   if (merged.maxPriceMinor !== undefined)
-    p.set("max", minorToMajorString(merged.maxPriceMinor, "INR"));
+    p.set("max", minorToMajorString(merged.maxPriceMinor, "USD"));
   if (merged.trust !== undefined) p.set("trust", String(merged.trust));
   if (merged.rating !== undefined) p.set("rating", String(merged.rating));
   if (merged.minSales !== undefined) p.set("minSales", String(merged.minSales));

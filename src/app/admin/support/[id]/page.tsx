@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
 
-const timeFmt = new Intl.DateTimeFormat("en-IN", {
+const timeFmt = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 });

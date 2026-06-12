@@ -11,7 +11,7 @@ import type { ReviewItem } from "@/server/services/reviews";
  * reply form appears on reviews that don't have one yet. Text is React-escaped.
  */
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 export function ReviewList({
   reviews,

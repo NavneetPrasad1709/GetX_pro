@@ -16,7 +16,7 @@ import {
 
 export const metadata: Metadata = { title: "Your orders", robots: { index: false } };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 // Buyer status → filter mapping (Prompt 06).
 const BUYER_FILTER: Record<Exclude<OrderFilter, "all">, OrderStatus[]> = {

@@ -31,7 +31,7 @@ const FAQS = [
   },
   {
     q: "How do I withdraw my earnings?",
-    a: `Go to your Seller Wallet in the dashboard and request a withdrawal. The minimum is ₹${(siteConfig.payouts.minPayoutMinor / 100).toLocaleString("en-IN")}. Funds are paid via UPI or crypto, usually within 1–3 business days after KYC approval.`,
+    a: `Go to your Seller Wallet in the dashboard and request a withdrawal. The minimum is $${(siteConfig.payouts.minPayoutMinor / 100).toLocaleString("en-US")}. Funds are paid via UPI or crypto, usually within 1–3 business days after KYC approval.`,
   },
   {
     q: "Is my account and payment information safe?",

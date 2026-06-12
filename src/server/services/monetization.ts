@@ -131,7 +131,7 @@ export async function subscribePro(
     });
     if (!profile) throw new MonetizationServiceError("Seller account not found.");
 
-    const currency = profile.wallet?.currency ?? "INR";
+    const currency = profile.wallet?.currency ?? "USD";
     await chargeSellerToPlatform(
       tx,
       profile.id,

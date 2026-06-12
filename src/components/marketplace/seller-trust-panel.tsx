@@ -8,7 +8,7 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { SellerLevelBadge } from "@/components/shared/seller-level-badge";
 import type { ListingDetail } from "@/server/services/marketplace";
 
-const memberSinceFmt = new Intl.DateTimeFormat("en-IN", {
+const memberSinceFmt = new Intl.DateTimeFormat("en-US", {
   month: "short",
   year: "numeric",
 });
@@ -107,14 +107,14 @@ export function SellerTrustPanel({
               className="size-4 text-muted-foreground"
               aria-hidden="true"
             />
-            {seller.totalSales.toLocaleString("en-IN")}
+            {seller.totalSales.toLocaleString("en-US")}
           </dd>
         </div>
       </dl>
 
       {seller.ratingCount > 0 ? (
         <p className="-mt-1 text-center text-[11px] text-faint">
-          Based on {seller.ratingCount.toLocaleString("en-IN")}{" "}
+          Based on {seller.ratingCount.toLocaleString("en-US")}{" "}
           {seller.ratingCount === 1 ? "review" : "reviews"}
         </p>
       ) : null}

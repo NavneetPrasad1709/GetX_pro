@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Dispute — Admin", robots: { index:
 
 type Props = { params: Promise<{ id: string }> };
 
-const timeFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" });
+const timeFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" });
 
 const STATUS_LABEL: Record<string, string> = {
   OPEN: "Open",

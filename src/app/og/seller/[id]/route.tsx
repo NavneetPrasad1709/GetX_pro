@@ -98,7 +98,7 @@ export async function GET(
 
         <div style={{ display: "flex", gap: 40, fontSize: 30, color: "#cfd3da" }}>
           <span>🛡 Trust {seller.trustScore}/100</span>
-          <span>📦 {seller.totalSales.toLocaleString("en-IN")} sales</span>
+          <span>📦 {seller.totalSales.toLocaleString("en-US")} sales</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 26, color: "#9aa" }}>

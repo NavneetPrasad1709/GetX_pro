@@ -185,7 +185,7 @@ const GAME_CATEGORY_COPY: Record<string, GameCategoryCopy> = {
     bodyParagraphs: [
       "Pokémon GO accounts on GETX range from mid-game profiles with a full regional collection to high-level accounts stacked with shiny legendaries and rare event Pokémon. Every listing shows the seller's rating, sales count and a detailed attribute table (level, candy counts, server) so you know exactly what you're buying before checkout.",
       "Our escrow system holds your money until you confirm the account credentials and email have transferred correctly — you have a 3-day window to raise a dispute if anything is wrong, backed by a free money-back guarantee on every order. Sellers face an immediate payout hold if a dispute is opened against them.",
-      "Prices vary by level, shiny dex completion and event Pokémon — typical accounts run from ₹800 starter stacks to ₹15,000+ endgame profiles. Use the price filter and sort by seller rating to find the best value in seconds.",
+      "Prices vary by level, shiny dex completion and event Pokémon — typical accounts run from $10 starter stacks to $200+ endgame profiles. Use the price filter and sort by seller rating to find the best value in seconds.",
     ],
     faqs: [
       {

@@ -190,7 +190,7 @@ export function CheckoutPayButton({
             />
             <span className="flex flex-1 flex-col">
               <span className="text-sm font-semibold">
-                Use {maxRedeemablePoints.toLocaleString("en-IN")} reward points
+                Use {maxRedeemablePoints.toLocaleString("en-US")} reward points
               </span>
               <span className="text-xs text-muted-foreground">
                 −{formatMoney(maxRedeemablePoints * pointValueMinor, currency)} off this order

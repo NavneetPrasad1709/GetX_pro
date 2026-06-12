@@ -20,7 +20,7 @@ export const requestPayoutSchema = z.object({
     .trim()
     .min(1, "Enter an amount")
     .transform((raw, ctx) => {
-      const minor = parsePriceToMinor(raw, "INR");
+      const minor = parsePriceToMinor(raw, "USD");
       if (minor === null) {
         ctx.addIssue({ code: "custom", message: "Enter a valid amount (e.g. 500)" });
         return z.NEVER;

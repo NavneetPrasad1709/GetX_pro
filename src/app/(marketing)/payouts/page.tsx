@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function PayoutsPage() {
   const { payouts, escrow } = siteConfig;
-  const minPayoutRupees = (payouts.minPayoutMinor / 100).toLocaleString("en-IN");
+  const minPayoutRupees = (payouts.minPayoutMinor / 100).toLocaleString("en-US");
 
   return (
     <main className="flex-1 py-8 min-[761px]:py-12">
@@ -42,7 +42,7 @@ export default function PayoutsPage() {
                 <tbody>
                   <tr>
                     <td className="px-4 py-3 font-medium text-foreground">Minimum withdrawal</td>
-                    <td className="px-4 py-3 text-muted-foreground">₹{minPayoutRupees}</td>
+                    <td className="px-4 py-3 text-muted-foreground">${minPayoutRupees}</td>
                   </tr>
                   <tr className="border-t border-border">
                     <td className="px-4 py-3 font-medium text-foreground">Auto-release after</td>

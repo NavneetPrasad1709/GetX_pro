@@ -12,7 +12,7 @@ import { db } from "@/lib/db";
  *                them with ESCROW_RELEASE on completion or REFUND on dispute)
  *   available = gross − held              (what the seller can withdraw)
  *
- * Worked example (docs/FEES.md, ₹1,000 account sale):
+ * Worked example (docs/FEES.md, $1,000 account sale):
  *   PAID      → CREDIT ESCROW_HOLD 1050            gross 1050, held 1050, avail 0
  *   COMPLETED → DEBIT ESCROW_RELEASE 1050,
  *               CREDIT SALE 920 (Step 10)          gross  920, held    0, avail 920

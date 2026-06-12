@@ -7,7 +7,7 @@ import { GuideModerationButtons } from "@/components/admin/guide-moderation-butt
 export const metadata: Metadata = { title: "Guides — Admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 type Props = { searchParams: Promise<{ status?: string }> };
 

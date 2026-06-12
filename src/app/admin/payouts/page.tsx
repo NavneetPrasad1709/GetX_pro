@@ -7,7 +7,7 @@ import { PayoutActions } from "@/components/admin/payout-actions";
 
 export const metadata: Metadata = { title: "Payouts — Admin" };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", {
+const dateFmt = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 });

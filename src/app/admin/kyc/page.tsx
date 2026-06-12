@@ -5,7 +5,7 @@ import { KycReviewActions } from "@/components/admin/kyc-review-actions";
 
 export const metadata: Metadata = { title: "KYC — Admin" };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 const DOC_LABEL: Record<string, string> = {
   PASSPORT: "Passport",
   NATIONAL_ID: "National ID",

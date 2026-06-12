@@ -10,7 +10,7 @@ const REASON_LABEL: Record<LoyaltyPointReason, string> = {
   PURCHASE_REFUND: "Refund — points returned",
 };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 /** Read-only loyalty transaction history (Step 21). EARN rows are +, REDEEM rows are −. */
 export function LoyaltyHistory({ rows }: { rows: LoyaltyPoint[] }) {

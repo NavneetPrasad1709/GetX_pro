@@ -3,7 +3,7 @@ import { buildEmailHtml, type EmailMessage } from "./layout";
 /** Payout paid / failed email (seller). */
 export function payoutUpdateEmail(vars: {
   statusLabel: string; // "paid" | "failed"
-  amountFormatted: string; // e.g. "₹1,200.00"
+  amountFormatted: string; // e.g. "$1,200.00"
   body: string;
   link: string; // relative path to the wallet
 }): EmailMessage {

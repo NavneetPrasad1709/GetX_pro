@@ -18,7 +18,7 @@ export type GameTileData = {
 
 export function formatListingCount(count: number): string {
   if (count === 0) return "No listings yet";
-  return `${count.toLocaleString("en-IN")} ${count === 1 ? "listing" : "listings"}`;
+  return `${count.toLocaleString("en-US")} ${count === 1 ? "listing" : "listings"}`;
 }
 
 type Props = {

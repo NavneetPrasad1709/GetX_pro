@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Users — Admin" };
 
 type Props = { searchParams: Promise<{ q?: string }> };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 export default async function AdminUsersPage({ searchParams }: Props) {
   await requireRole("ADMIN");

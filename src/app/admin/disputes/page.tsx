@@ -7,7 +7,7 @@ import { formatMoney } from "@/lib/money";
 
 export const metadata: Metadata = { title: "Disputes — Admin" };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 export default async function AdminDisputesPage() {
   await requireRole("ADMIN");

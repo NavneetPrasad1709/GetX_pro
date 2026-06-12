@@ -131,7 +131,7 @@ export async function MarketplaceResults({
         <p className="text-[13px] text-faint" role="status" aria-live="polite">
           {total === 0
             ? "No matching listings"
-            : `${total.toLocaleString("en-IN")} ${total === 1 ? "listing" : "listings"}`}
+            : `${total.toLocaleString("en-US")} ${total === 1 ? "listing" : "listings"}`}
           {pageCount > 1 ? ` · Page ${page} of ${pageCount}` : ""}
         </p>
 

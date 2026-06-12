@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
+import { usdMinorToInrMinor } from "@/lib/money";
 import {
   PaymentGatewayError,
   type ChargeOrder,
@@ -54,10 +55,17 @@ export async function createRazorpayCharge(
 ): Promise<CreateChargeResult> {
   const { keyId, keySecret } = credentials();
 
+  // Razorpay settles INR only — convert the order's USD total to INR paise at
+  // the current FX rate (O-T1). The order/ledger/escrow stay in USD; ONLY the
+  // gateway charge is INR. The amount-mismatch check then reconciles the INR
+  // webhook against this INR Payment row, while the raw snapshot pins the USD
+  // order economics (re-price drift guard) — exactly like the CoinGate path.
+  const rzpAmountMinor = usdMinorToInrMinor(order.totalMinor);
+
   const checkoutShell = {
     keyId,
-    amountMinor: order.totalMinor,
-    currency: order.currency,
+    amountMinor: rzpAmountMinor,
+    currency: "INR",
     name: "GETX",
     description: order.listingTitle.slice(0, 120),
     prefillEmail: order.buyerEmail,
@@ -68,7 +76,7 @@ export async function createRazorpayCharge(
       orderId: order.id,
       provider: "RAZORPAY",
       status: "PENDING",
-      amountMinor: order.totalMinor,
+      amountMinor: rzpAmountMinor,
       providerRef: { not: null },
     },
     orderBy: { createdAt: "desc" },
@@ -89,10 +97,10 @@ export async function createRazorpayCharge(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      amount: order.totalMinor, // integer paise — our minor units, unchanged
-      currency: order.currency,
+      amount: rzpAmountMinor, // integer INR paise (Razorpay settles INR; O-T1 FX)
+      currency: "INR",
       receipt: order.id, // cuid ≤ 40 chars, unique per order
-      notes: { getxOrderId: order.id },
+      notes: { getxOrderId: order.id, usdTotalMinor: order.totalMinor },
     }),
     signal: AbortSignal.timeout(15_000),
   });
@@ -118,8 +126,9 @@ export async function createRazorpayCharge(
       orderId: order.id,
       provider: "RAZORPAY",
       providerRef: rzp.id,
-      amountMinor: order.totalMinor,
-      currency: order.currency,
+      // The CHARGE as invoiced (INR); the webhook must confirm exactly this.
+      amountMinor: rzpAmountMinor,
+      currency: "INR",
       status: "PENDING",
       raw: {
         rzpStatus: rzp.status,

@@ -10,7 +10,7 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
 
   // Supported currencies (fiat + crypto)
-  currencies: ["INR", "USDT", "BTC", "ETH"] as const,
+  currencies: ["USD", "USDT", "BTC", "ETH"] as const,
 
   // Launch niche: start small (5 games), Pokemon GO first (see docs/STRATEGY.md)
   launchGames: [
@@ -41,7 +41,7 @@ export const siteConfig = {
     // tiers (O-T5) — Pro sells commission discount + badge + support + analytics.
     // All pay-for-visibility levers (Boost/Bump/Spotlight) removed — O-T15.
     subscription: {
-      proMonthlyFeeMinor: 49_900, // ₹499/month
+      proMonthlyFeeMinor: 599, // $5.99/month
       proCommissionDiscount: 2, // percentage POINTS off base commission
     },
   },
@@ -63,12 +63,12 @@ export const siteConfig = {
 
   // Seller payouts / withdrawals (Step 14). Minor units (paise).
   payouts: {
-    minPayoutMinor: 50_000, // ₹500 minimum withdrawal
-    maxPayoutMinor: 1_000_000_00, // ₹10,00,000 sanity cap per request
+    minPayoutMinor: 500, // $5 minimum withdrawal
+    maxPayoutMinor: 1_000_000, // $10,000 sanity cap per request
     // Instant payout fast-track (Prompt 15b, Stream 6).
     instant: {
       feePercent: 1, // 1% of payout amount
-      minFeeMinor: 5_000, // ₹50 floor
+      minFeeMinor: 100, // $1 floor
     },
   },
 
@@ -83,7 +83,7 @@ export const siteConfig = {
       SUPPORT: 24,
     },
     // Disputes on orders at/above this amount (minor units) open as HIGH priority.
-    highValueDisputeMinor: 5_000_000, // ₹50,000
+    highValueDisputeMinor: 50_000, // $500
     queuePageSize: 30,
   },
 

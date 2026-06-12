@@ -8,7 +8,7 @@ import { SubscribeProButton } from "@/components/seller/subscribe-pro-button";
 
 export const metadata: Metadata = { title: "GETX Pro" };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 /** GETX Pro pricing + subscribe (Prompt 15, Stream 4). */
 export default async function SubscriptionPage() {
@@ -60,7 +60,7 @@ export default async function SubscriptionPage() {
         {/* Free */}
         <div className="flex flex-col rounded-xl border border-border bg-card p-5">
           <p className="font-heading text-lg font-bold">Free</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums">₹0</p>
+          <p className="mt-1 text-2xl font-bold tabular-nums">$0</p>
           <ul className="mt-4 flex flex-1 flex-col gap-2 text-sm text-muted-foreground">
             {freeFeatures.map((f) => (
               <li key={f} className="flex items-start gap-2">
@@ -80,7 +80,7 @@ export default async function SubscriptionPage() {
             </span>
           </div>
           <p className="mt-1 text-2xl font-bold tabular-nums">
-            {formatMoney(proMonthlyFeeMinor, "INR")}
+            {formatMoney(proMonthlyFeeMinor, "USD")}
             <span className="text-sm font-normal text-muted-foreground">/month</span>
           </p>
           <ul className="mt-4 flex flex-1 flex-col gap-2 text-sm">

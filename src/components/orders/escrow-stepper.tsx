@@ -92,7 +92,7 @@ export type EscrowStepperProps = {
   viewer: "buyer" | "seller";
   /** Formatted auto-release deadline (set once DELIVERED+). */
   deadlineLabel?: string;
-  /** Pre-formatted order total (e.g. "₹1,050") — copy on COMPLETED. */
+  /** Pre-formatted order total (e.g. "$1,050") — copy on COMPLETED. */
   formattedTotal?: string;
   className?: string;
 };

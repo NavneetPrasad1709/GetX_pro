@@ -90,7 +90,7 @@ export function InstantSearchBar() {
                 <span className="min-w-0 flex-1 truncate">{h.title}</span>
                 <span className="shrink-0 text-xs text-muted-foreground">{h.gameName}</span>
                 {h.priceMinor != null ? (
-                  <span className="shrink-0 font-semibold tabular-nums">{formatMoney(h.priceMinor, h.currency ?? "INR")}</span>
+                  <span className="shrink-0 font-semibold tabular-nums">{formatMoney(h.priceMinor, h.currency ?? "USD")}</span>
                 ) : null}
               </button>
             </li>

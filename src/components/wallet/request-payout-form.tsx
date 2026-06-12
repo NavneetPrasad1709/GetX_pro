@@ -33,7 +33,7 @@ export function RequestPayoutForm({
 
   const min = siteConfig.payouts.minPayoutMinor;
   // Live instant-fee preview (server recomputes the authoritative value).
-  const amountMinor = parsePriceToMinor(amount, "INR");
+  const amountMinor = parsePriceToMinor(amount, "USD");
   const instantFeeMinor =
     instant && amountMinor != null && amountMinor > 0
       ? computeInstantPayoutFeeMinor(amountMinor)
@@ -84,7 +84,7 @@ export function RequestPayoutForm({
 
       <div className="grid grid-cols-1 gap-3 min-[521px]:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="payout-amount">Amount (₹)</Label>
+          <Label htmlFor="payout-amount">Amount ($)</Label>
           <Input
             id="payout-amount"
             inputMode="decimal"

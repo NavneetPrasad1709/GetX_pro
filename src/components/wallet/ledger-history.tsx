@@ -23,7 +23,7 @@ const REASON_LABEL: Record<string, string> = {
   ESCROW_RELEASE: "Escrow release",
 };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", {
+const dateFmt = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 });

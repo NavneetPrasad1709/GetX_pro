@@ -47,7 +47,7 @@ const NEXT_STEP: Partial<Record<OrderStatus, string>> = {
   EXPIRED: "This order expired before payment. Start a new one anytime.",
 };
 
-const dateFmt = new Intl.DateTimeFormat("en-IN", {
+const dateFmt = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 });

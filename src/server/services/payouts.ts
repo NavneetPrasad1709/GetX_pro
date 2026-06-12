@@ -72,7 +72,7 @@ export async function getWalletOverview(userId: string): Promise<WalletOverview>
   if (!wallet) {
     return {
       walletId: null,
-      currency: "INR",
+      currency: "USD",
       availableMinor: 0,
       heldMinor: 0,
       pendingPayoutMinor: 0,
@@ -226,7 +226,7 @@ export async function requestPayout(
         },
       });
       await tx.wallet.createMany({
-        data: [{ id: PLATFORM_WALLET_ID, kind: "PLATFORM", currency: "INR" }],
+        data: [{ id: PLATFORM_WALLET_ID, kind: "PLATFORM", currency: "USD" }],
         skipDuplicates: true,
       });
       await lockWallet(tx, PLATFORM_WALLET_ID);
