@@ -184,7 +184,7 @@ const GAME_CATEGORY_COPY: Record<string, GameCategoryCopy> = {
       "Find hand-leveled Pokémon GO accounts with rare shinies, legendaries and maxed-out Pokédex entries — all listed by verified GETX sellers and protected by escrow from the moment you pay.",
     bodyParagraphs: [
       "Pokémon GO accounts on GETX range from mid-game profiles with a full regional collection to high-level accounts stacked with shiny legendaries and rare event Pokémon. Every listing shows the seller's rating, sales count and a detailed attribute table (level, candy counts, server) so you know exactly what you're buying before checkout.",
-      "Our escrow system holds your money until you confirm the account credentials and email have transferred correctly — you have a 3-day window (7 with Shield) to raise a dispute if anything is wrong. Sellers are ID-verified before listing and face an immediate payout hold if a dispute is opened against them.",
+      "Our escrow system holds your money until you confirm the account credentials and email have transferred correctly — you have a 3-day window to raise a dispute if anything is wrong, backed by a free money-back guarantee on every order. Sellers face an immediate payout hold if a dispute is opened against them.",
       "Prices vary by level, shiny dex completion and event Pokémon — typical accounts run from ₹800 starter stacks to ₹15,000+ endgame profiles. Use the price filter and sort by seller rating to find the best value in seconds.",
     ],
     faqs: [
@@ -241,7 +241,7 @@ export function getGameCategoryCopy(
     intro: `${CATEGORY_KIND_COPY[kind].blurb(game)} Every order on GETX is escrow-protected — your payment is held safely until you confirm delivery.`,
     bodyParagraphs: [
       `Browse ${game} ${cat} from verified GETX sellers, each with a public rating, sales history and a clear attribute table so you know exactly what you're buying. Filter by price, delivery speed and seller experience to find the right listing in seconds.`,
-      `Your money is held in escrow until you confirm the order is as described — a 3-day buyer-protection window (7 days with Shield) backs every purchase. Sellers are reputation-scored and face an automatic payout hold if a dispute is opened, so the incentive is always to deliver exactly what was promised.`,
+      `Your money is held in escrow until you confirm the order is as described — a 3-day buyer-protection window with a free money-back guarantee backs every purchase. Sellers are reputation-scored and face an automatic payout hold if a dispute is opened, so the incentive is always to deliver exactly what was promised.`,
     ],
     faqs: [
       {

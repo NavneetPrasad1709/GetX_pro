@@ -69,7 +69,6 @@ export type ApplyEventResult =
       oversold?: boolean;
       /** INSTANT-delivery listing (drives post-commit auto-delivery) */
       instant?: boolean;
-      hasShield?: boolean;
       listingId?: string;
       /** set post-commit: an item was auto-assigned + the order moved to DELIVERED */
       autoDelivered?: boolean;
@@ -139,7 +138,6 @@ export async function applyPaymentEvent(
               currency: true,
               sellerId: true,
               listingId: true,
-              hasShield: true,
               listing: { select: { deliveryType: true } },
             },
           },
@@ -421,7 +419,6 @@ export async function applyPaymentEvent(
             orderStatus: "PAID",
             oversold,
             instant: order.listing.deliveryType === "INSTANT",
-            hasShield: order.hasShield,
             listingId: order.listingId,
           };
         }
@@ -449,7 +446,7 @@ export async function applyPaymentEvent(
     // fails the (already-committed) payment — the order just falls back to MANUAL delivery.
     if (result.instant && result.listingId) {
       try {
-        await autoDeliver(result.orderId, result.listingId, result.hasShield ?? false);
+        await autoDeliver(result.orderId, result.listingId);
         result.autoDelivered = true;
         void notifyOrderEvent(result.orderId, "DELIVERED").catch(() => {});
         if ((await getDeliveryItemCount(result.listingId)) === 0) {

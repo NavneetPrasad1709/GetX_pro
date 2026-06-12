@@ -106,8 +106,8 @@ export async function createOrder(
     }
 
     // Recompute ALL money server-side from the DB (never trust the client).
-    const { subtotalMinor, platformFeeMinor, totalMinor, shieldFeeMinor, hasShield } =
-      computeBuyerFee(listing.priceMinor, input.qty, { shield: input.shield });
+    const { subtotalMinor, platformFeeMinor, totalMinor } =
+      computeBuyerFee(listing.priceMinor, input.qty);
     const sellerFeeMinor = computeSellerCommissionMinorForLevel(
       subtotalMinor,
       listing.type,
@@ -147,8 +147,6 @@ export async function createOrder(
       feeMinor: platformFeeMinor - discountMinor,
       sellerFeeMinor,
       totalMinor: totalMinor - discountMinor,
-      hasShield,
-      shieldFeeMinor,
       loyaltyPointsRedeemed: redeemPts,
       currency: listing.currency,
       paymentProvider: input.provider ?? null,

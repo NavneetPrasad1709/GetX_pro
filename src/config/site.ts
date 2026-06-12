@@ -62,12 +62,6 @@ export const siteConfig = {
       minRatingForSponsorship: 4.0, // quality gate
       minSalesForSponsorship: 5, // must have ≥5 completed sales
     },
-    // Shield buyer-protection add-on (Stream 5).
-    shield: {
-      feePercent: 1, // 1% of subtotal
-      minFeeMinor: 2_000, // ₹20 floor
-      extendedEscrowDays: 7, // vs escrow.autoReleaseDays (3)
-    },
   },
 
   // Escrow / buyer protection (see docs/ENGINEERING-GUARDRAILS.md §4). Client-safe

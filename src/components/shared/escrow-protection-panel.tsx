@@ -30,7 +30,7 @@ const ROWS = [
     icon: RotateCcwIcon,
     iconClass: "text-primary",
     title: "Money-back guarantee",
-    desc: "If the seller doesn't deliver or it's not as described, you get a full refund.",
+    desc: "Free on every order: if the seller doesn't deliver or it's not as described, you get a full refund — fees included.",
   },
   {
     icon: ShieldAlertIcon,

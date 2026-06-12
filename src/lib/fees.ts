@@ -15,22 +15,13 @@
 import type { CategoryKind, SellerSubscriptionTier } from "@prisma/client";
 import { siteConfig } from "@/config/site";
 
-export type CheckoutOptions = {
-  /** Shield buyer-protection add-on (Prompt 15b, Stream 5). */
-  shield?: boolean;
-};
-
 export type BuyerFeeBreakdown = {
   /** unit price × quantity (minor units) */
   subtotalMinor: number;
   /** buyer platform fee on the subtotal (minor units, round-half-up) */
   platformFeeMinor: number;
-  /** Shield add-on fee (minor units); 0 when not selected */
-  shieldFeeMinor: number;
-  /** whether Shield was selected (snapshotted on the order) */
-  hasShield: boolean;
-  /** subtotal + platform fee + shield fee (minor units) — the buyer's checkout
-   *  total; this exact amount is charged at the gateway (Step 09). */
+  /** subtotal + platform fee (minor units) — the buyer's checkout total; this
+   *  exact amount is charged at the gateway (Step 09). */
   totalMinor: number;
   /** the fee rate used (percent) — for "5% platform fee" copy */
   platformFeePercent: number;
@@ -52,7 +43,6 @@ function percentOfMinorHalfUp(amountMinor: number, percent: number): number {
 export function computeBuyerFee(
   unitPriceMinor: number,
   qty = 1,
-  options: CheckoutOptions = {},
 ): BuyerFeeBreakdown {
   const { buyerPlatformFeePercent, minPlatformFeeMinor } = siteConfig.fees;
   const quantity = Math.max(1, Math.floor(qty));
@@ -61,23 +51,12 @@ export function computeBuyerFee(
   const rawFee = percentOfMinorHalfUp(subtotalMinor, buyerPlatformFeePercent);
   const platformFeeMinor = Math.max(rawFee, minPlatformFeeMinor);
 
-  const hasShield = options.shield === true;
-  const shieldFeeMinor = hasShield ? computeShieldFeeMinor(subtotalMinor) : 0;
-
   return {
     subtotalMinor,
     platformFeeMinor,
-    shieldFeeMinor,
-    hasShield,
-    totalMinor: subtotalMinor + platformFeeMinor + shieldFeeMinor,
+    totalMinor: subtotalMinor + platformFeeMinor,
     platformFeePercent: buyerPlatformFeePercent,
   };
-}
-
-/** Shield add-on fee = max(1% of subtotal, ₹20). Pure, minor units (Stream 5). */
-export function computeShieldFeeMinor(subtotalMinor: number): number {
-  const { feePercent, minFeeMinor } = siteConfig.fees.shield;
-  return Math.max(percentOfMinorHalfUp(subtotalMinor, feePercent), minFeeMinor);
 }
 
 /**

@@ -26,8 +26,6 @@ export const createOrderSchema = z.object({
     .max(MAX_ORDER_QTY, `Quantity cannot exceed ${MAX_ORDER_QTY}`),
   // Buyer's chosen gateway (the real charge happens in Step 09). Optional now.
   provider: z.enum(["COINGATE", "RAZORPAY"]).optional(),
-  // Shield buyer-protection add-on (Prompt 15b) — server recomputes the fee.
-  shield: z.coerce.boolean().optional(),
   // Loyalty points to redeem (Step 21) — ADVISORY only. The server re-clamps to the user's
   // balance, the 20% subtotal cap, and the platform-fee cap; the client value is never trusted.
   redeemPoints: z.coerce.number().int().min(0).max(1_000_000).optional(),

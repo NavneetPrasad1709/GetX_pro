@@ -19,7 +19,6 @@ import { encrypt, decrypt, isEncryptionAvailable } from "@/lib/encryption";
 type Tx = Prisma.TransactionClient;
 
 const AUTO_RELEASE_DAYS = siteConfig.escrow.autoReleaseDays;
-const SHIELD_DAYS = siteConfig.fees.shield.extendedEscrowDays;
 const MAX_ITEM_CHARS = 10_000;
 const LOW_STOCK = 5;
 
@@ -38,9 +37,8 @@ export class DeliveryStockoutError extends Error {
   }
 }
 
-function computeAutoReleaseAt(hasShield: boolean, now: Date): Date {
-  const days = hasShield ? SHIELD_DAYS : AUTO_RELEASE_DAYS;
-  return new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+function computeAutoReleaseAt(now: Date): Date {
+  return new Date(now.getTime() + AUTO_RELEASE_DAYS * 24 * 60 * 60 * 1000);
 }
 
 /** Resolve a listing the acting user owns + that is INSTANT-delivery. Throws otherwise. */
@@ -167,7 +165,7 @@ export async function getSellerDeliveryStock(
  */
 async function autoDeliverInTx(
   tx: Tx,
-  args: { orderId: string; listingId: string; hasShield: boolean },
+  args: { orderId: string; listingId: string },
 ): Promise<void> {
   if (!isEncryptionAvailable()) throw new DeliveryStockoutError();
 
@@ -196,7 +194,7 @@ async function autoDeliverInTx(
   });
   await tx.order.updateMany({
     where: { id: args.orderId, status: "PAID" },
-    data: { status: "DELIVERED", deliveredAt: now, autoReleaseAt: computeAutoReleaseAt(args.hasShield, now) },
+    data: { status: "DELIVERED", deliveredAt: now, autoReleaseAt: computeAutoReleaseAt(now) },
   });
   await tx.auditLog.create({
     data: { action: "ORDER_AUTO_DELIVERED", entity: "Order", entityId: args.orderId, meta: { itemId: rows[0].id } },
@@ -211,9 +209,8 @@ async function autoDeliverInTx(
 export async function autoDeliver(
   orderId: string,
   listingId: string,
-  hasShield: boolean,
 ): Promise<void> {
-  await db.$transaction((tx) => autoDeliverInTx(tx, { orderId, listingId, hasShield }));
+  await db.$transaction((tx) => autoDeliverInTx(tx, { orderId, listingId }));
 }
 
 /** Pause a listing that just hit 0 stock + audit it. Called post-commit (never blocks payment). */

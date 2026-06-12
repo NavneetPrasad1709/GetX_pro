@@ -302,7 +302,7 @@ export async function markDelivered(
   await db.$transaction(async (tx) => {
     const order = await tx.order.findUnique({
       where: { id: orderId },
-      select: { status: true, hasShield: true, seller: { select: { userId: true } } },
+      select: { status: true, seller: { select: { userId: true } } },
     });
     // Not the seller → identical answer to "not found" (no order enumeration).
     if (!order || order.seller.userId !== sellerUserId) {
@@ -310,11 +310,8 @@ export async function markDelivered(
     }
 
     const now = new Date();
-    // Shield orders (Prompt 15b) get the longer protection window.
-    const releaseMs = order.hasShield
-      ? siteConfig.fees.shield.extendedEscrowDays * 24 * 60 * 60 * 1000
-      : AUTO_RELEASE_MS;
-    const autoReleaseAt = new Date(now.getTime() + releaseMs);
+    // Every order uses the single standard escrow window (O-T16 — Shield removed).
+    const autoReleaseAt = new Date(now.getTime() + AUTO_RELEASE_MS);
     const moved = await tx.order.updateMany({
       where: { id: orderId, status: "PAID" },
       data: { status: "DELIVERED", deliveredAt: now, autoReleaseAt },

@@ -65,7 +65,6 @@ export function CheckoutPayButton({
   qty,
   totalMinor,
   currency,
-  shield = false,
   maxRedeemablePoints = 0,
   pointValueMinor = 10,
 }: {
@@ -73,8 +72,6 @@ export function CheckoutPayButton({
   qty: number;
   totalMinor: number;
   currency: string;
-  /** Shield add-on selected at checkout (Prompt 15b) — server recomputes the fee. */
-  shield?: boolean;
   /** Loyalty (Step 21): max points this buyer can redeem here (server already clamped). */
   maxRedeemablePoints?: number;
   pointValueMinor?: number;
@@ -123,7 +120,6 @@ export function CheckoutPayButton({
         listingSlug,
         qty,
         provider,
-        shield,
         redeemPoints: redeem ? maxRedeemablePoints : 0,
       });
       if (!created.ok || !created.orderId) {

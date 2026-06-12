@@ -9,11 +9,9 @@ import {
   ShoppingCartIcon,
   CheckCircle2Icon,
   AlertTriangleIcon,
-  ShieldCheckIcon,
 } from "lucide-react";
 import type { DeliveryType } from "@prisma/client";
 import { computeBuyerFee } from "@/lib/fees";
-import { siteConfig } from "@/config/site";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { Price } from "@/components/shared/price";
@@ -44,14 +42,13 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
   const inStock = stock > 0;
   const maxQty = Math.min(stock, MAX_QTY);
   const [qty, setQty] = useState(1);
-  const [shield, setShield] = useState(false);
 
   const clampedQty = Math.min(Math.max(1, qty), Math.max(1, maxQty));
-  const { subtotalMinor, platformFeeMinor, totalMinor, platformFeePercent, shieldFeeMinor } =
-    computeBuyerFee(priceMinor, clampedQty, { shield });
+  const { subtotalMinor, platformFeeMinor, totalMinor, platformFeePercent } =
+    computeBuyerFee(priceMinor, clampedQty);
 
   const instant = deliveryType === "INSTANT";
-  const checkoutHref = `/checkout?listing=${encodeURIComponent(slug)}&qty=${clampedQty}${shield ? "&shield=1" : ""}`;
+  const checkoutHref = `/checkout?listing=${encodeURIComponent(slug)}&qty=${clampedQty}`;
 
   return (
     <>
@@ -148,12 +145,6 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
             {formatMoney(platformFeeMinor, currency)}
           </dd>
         </div>
-        {shield ? (
-          <div className="flex items-center justify-between">
-            <dt className="text-muted-foreground">Shield protection</dt>
-            <dd className="tabular-nums">{formatMoney(shieldFeeMinor, currency)}</dd>
-          </div>
-        ) : null}
         <div className="mt-1 flex items-center justify-between border-t border-border pt-2">
           <dt className="font-semibold">Total</dt>
           <dd>
@@ -164,26 +155,6 @@ export function BuyBox({ slug, priceMinor, currency, stock, deliveryType }: Prop
           Payment processing included — what you see is what you pay.
         </p>
       </dl>
-
-      {/* Shield add-on (Prompt 15b) — extends protection + full refund cover. */}
-      <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-border bg-card p-3 transition-colors has-checked:border-primary/50 has-checked:bg-primary/5">
-        <input
-          type="checkbox"
-          checked={shield}
-          onChange={(e) => setShield(e.target.checked)}
-          className="mt-0.5 size-4 accent-primary"
-        />
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5 text-sm font-semibold">
-            <ShieldCheckIcon className="size-4 text-primary" aria-hidden="true" />
-            Add Shield protection
-          </span>
-          <span className="mt-0.5 block text-xs text-muted-foreground">
-            Extends your escrow window to {siteConfig.fees.shield.extendedEscrowDays}{" "}
-            days and guarantees a full refund (incl. fees) if anything&apos;s wrong.
-          </span>
-        </span>
-      </label>
 
       {/* CTAs */}
       <div className="flex flex-col gap-2.5">

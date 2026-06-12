@@ -51,10 +51,8 @@ export default async function CheckoutPage({ searchParams }: Props) {
   // a layout can't (it never receives searchParams).
   const session = await auth();
   if (!session?.user?.id) {
-    const shieldFlag =
-      (Array.isArray(sp.shield) ? sp.shield[0] : sp.shield) === "1";
     const dest = slug
-      ? `/checkout?listing=${encodeURIComponent(slug)}&qty=${parseQty(sp.qty)}${shieldFlag ? "&shield=1" : ""}`
+      ? `/checkout?listing=${encodeURIComponent(slug)}&qty=${parseQty(sp.qty)}`
       : "/checkout";
     redirect(`/login?callbackUrl=${encodeURIComponent(dest)}`);
   }
@@ -77,9 +75,8 @@ export default async function CheckoutPage({ searchParams }: Props) {
 
   const outOfStock = listing.stock <= 0;
   const qty = Math.min(parseQty(sp.qty), Math.max(1, listing.stock));
-  const shield = (Array.isArray(sp.shield) ? sp.shield[0] : sp.shield) === "1";
-  const { subtotalMinor, platformFeeMinor, totalMinor, platformFeePercent, shieldFeeMinor } =
-    computeBuyerFee(listing.priceMinor, qty, { shield });
+  const { subtotalMinor, platformFeeMinor, totalMinor, platformFeePercent } =
+    computeBuyerFee(listing.priceMinor, qty);
   const instant = listing.deliveryType === "INSTANT";
 
   // Loyalty (Step 21): how many points this buyer can redeem here. Capped by the 20% rule, the
@@ -160,12 +157,6 @@ export default async function CheckoutPage({ searchParams }: Props) {
               </dt>
               <dd className="tabular-nums">{formatMoney(platformFeeMinor, listing.currency)}</dd>
             </div>
-            {shield ? (
-              <div className="flex items-center justify-between">
-                <dt className="text-muted-foreground">Shield protection</dt>
-                <dd className="tabular-nums">{formatMoney(shieldFeeMinor, listing.currency)}</dd>
-              </div>
-            ) : null}
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">Payment processing</dt>
               <dd className="text-xs text-faint">included</dd>
@@ -197,7 +188,6 @@ export default async function CheckoutPage({ searchParams }: Props) {
                 qty={qty}
                 totalMinor={totalMinor}
                 currency={listing.currency}
-                shield={shield}
                 maxRedeemablePoints={maxRedeemablePoints}
                 pointValueMinor={LOYALTY_CONFIG.POINT_VALUE_MINOR}
               />

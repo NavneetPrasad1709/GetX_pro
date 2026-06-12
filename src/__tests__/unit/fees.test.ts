@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   computeBuyerFee,
-  computeShieldFeeMinor,
   computeSellerCommissionMinor,
   computeSellerCommissionMinorForLevel,
   effectiveSellerCommissionPct,
@@ -25,8 +24,6 @@ describe("computeBuyerFee", () => {
     expect(r.platformFeeMinor).toBe(Math.floor((100_000 * pct + 50) / 100));
     expect(r.totalMinor).toBe(r.subtotalMinor + r.platformFeeMinor);
     expect(r.platformFeePercent).toBe(pct);
-    expect(r.hasShield).toBe(false);
-    expect(r.shieldFeeMinor).toBe(0);
   });
 
   it("multiplies by quantity and clamps qty to >= 1", () => {
@@ -49,27 +46,6 @@ describe("computeBuyerFee", () => {
     ));
   });
 
-  it("includes the Shield add-on only when selected", () => {
-    const withShield = computeBuyerFee(100_000, 1, { shield: true });
-    expect(withShield.hasShield).toBe(true);
-    expect(withShield.shieldFeeMinor).toBe(computeShieldFeeMinor(100_000));
-    expect(withShield.totalMinor).toBe(
-      withShield.subtotalMinor + withShield.platformFeeMinor + withShield.shieldFeeMinor,
-    );
-  });
-});
-
-describe("computeShieldFeeMinor", () => {
-  it("is max(percent of subtotal, floor)", () => {
-    const { feePercent, minFeeMinor } = siteConfig.fees.shield;
-    // tiny subtotal → floor wins
-    expect(computeShieldFeeMinor(100)).toBe(minFeeMinor);
-    // big subtotal → percent wins
-    const big = 10_000_000;
-    expect(computeShieldFeeMinor(big)).toBe(
-      Math.max(Math.floor((big * feePercent + 50) / 100), minFeeMinor),
-    );
-  });
 });
 
 describe("computeSellerCommissionMinor", () => {
