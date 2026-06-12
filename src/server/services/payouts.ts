@@ -9,6 +9,10 @@ import { db } from "@/lib/db";
 import { getWalletBalances } from "@/server/services/wallet";
 import { PLATFORM_WALLET_ID } from "@/server/services/escrow";
 import { notifyPayoutEvent } from "@/server/services/notifications";
+import {
+  buildDestinationSnapshot,
+  type PayoutDestinationSnapshot,
+} from "@/server/services/payout-accounts";
 import { computeInstantPayoutFeeMinor } from "@/lib/fees";
 import { siteConfig } from "@/config/site";
 import { formatMoney } from "@/lib/money";
@@ -149,7 +153,6 @@ export async function getLedgerHistory(
 export async function requestPayout(
   userId: string,
   amountMinor: number,
-  method: PayoutMethod,
   isInstant = false,
 ): Promise<Payout> {
   const { minPayoutMinor, maxPayoutMinor } = siteConfig.payouts;
@@ -186,6 +189,16 @@ export async function requestPayout(
     const walletId = profile?.wallet?.id;
     if (!walletId) {
       throw new PayoutServiceError("You don't have any earnings to withdraw yet.");
+    }
+
+    // A saved payout destination is required (P1-T1). Snapshot it onto the Payout
+    // so the admin knows exactly where to send, and a later edit to the account
+    // can never change this in-flight payout.
+    const account = await tx.payoutAccount.findUnique({ where: { userId } });
+    if (!account) {
+      throw new PayoutServiceError(
+        "Add a payout method before withdrawing — save your bank/UPI or crypto destination first.",
+      );
     }
 
     // Lock FIRST, THEN read available inside the lock — two concurrent requests
@@ -254,7 +267,15 @@ export async function requestPayout(
       data: { cachedBalanceMinor: runningGross, payoutMethodSet: true },
     });
     const payout = await tx.payout.create({
-      data: { walletId, amountMinor, method, status: "REQUESTED", isInstant, instantFeeMinor },
+      data: {
+        walletId,
+        amountMinor,
+        method: account.method,
+        status: "REQUESTED",
+        isInstant,
+        instantFeeMinor,
+        destinationSnapshot: buildDestinationSnapshot(account) as Prisma.InputJsonValue,
+      },
     });
     await tx.auditLog.create({
       data: {
@@ -262,7 +283,7 @@ export async function requestPayout(
         action: "PAYOUT_REQUESTED",
         entity: "Payout",
         entityId: payout.id,
-        meta: { amountMinor, method, isInstant, instantFeeMinor },
+        meta: { amountMinor, method: account.method, isInstant, instantFeeMinor },
       },
     });
     return payout;
@@ -312,6 +333,7 @@ export type AdminPayoutRow = {
   sellerId: string;
   sellerName: string;
   isInstant: boolean;
+  destination: PayoutDestinationSnapshot | null;
 };
 
 export async function listPayouts(
@@ -326,6 +348,7 @@ export async function listPayouts(
       method: true,
       status: true,
       isInstant: true,
+      destinationSnapshot: true,
       createdAt: true,
       wallet: {
         select: {
@@ -345,6 +368,8 @@ export async function listPayouts(
     sellerId: r.wallet.sellerProfile?.id ?? "",
     sellerName: r.wallet.sellerProfile?.displayName ?? "Unknown",
     isInstant: r.isInstant,
+    destination:
+      (r.destinationSnapshot as PayoutDestinationSnapshot | null) ?? null,
   }));
 }
 

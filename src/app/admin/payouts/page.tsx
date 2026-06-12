@@ -64,6 +64,43 @@ export default async function AdminPayoutsPage() {
                     {p.sellerName} · {dateFmt.format(new Date(p.createdAt))} ·{" "}
                     <span className="font-mono">#{p.id.slice(-8).toUpperCase()}</span>
                   </p>
+                  {p.destination ? (
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      Send to{" "}
+                      <span className="font-semibold text-foreground">
+                        {p.destination.holderName}
+                      </span>
+                      {p.destination.method === "CRYPTO" &&
+                      p.destination.walletAddress ? (
+                        <>
+                          {" "}
+                          · {p.destination.cryptoNetwork} ·{" "}
+                          <span className="font-mono break-all text-foreground">
+                            {p.destination.walletAddress}
+                          </span>
+                        </>
+                      ) : p.destination.upiVpa ? (
+                        <>
+                          {" "}
+                          · UPI{" "}
+                          <span className="font-mono text-foreground">
+                            {p.destination.upiVpa}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          {" "}
+                          · Bank {p.destination.maskedHint}
+                          {p.destination.ifsc ? ` · ${p.destination.ifsc}` : ""}{" "}
+                          <span className="text-faint">(full a/c on request)</span>
+                        </>
+                      )}
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 text-xs text-warning">
+                      No saved destination on this payout.
+                    </p>
+                  )}
                 </div>
                 <PayoutActions payoutId={p.id} />
               </li>

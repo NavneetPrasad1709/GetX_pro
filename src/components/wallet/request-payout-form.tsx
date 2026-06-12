@@ -6,7 +6,6 @@ import { BanknoteIcon } from "lucide-react";
 import { requestPayoutAction } from "@/server/actions/payouts";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NativeSelect } from "@/components/ui/native-select";
 import { ctaVariants } from "@/components/shared/cta-link";
 import { formatMoney, parsePriceToMinor } from "@/lib/money";
 import { computeInstantPayoutFeeMinor } from "@/lib/fees";
@@ -20,13 +19,18 @@ import { cn } from "@/lib/utils";
 export function RequestPayoutForm({
   availableMinor,
   currency,
+  hasPayoutAccount,
+  destinationLabel,
 }: {
   availableMinor: number;
   currency: string;
+  /** A saved payout destination is required to withdraw (P1-T1). */
+  hasPayoutAccount: boolean;
+  /** Masked destination label shown above the withdraw button. */
+  destinationLabel?: string;
 }) {
   const router = useRouter();
   const [amount, setAmount] = useState("");
-  const [method, setMethod] = useState<"RAZORPAY" | "CRYPTO">("RAZORPAY");
   const [instant, setInstant] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -43,7 +47,7 @@ export function RequestPayoutForm({
     event.preventDefault();
     setError(null);
     startTransition(async () => {
-      const res = await requestPayoutAction({ amount, method, instant });
+      const res = await requestPayoutAction({ amount, instant });
       if (!res.ok) {
         setError(res.error);
         return;
@@ -51,6 +55,14 @@ export function RequestPayoutForm({
       setAmount("");
       router.refresh();
     });
+  }
+
+  if (!hasPayoutAccount) {
+    return (
+      <div className="rounded-lg border border-dashed border-border bg-card/40 p-4 text-sm text-muted-foreground">
+        Add a payout method above before you can withdraw.
+      </div>
+    );
   }
 
   if (availableMinor < min) {
@@ -82,31 +94,23 @@ export function RequestPayoutForm({
         </span>
       </p>
 
-      <div className="grid grid-cols-1 gap-3 min-[521px]:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="payout-amount">Amount ($)</Label>
-          <Input
-            id="payout-amount"
-            inputMode="decimal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder={`Min ${formatMoney(min, currency)}`}
-            disabled={isPending}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="payout-method">Method</Label>
-          <NativeSelect
-            id="payout-method"
-            value={method}
-            onChange={(e) => setMethod(e.target.value as "RAZORPAY" | "CRYPTO")}
-            disabled={isPending}
-          >
-            <option value="RAZORPAY">Bank / UPI</option>
-            <option value="CRYPTO">Crypto (USDT)</option>
-          </NativeSelect>
-        </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="payout-amount">Amount ($)</Label>
+        <Input
+          id="payout-amount"
+          inputMode="decimal"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder={`Min ${formatMoney(min, currency)}`}
+          disabled={isPending}
+        />
       </div>
+      {destinationLabel ? (
+        <p className="text-xs text-muted-foreground">
+          Sending to{" "}
+          <span className="font-semibold text-foreground">{destinationLabel}</span>
+        </p>
+      ) : null}
 
       {/* Instant payout (Prompt 15b) — priority processing for a small fee. */}
       <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-border bg-background p-3 transition-colors has-checked:border-primary/50 has-checked:bg-primary/5">

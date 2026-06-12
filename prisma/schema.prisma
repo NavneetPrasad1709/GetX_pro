@@ -297,6 +297,7 @@ model User {
 
   // Domain relations
   sellerProfile      SellerProfile?
+  payoutAccount      PayoutAccount?      // saved withdrawal destination (P1-T1)
   ordersAsBuyer      Order[]             @relation("BuyerOrders")
   reviewsWritten     Review[]            @relation("BuyerReviews")
   conversations      Conversation[]      @relation("BuyerConversations")
@@ -737,6 +738,9 @@ model Payout {
   // Instant payout (Prompt 15b, Stream 6) — priority flag + fee snapshot.
   isInstant       Boolean      @default(false)
   instantFeeMinor Int          @default(0)
+  // Masked destination snapshotted at request time (P1-T1) — editing the saved
+  // PayoutAccount later never changes an in-flight payout. Admin pays from this.
+  destinationSnapshot Json?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
@@ -744,6 +748,33 @@ model Payout {
 
   @@index([walletId])
   @@index([status])
+}
+
+// Seller's saved withdrawal destination (P1-T1). One updatable account per
+// seller. The bank account NUMBER is the only secret → AES-256-GCM encrypted at
+// rest (reuses lib/encryption, the DELIVERY_ENCRYPTION_KEY). UPI VPA / IFSC /
+// crypto address are shareable routing data, kept in plaintext. `maskedHint` is
+// the display-safe value shown to the seller + admin without decrypting.
+model PayoutAccount {
+  id     String       @id @default(cuid())
+  userId String       @unique
+  method PayoutMethod // RAZORPAY (bank/UPI) | CRYPTO
+
+  holderName String
+
+  upiVpa           String?
+  accountNumberEnc String? // {iv,tag,ciphertext} JSON — NEVER returned in full
+  ifsc             String?
+
+  cryptoNetwork String?
+  walletAddress String?
+
+  maskedHint String
+  isDefault  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ---------------------------------------------------------------------------

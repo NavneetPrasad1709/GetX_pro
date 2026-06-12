@@ -125,8 +125,10 @@ async function main() {
     const ovAfter = await getWalletOverview(sellerUser.id);
     ok("seller available = sale (subtotal − commission)", ovAfter.availableMinor === expSale, `${ovAfter.availableMinor} vs ${expSale}`);
 
+    // P1-T1: a saved payout destination is required before any withdrawal.
+    await db.payoutAccount.create({ data: { userId: sellerUser.id, method: "RAZORPAY", holderName: "QA15 Seller", upiVpa: "qa15s@upi", maskedHint: "qa15s@upi" } });
     console.log("\n— payout: request → admin paid —");
-    const payout = await requestPayout(sellerUser.id, expSale, "RAZORPAY");
+    const payout = await requestPayout(sellerUser.id, expSale);
     ok("payout reserved (available → 0)", (await getWalletOverview(sellerUser.id)).availableMinor === 0);
     await markPayoutPaid(admin.id, payout.id);
     ok("payout PAID", (await db.payout.findUniqueOrThrow({ where: { id: payout.id } })).status === "PAID");

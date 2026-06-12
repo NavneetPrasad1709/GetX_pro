@@ -6,9 +6,11 @@ import {
   getMyPayouts,
   getWalletOverview,
 } from "@/server/services/payouts";
+import { getPayoutAccountView } from "@/server/services/payout-accounts";
 import { formatMoney } from "@/lib/money";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RequestPayoutForm } from "@/components/wallet/request-payout-form";
+import { PayoutAccountForm } from "@/components/wallet/payout-account-form";
 import { LedgerHistory } from "@/components/wallet/ledger-history";
 import { PayoutStatusBadge } from "@/components/wallet/payout-status-badge";
 
@@ -22,10 +24,11 @@ const METHOD_LABEL: Record<string, string> = {
 
 export default async function SellerWalletPage() {
   const session = await requireUser();
-  const [overview, ledger, payouts] = await Promise.all([
+  const [overview, ledger, payouts, payoutAccount] = await Promise.all([
     getWalletOverview(session.user.id),
     getLedgerHistory(session.user.id, { limit: 15 }),
     getMyPayouts(session.user.id),
+    getPayoutAccountView(session.user.id),
   ]);
 
   const cards = [
@@ -81,9 +84,13 @@ export default async function SellerWalletPage() {
         ))}
       </div>
 
+      <PayoutAccountForm saved={payoutAccount} />
+
       <RequestPayoutForm
         availableMinor={overview.availableMinor}
         currency={overview.currency}
+        hasPayoutAccount={payoutAccount != null}
+        destinationLabel={payoutAccount?.label}
       />
 
       {/* withdrawal history */}

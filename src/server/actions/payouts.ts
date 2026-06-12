@@ -49,7 +49,6 @@ export async function requestPayoutAction(
     await requestPayout(
       session.user.id,
       parsed.data.amount,
-      parsed.data.method,
       parsed.data.instant ?? false,
     );
     revalidatePath("/seller/wallet");

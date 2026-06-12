@@ -46,6 +46,9 @@ async function main() {
   const sellerB = await db.sellerProfile.create({ data: { userId: userB.id, displayName: "QA14 B" } });
   const walletA = await db.wallet.create({ data: { sellerProfileId: sellerA.id, currency: "INR" } });
   const walletB = await db.wallet.create({ data: { sellerProfileId: sellerB.id, currency: "INR" } });
+  // P1-T1: a saved payout destination is required before any withdrawal.
+  await db.payoutAccount.create({ data: { userId: userA.id, method: "RAZORPAY", holderName: "QA14 A", upiVpa: "qa14a@upi", maskedHint: "qa14a@upi" } });
+  await db.payoutAccount.create({ data: { userId: userB.id, method: "RAZORPAY", holderName: "QA14 B", upiVpa: "qa14b@upi", maskedHint: "qa14b@upi" } });
 
   const seed = (walletId: string, type: "CREDIT" | "DEBIT", reason: "SALE" | "ESCROW_HOLD", amount: number, after: number) =>
     db.ledgerEntry.create({ data: { walletId, type, reason, amountMinor: amount, balanceAfterMinor: after } });
@@ -65,14 +68,14 @@ async function main() {
     ok("available = 100000, held = 50000, pending = 0", ov0.availableMinor === 100000 && ov0.heldMinor === 50000 && ov0.pendingPayoutMinor === 0, JSON.stringify(ov0));
 
     console.log("\n— min + insufficient guards —");
-    const belowMin = await threw(() => requestPayout(userA.id, 10000, "RAZORPAY")); // < ₹500 min
+    const belowMin = await threw(() => requestPayout(userA.id, 10000)); // < ₹500 min
     ok("below minimum rejected", belowMin?.includes("Minimum") === true, belowMin ?? "");
-    const tooMuch = await threw(() => requestPayout(userA.id, 120000, "RAZORPAY")); // > available
+    const tooMuch = await threw(() => requestPayout(userA.id, 120000)); // > available
     ok("above available rejected", tooMuch?.includes("available") === true, tooMuch ?? "");
     ok("no reserve written for rejected requests", (await payoutEntries(walletA.id)) === 0);
 
     console.log("\n— request reserves funds (DEBIT/PAYOUT) —");
-    const p1 = await requestPayout(userA.id, 50000, "RAZORPAY");
+    const p1 = await requestPayout(userA.id, 50000);
     ok("payout REQUESTED", p1.status === "REQUESTED" && p1.amountMinor === 50000);
     const ov1 = await getWalletOverview(userA.id);
     ok("available dropped to 50000, pending 50000 (reserved), held unchanged", ov1.availableMinor === 50000 && ov1.pendingPayoutMinor === 50000 && ov1.heldMinor === 50000, JSON.stringify(ov1));
@@ -86,10 +89,10 @@ async function main() {
     ok("markPayoutPaid again → noop (idempotent)", (await markPayoutPaid(userA.id, p1.id)) === "noop");
 
     console.log("\n— escrow-held funds are never withdrawable —");
-    const p2 = await requestPayout(userA.id, 50000, "RAZORPAY"); // drains available to 0
+    const p2 = await requestPayout(userA.id, 50000); // drains available to 0
     const ovDrained = await getWalletOverview(userA.id);
     ok("available now 0, but 50000 still held", ovDrained.availableMinor === 0 && ovDrained.heldMinor === 50000);
-    const grabHeld = await threw(() => requestPayout(userA.id, 50000, "RAZORPAY")); // tries to take the held 500
+    const grabHeld = await threw(() => requestPayout(userA.id, 50000)); // tries to take the held 500
     ok("cannot withdraw the escrow-held balance", grabHeld?.includes("available") === true, grabHeld ?? "");
 
     console.log("\n— FAILED reverses the reserve (CREDIT back) —");
@@ -108,8 +111,8 @@ async function main() {
 
     console.log("\n— concurrency: two parallel full-balance requests, only ONE wins —");
     const racers = await Promise.allSettled([
-      requestPayout(userB.id, 100000, "RAZORPAY"),
-      requestPayout(userB.id, 100000, "RAZORPAY"),
+      requestPayout(userB.id, 100000),
+      requestPayout(userB.id, 100000),
     ]);
     const fulfilled = racers.filter((r) => r.status === "fulfilled").length;
     ok("exactly one of two concurrent full withdrawals succeeded", fulfilled === 1, JSON.stringify(racers.map((r) => r.status)));

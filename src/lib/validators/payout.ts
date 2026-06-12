@@ -27,7 +27,9 @@ export const requestPayoutSchema = z.object({
       }
       return minor;
     }),
-  method: z.enum(["RAZORPAY", "CRYPTO"]),
+  // Method is determined by the seller's SAVED payout destination (P1-T1), not a
+  // picker — kept optional for backward-compat with older clients.
+  method: z.enum(["RAZORPAY", "CRYPTO"]).optional(),
   // Instant payout fast-track (Prompt 15b) — server recomputes the fee.
   instant: z.coerce.boolean().optional(),
 });
