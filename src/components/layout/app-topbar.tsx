@@ -2,7 +2,9 @@ import Link from "next/link";
 import { MessageSquareIcon } from "lucide-react";
 import type { Role } from "@prisma/client";
 import { countUnread } from "@/server/services/chat";
+import { loadNotificationBell } from "@/server/services/notifications";
 import { Logo } from "@/components/shared/icons";
+import { NotificationBell } from "@/components/shared/notification-bell";
 import { UserMenu } from "@/components/layout/user-menu";
 
 type TopbarUser = {
@@ -14,11 +16,15 @@ type TopbarUser = {
 };
 
 /**
- * App shell topbar (Prompt 01): logo + messages bell (unread badge) + avatar.
- * RSC — the unread count is read server-side (same logic SiteHeader used).
+ * App shell topbar (Prompt 01): logo + messages link + notification bell +
+ * avatar. RSC — the chat unread count and the bell's notification feed are read
+ * server-side in parallel (P6-T1: the bell now lives on the dashboard chrome).
  */
 export async function AppTopbar({ user }: { user: TopbarUser }) {
-  const unread = await countUnread(user.id);
+  const [unread, bell] = await Promise.all([
+    countUnread(user.id),
+    loadNotificationBell(user.id),
+  ]);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-[rgba(10,11,13,0.96)] backdrop-blur-[12px]">
@@ -55,6 +61,11 @@ export async function AppTopbar({ user }: { user: TopbarUser }) {
               </span>
             ) : null}
           </Link>
+
+          <NotificationBell
+            initialUnread={bell.unread}
+            initialNotifications={bell.items}
+          />
 
           <UserMenu
             user={{

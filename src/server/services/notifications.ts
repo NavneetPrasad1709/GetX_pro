@@ -190,6 +190,22 @@ export async function countUnreadNotifications(userId: string): Promise<number> 
   return db.notification.count({ where: { userId, read: false } });
 }
 
+/**
+ * One-shot loader for the header NotificationBell — unread count + the first
+ * page of notifications, in parallel. Shared by SiteHeader, MarketplaceHeader
+ * and AppTopbar so the bell renders identically wherever a logged-in user is
+ * (P6-T1 — exposing the already-built bell on the shop + dashboard chrome).
+ */
+export async function loadNotificationBell(
+  userId: string,
+): Promise<{ unread: number; items: NotificationRow[] }> {
+  const [unread, items] = await Promise.all([
+    countUnreadNotifications(userId),
+    getNotifications(userId),
+  ]);
+  return { unread, items };
+}
+
 /** Mark one notification read. Ownership is enforced by the `userId` in WHERE. */
 export async function markNotificationRead(
   userId: string,

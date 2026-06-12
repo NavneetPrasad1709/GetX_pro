@@ -1,18 +1,21 @@
 import Link from "next/link";
 import { SearchIcon } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { loadNotificationBell } from "@/server/services/notifications";
 import { Logo } from "@/components/shared/icons";
+import { NotificationBell } from "@/components/shared/notification-bell";
 import { UserMenu } from "@/components/layout/user-menu";
 
 /**
  * Shop shell header (Prompt 01): search-first marketplace bar.
  * Same sticky height as SiteHeader (h-58/66) so listing-page sticky offsets
  * stay correct, but no TrustRibbon and no "Sell" CTA — browsing-focused.
- * RSC: reads the live session for the auth state only.
+ * RSC: reads the live session + (for logged-in users) the notification bell.
  */
 export async function MarketplaceHeader() {
   const session = await auth();
   const user = session?.user;
+  const bell = user ? await loadNotificationBell(user.id) : null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-[rgba(10,11,13,0.88)] backdrop-blur-[12px]">
@@ -41,15 +44,21 @@ export async function MarketplaceHeader() {
         </form>
 
         <div className="ml-auto flex shrink-0 items-center gap-2.5">
-          {user ? (
-            <UserMenu
-              user={{
-                name: user.name ?? null,
-                email: user.email ?? null,
-                image: user.image ?? null,
-                role: user.role,
-              }}
-            />
+          {user && bell ? (
+            <>
+              <NotificationBell
+                initialUnread={bell.unread}
+                initialNotifications={bell.items}
+              />
+              <UserMenu
+                user={{
+                  name: user.name ?? null,
+                  email: user.email ?? null,
+                  image: user.image ?? null,
+                  role: user.role,
+                }}
+              />
+            </>
           ) : (
             <Link
               href="/login"
