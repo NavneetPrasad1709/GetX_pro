@@ -60,8 +60,10 @@ export default async function BecomeSellerPage() {
         <CardHeader>
           <CardTitle className="text-xl">Become a seller</CardTitle>
           <CardDescription>
-            Takes about 2 minutes — you get a seller profile, a wallet, and
-            your <span className="font-medium text-foreground">first listing is free</span>.
+            Create your seller profile and a wallet, then{" "}
+            <span className="font-medium text-foreground">verify your ID</span> —
+            every seller is ID-verified before they can list, so buyers can
+            trust the marketplace.
           </CardDescription>
         </CardHeader>
         <CardContent>

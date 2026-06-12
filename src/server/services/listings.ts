@@ -171,9 +171,17 @@ export async function createListing(
       resolveCategory(tx, input.gameId, input.categoryId),
       tx.sellerProfile.findUniqueOrThrow({
         where: { id: sellerId },
-        select: { totalSales: true },
+        select: { totalSales: true, kycStatus: true },
       }),
     ]);
+    // Mandatory KYC before selling (O-T2, legal) — no listing (draft or live)
+    // until the seller's identity is verified. The new-listing page gates this
+    // in the UI too, but the server is the real enforcement.
+    if (profile.kycStatus !== "APPROVED") {
+      throw new ListingServiceError(
+        "Verify your identity before listing. Complete KYC verification to start selling.",
+      );
+    }
 
     const now = new Date();
     const { staleListingDays, newSellerBoostDays, newSellerBoostMaxSales } =

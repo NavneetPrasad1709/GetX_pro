@@ -20,6 +20,7 @@ type Step = {
   label: string;
   done: boolean;
   pending?: boolean;
+  locked?: boolean; // gated by an earlier step (e.g. listing needs APPROVED KYC)
   href: string;
   cta: string;
   hint: string;
@@ -40,14 +41,17 @@ export function OnboardingChecklist({ state }: { state: OnboardingState }) {
       pending: state.kycPending && !state.kycApproved,
       href: "/seller/verify",
       cta: state.kycPending ? "Check status" : "Verify now",
-      hint: "Required before you can withdraw earnings.",
+      hint: "Required before you can list, sell, or withdraw earnings.",
     },
     {
       label: "Create your first listing",
       done: state.firstListingDone,
+      locked: !state.kycApproved,
       href: "/seller/listings/new",
       cta: "Create listing",
-      hint: "Listings with photos + clear titles sell first.",
+      hint: state.kycApproved
+        ? "Listings with photos + clear titles sell first."
+        : "Unlocks once your ID is verified.",
     },
     {
       label: "Set your payout method",
@@ -140,13 +144,18 @@ export function OnboardingChecklist({ state }: { state: OnboardingState }) {
                 <p className="text-xs text-muted-foreground">{step.hint}</p>
               )}
             </div>
-            {!step.done && (
+            {!step.done && !step.locked && (
               <Link
                 href={step.href}
                 className="shrink-0 rounded-sm px-2 py-1 text-xs font-semibold text-primary hover:text-primary-hover focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
                 {step.cta} →
               </Link>
+            )}
+            {!step.done && step.locked && (
+              <span className="shrink-0 px-2 py-1 text-xs font-semibold text-muted-foreground">
+                Locked
+              </span>
             )}
           </li>
         ))}

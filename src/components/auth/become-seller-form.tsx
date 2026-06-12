@@ -35,8 +35,8 @@ export function BecomeSellerForm() {
       setServerError(res.error ?? "Something went wrong. Please try again.");
       return;
     }
-    // Straight into the seller hub — first listing is one click away.
-    router.push("/seller");
+    // Verification is mandatory before listing (O-T2) — go straight to KYC.
+    router.push("/seller/verify");
     router.refresh(); // header re-renders with the SELLER role
   }
 
@@ -162,7 +162,7 @@ export function BecomeSellerForm() {
       {/* default variant already styles the primary button — an explicit
           bg-primary here would override the AA-compliant -strong fill. */}
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Opening your shop…" : "Open my shop — free"}
+        {isSubmitting ? "Creating your shop…" : "Create shop & verify ID"}
       </Button>
     </form>
   );

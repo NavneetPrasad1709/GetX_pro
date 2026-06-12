@@ -87,7 +87,7 @@ export function HomeHero() {
           <span className="font-medium text-muted-foreground">
             {siteConfig.launchGames.join(", ")}
           </span>{" "}
-          — every order escrow-protected, every seller verified.
+          — every order escrow-protected, every seller ID-verified before they list.
         </p>
       </PageContainer>
     </section>
