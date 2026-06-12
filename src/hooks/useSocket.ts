@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { io, type Socket } from "socket.io-client";
+// Type-only import (erased at build); the ~40KB `io` runtime is lazy-loaded
+// inside the effect so it never ships in guest/marketing first-load JS (P8-T1).
+import type { Socket } from "socket.io-client";
 
 /**
  * Shared Socket.io connection hook (Step 22). Fetches a short-lived auth token
@@ -35,6 +37,10 @@ export function useSocket(enabled = true): Socket | null {
     void (async () => {
       const authData = await fetchSocketAuth();
       if (!active || !authData) return;
+
+      // Lazy-load socket.io-client only for authed users who actually connect.
+      const { io } = await import("socket.io-client");
+      if (!active) return;
 
       s = io(authData.url, {
         // Re-fetch a FRESH token on every (re)connect — tokens are short-lived.

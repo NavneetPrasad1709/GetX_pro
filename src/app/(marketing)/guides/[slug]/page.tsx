@@ -9,7 +9,9 @@ import { GuideLikeButton } from "@/components/community/guide-like-button";
 import { GuideViewTracker } from "@/components/community/guide-view-tracker";
 import { UserAvatar } from "@/components/shared/user-avatar";
 
-export const dynamic = "force-dynamic";
+// ISR (P9-T3) — guides change rarely; caching makes them fast + crawlable
+// (the like/view trackers are client-side, so the count still updates live).
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -20,10 +22,19 @@ function plainExcerpt(markdown: string, max = 160): string {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const guide = await getGuideBySlug(slug);
-  if (!guide || !guide.published) return { title: "Guide" };
+  if (!guide || !guide.published) return { title: "Guide", robots: { index: false } };
+  const description = plainExcerpt(guide.content);
+  const canonical = `/guides/${guide.slug}`;
   return {
     title: `${guide.title} | GETX Guides`,
-    description: plainExcerpt(guide.content),
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title: guide.title,
+      description,
+      url: canonical,
+    },
   };
 }
 

@@ -4,6 +4,7 @@ import { Inter, Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { DeferredToaster } from "@/components/layout/deferred-toaster";
 import { OrganizationJsonLd } from "@/components/seo/organization-jsonld";
+import { WebsiteJsonLd } from "@/components/seo/website-jsonld";
 import { SwRegister } from "@/components/pwa/sw-register";
 import { InstallBanner } from "@/components/pwa/install-banner";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
@@ -107,6 +108,7 @@ export default function RootLayout({
           </Suspense>
           {children}
           <OrganizationJsonLd />
+          <WebsiteJsonLd />
           <DeferredToaster />
           {/* PWA (Step 24) — rendered after content, both no-op until mounted (never block FCP) */}
           <SwRegister />

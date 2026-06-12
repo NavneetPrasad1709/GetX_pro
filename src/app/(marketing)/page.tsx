@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { HomeHero } from "@/components/home/home-hero";
 import { CategoryMegaGrid } from "@/components/home/category-mega-grid";
 import { BrowseGames } from "@/components/home/browse-games";
@@ -5,8 +6,20 @@ import { ProtectionSteps } from "@/components/home/protection-steps";
 import { WhyGetx } from "@/components/home/why-getx";
 import { SellerCta } from "@/components/home/seller-cta";
 import { getActiveGames } from "@/server/services/catalog";
+import { siteConfig } from "@/config/site";
 import { GAME_COPY, getGameCopy } from "@/config/games";
 import type { GameTileData } from "@/components/marketplace/game-card";
+
+// Keyword title + self-canonical for the head term (P9-T2). `absolute` keeps the
+// homepage off the "%s · GETX" template so the brand + value prop lead.
+export const metadata: Metadata = {
+  title: {
+    absolute:
+      "GETX — Buy & Sell Game Accounts, Items, Currency & Boosting (Escrow-Protected)",
+  },
+  description: siteConfig.description,
+  alternates: { canonical: "/" },
+};
 
 // Game tiles change at most hourly — ISR keeps homepage TTFB <100ms from CDN edge.
 export const revalidate = 3600;
