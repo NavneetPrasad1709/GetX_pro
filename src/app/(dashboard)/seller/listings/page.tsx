@@ -13,7 +13,6 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ListingActions } from "@/components/seller/listing-actions";
 import { ListingStatusBadge } from "@/components/seller/listing-status-badge";
 import { BoostListingButton } from "@/components/seller/boost-listing-button";
-import { BumpListingButton } from "@/components/seller/bump-listing-button";
 
 export const metadata: Metadata = { title: "My listings" };
 
@@ -101,7 +100,6 @@ export default async function SellerListingsPage() {
                         listing.boostExpiresAt > now
                       }
                     />
-                    <BumpListingButton listingId={listing.id} />
                   </div>
                 ) : null}
               </div>

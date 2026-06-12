@@ -129,11 +129,6 @@ export function computeBoostFeeMinor(duration: BoostDuration): number {
   return duration === "daily" ? dailyFeeMinor : weeklyFeeMinor;
 }
 
-/** Flat one-time listing bump fee (Prompt 15b, Stream 7). */
-export function computeBumpFeeMinor(): number {
-  return siteConfig.fees.boost.bumpFeeMinor;
-}
-
 /** Instant-payout fee = max(1% of amount, ₹50). Pure, minor units (Stream 6). */
 export function computeInstantPayoutFeeMinor(payoutAmountMinor: number): number {
   const { feePercent, minFeeMinor } = siteConfig.payouts.instant;

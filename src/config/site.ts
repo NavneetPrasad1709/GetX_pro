@@ -45,9 +45,6 @@ export const siteConfig = {
       maxFeaturedPerPage: 2, // promoted slots shown per page (cap pay-to-win)
       maxActiveFeaturedPerSeller: 3, // a seller can boost ≤3 listings at once
       homepageMinRating: 4.0, // boosted listings reach the homepage only at/above this
-      // Listing "bump" (Stream 7) — one-time recency reset for the newest sort.
-      bumpFeeMinor: 9_900, // ₹99 per bump
-      maxBumpsPerDay: 3, // per listing, sliding 24h window
     },
     // GETX Pro seller subscription (Stream 4). Listings are unlimited for all
     // tiers (O-T5) — Pro sells commission discount + badge + support + analytics.

@@ -175,7 +175,7 @@ async function searchListingsNewestBoosted(
       JOIN "SellerProfile" sp ON sp.id = l."sellerId"
       JOIN "Game" g ON g.id = l."gameId"
       WHERE ${whereSql}
-      ORDER BY ${boost} DESC, COALESCE(l."bumpedAt", l."createdAt") DESC, l.id DESC
+      ORDER BY ${boost} DESC, l."createdAt" DESC, l.id DESC
       LIMIT ${MARKETPLACE_PAGE_SIZE} OFFSET ${offset}
     `),
     db.listing.count({ where: buildWhere(f) }),

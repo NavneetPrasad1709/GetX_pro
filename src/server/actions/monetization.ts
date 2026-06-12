@@ -9,7 +9,6 @@ import {
   boostListing,
   subscribePro,
   sponsorSeller,
-  bumpListing,
   MonetizationServiceError,
 } from "@/server/services/monetization";
 
@@ -106,32 +105,3 @@ export async function sponsorSellerAction(): Promise<MonetizationResult> {
   }
 }
 
-const bumpSchema = z.object({ listingId: id });
-
-export async function bumpListingAction(
-  raw: unknown,
-): Promise<MonetizationResult> {
-  const session = await requireUser();
-  const user = { id: session.user.id, role: session.user.role };
-  if (!rateLimit(`bump:${user.id}`, { limit: 10, windowMs: 60_000 }).ok) {
-    return { ok: false, error: "Too many requests — slow down a moment." };
-  }
-
-  const parsed = bumpSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid request." };
-  }
-
-  try {
-    await bumpListing(user, parsed.data.listingId);
-    revalidatePath("/seller/listings");
-    return { ok: true };
-  } catch (err) {
-    if (err instanceof MonetizationServiceError) {
-      return { ok: false, error: err.message };
-    }
-    Sentry.captureException(err);
-    console.error("[bumpListingAction]", err);
-    return { ok: false, error: GENERIC };
-  }
-}

@@ -10,7 +10,6 @@ import { getWalletBalances } from "@/server/services/wallet";
 import { PLATFORM_WALLET_ID } from "@/server/services/escrow";
 import {
   computeBoostFeeMinor,
-  computeBumpFeeMinor,
   type BoostDuration,
 } from "@/lib/fees";
 
@@ -363,76 +362,6 @@ export async function sponsorSeller(
         entity: "SellerProfile",
         entityId: profile.id,
         meta: { weeklyFeeMinor, sponsorshipExpiresAt: sponsorshipExpiresAt.toISOString() },
-      },
-    });
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Stream 7 — Listing bump
-// ---------------------------------------------------------------------------
-
-/**
- * Bump a listing to the top of the "newest" sort (Prompt 15b). Flat fee, max
- * `maxBumpsPerDay` per listing in a sliding 24h window (counted from AuditLog).
- */
-export async function bumpListing(
-  user: SessionUser,
-  listingId: string,
-  now = new Date(),
-): Promise<void> {
-  const { maxBumpsPerDay } = siteConfig.fees.boost;
-
-  await db.$transaction(async (tx) => {
-    const listing = await tx.listing.findUnique({
-      where: { id: listingId },
-      select: {
-        id: true,
-        sellerId: true,
-        status: true,
-        currency: true,
-        seller: { select: { userId: true } },
-      },
-    });
-    if (!listing) throw new MonetizationServiceError("Listing not found.");
-    assertOwner({ userId: listing.seller.userId }, user);
-    if (listing.status !== "ACTIVE") {
-      throw new MonetizationServiceError("Only active listings can be bumped.");
-    }
-
-    const since = new Date(now.getTime() - DAY_MS);
-    const bumpsToday = await tx.auditLog.count({
-      where: {
-        action: "LISTING_BUMPED",
-        entityId: listing.id,
-        createdAt: { gte: since },
-      },
-    });
-    if (bumpsToday >= maxBumpsPerDay) {
-      throw new MonetizationServiceError(
-        `You can bump a listing up to ${maxBumpsPerDay} times a day. Try again later.`,
-      );
-    }
-
-    await chargeSellerToPlatform(
-      tx,
-      listing.sellerId,
-      listing.currency,
-      computeBumpFeeMinor(),
-      "BOOST_FEE",
-    );
-
-    await tx.listing.update({
-      where: { id: listing.id },
-      data: { bumpedAt: now, lastBumpAt: now, bumpCount: { increment: 1 } },
-    });
-    await tx.auditLog.create({
-      data: {
-        actorId: user.id,
-        action: "LISTING_BUMPED",
-        entity: "Listing",
-        entityId: listing.id,
-        meta: { feeMinor: computeBumpFeeMinor() },
       },
     });
   });
