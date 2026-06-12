@@ -9,7 +9,10 @@ import { recomputeSellerTrustAndLevel } from "@/server/services/trust-score";
  * NOT been manually overridden (`trustScoreOverride = false`).
  *
  * Auth: same constant-time Bearer check as auto-release. Fail-closed.
- * Batch: 200 sellers per run; next morning cron clears the remainder.
+ * Batch: 200 sellers per run; next morning cron clears the remainder. Within a
+ * run, sellers are recomputed CONCURRENCY at a time (P8-T3) — each recompute is
+ * independent, so this cuts wall-clock ~10× while staying under the pooled
+ * (pgbouncer) connection limit.
  */
 
 export const runtime = "nodejs";
@@ -17,6 +20,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 const BATCH = 200;
+const CONCURRENCY = 10;
 
 function isAuthorized(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
@@ -43,15 +47,23 @@ export async function GET(req: Request): Promise<Response> {
   let done = 0;
   const failed: string[] = [];
 
-  for (const { id } of sellers) {
-    try {
-      await recomputeSellerTrustAndLevel(id);
-      done += 1;
-    } catch (err) {
-      console.error(`[cron:trust-score] seller ${id} failed`, err);
-      Sentry.captureException(err);
-      failed.push(id);
-    }
+  // Process in fixed-size concurrent chunks (bounded so we never exceed the
+  // pooled Neon connection limit). One slow/failing seller can't stall the rest.
+  for (let i = 0; i < sellers.length; i += CONCURRENCY) {
+    const chunk = sellers.slice(i, i + CONCURRENCY);
+    const results = await Promise.allSettled(
+      chunk.map(({ id }) => recomputeSellerTrustAndLevel(id)),
+    );
+    results.forEach((res, j) => {
+      if (res.status === "fulfilled") {
+        done += 1;
+      } else {
+        const id = chunk[j].id;
+        console.error(`[cron:trust-score] seller ${id} failed`, res.reason);
+        Sentry.captureException(res.reason);
+        failed.push(id);
+      }
+    });
   }
 
   if (failed.length > 0) {
