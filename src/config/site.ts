@@ -37,27 +37,12 @@ export const siteConfig = {
     rounding: "HALF_UP",
     paymentProcessing: "PASS_THROUGH",
 
-    // Opt-in monetization (Prompt 15) — additive, never raises the base take.
-    // Featured/"Promoted" listing placement (Stream 1/2). Minor units.
-    boost: {
-      dailyFeeMinor: 20_000, // ₹200/day
-      weeklyFeeMinor: 100_000, // ₹1,000/7 days (~₹143/day, 28% cheaper)
-      maxFeaturedPerPage: 2, // promoted slots shown per page (cap pay-to-win)
-      maxActiveFeaturedPerSeller: 3, // a seller can boost ≤3 listings at once
-      homepageMinRating: 4.0, // boosted listings reach the homepage only at/above this
-    },
     // GETX Pro seller subscription (Stream 4). Listings are unlimited for all
     // tiers (O-T5) — Pro sells commission discount + badge + support + analytics.
+    // All pay-for-visibility levers (Boost/Bump/Spotlight) removed — O-T15.
     subscription: {
       proMonthlyFeeMinor: 49_900, // ₹499/month
       proCommissionDiscount: 2, // percentage POINTS off base commission
-    },
-    // Spotlight sponsorship (Stream 3) — scarce, quality-gated weekly slot.
-    sponsorship: {
-      weeklyFeeMinor: 250_000, // ₹2,500/week
-      maxSponsoredSellers: 3, // total slots (scarcity = value)
-      minRatingForSponsorship: 4.0, // quality gate
-      minSalesForSponsorship: 5, // must have ≥5 completed sales
     },
   },
 

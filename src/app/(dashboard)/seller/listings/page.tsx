@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ListingActions } from "@/components/seller/listing-actions";
 import { ListingStatusBadge } from "@/components/seller/listing-status-badge";
-import { BoostListingButton } from "@/components/seller/boost-listing-button";
 
 export const metadata: Metadata = { title: "My listings" };
 
@@ -26,7 +25,6 @@ export default async function SellerListingsPage() {
       select: { id: true },
     }),
   ]);
-  const now = new Date();
 
   return (
     <div className="flex flex-col gap-4">
@@ -89,19 +87,6 @@ export default async function SellerListingsPage() {
                   </span>{" "}
                   · stock {listing.stock}
                 </p>
-                {/* boost control for live listings (Prompt 15) */}
-                {listing.status === "ACTIVE" ? (
-                  <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                    <BoostListingButton
-                      listingId={listing.id}
-                      active={
-                        listing.isFeatured &&
-                        listing.boostExpiresAt != null &&
-                        listing.boostExpiresAt > now
-                      }
-                    />
-                  </div>
-                ) : null}
               </div>
 
               <ListingActions listingId={listing.id} status={listing.status} />

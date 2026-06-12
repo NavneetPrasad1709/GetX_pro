@@ -32,21 +32,12 @@ export async function GET(req: Request): Promise<Response> {
 
   try {
     const now = new Date();
-    const [res, spot] = await Promise.all([
-      db.sellerProfile.updateMany({
-        where: { subscriptionTier: "PRO", subscriptionExpiresAt: { lt: now } },
-        data: { subscriptionTier: "FREE", subscriptionExpiresAt: null },
-      }),
-      // Spotlight sponsorship expiry (Prompt 15b, Stream 3).
-      db.sellerProfile.updateMany({
-        where: { isSponsored: true, sponsorshipExpiresAt: { lt: now } },
-        data: { isSponsored: false, sponsorshipExpiresAt: null },
-      }),
-    ]);
-    console.log(
-      `[cron:subscription-renewal] downgraded ${res.count}, un-sponsored ${spot.count}`,
-    );
-    return Response.json({ downgraded: res.count, unsponsored: spot.count });
+    const res = await db.sellerProfile.updateMany({
+      where: { subscriptionTier: "PRO", subscriptionExpiresAt: { lt: now } },
+      data: { subscriptionTier: "FREE", subscriptionExpiresAt: null },
+    });
+    console.log(`[cron:subscription-renewal] downgraded ${res.count}`);
+    return Response.json({ downgraded: res.count });
   } catch (err) {
     Sentry.captureException(err);
     await Sentry.flush(2000);

@@ -24,7 +24,6 @@ import {
 } from "@/server/services/admin";
 import { getKycDocSignedUrl, KycServiceError, reviewKyc } from "@/server/services/kyc";
 import { EscrowServiceError, resolveDispute } from "@/server/services/escrow";
-import { clearListingBoost } from "@/server/services/monetization";
 import { db } from "@/lib/db";
 
 /**
@@ -210,35 +209,6 @@ export async function overrideAiVerdictAction(raw: unknown): Promise<AdminAction
  * Admin manually overrides a seller's trust score and/or level, and locks it
  * from the nightly cron sweep until the override is cleared. Audit-logged.
  */
-/** Admin force-clears a listing's paid boost (fraud/abuse recourse). Audit-logged. */
-export async function clearListingBoostAction(
-  raw: unknown,
-): Promise<AdminActionResult> {
-  const admin = await requireAdmin();
-  if (!admin) return { ok: false, error: "Forbidden." };
-  if (limited(admin.id)) return { ok: false, error: "Too many requests." };
-
-  const parsed = removeListingSchema.safeParse(raw);
-  if (!parsed.success) return { ok: false, error: "Invalid request." };
-  try {
-    await clearListingBoost(parsed.data.listingId);
-    await db.auditLog.create({
-      data: {
-        actorId: admin.id,
-        action: "LISTING_BOOST_CLEARED",
-        entity: "Listing",
-        entityId: parsed.data.listingId,
-      },
-    });
-    revalidatePath("/admin/listings");
-    return { ok: true };
-  } catch (err) {
-    Sentry.captureException(err);
-    console.error("[clearListingBoostAction]", err);
-    return { ok: false, error: GENERIC };
-  }
-}
-
 export async function overrideTrustScoreAction(
   raw: unknown,
 ): Promise<AdminActionResult> {

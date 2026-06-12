@@ -40,7 +40,6 @@ export function LevelProgressPanel({
       <div className="grid grid-cols-2 gap-3">
         <Perk label="Commission discount" value={`-${current.perks.commissionDiscountPct}%`} />
         <Perk label="Payout speed" value={`${current.perks.payoutSpeedDays} day${current.perks.payoutSpeedDays > 1 ? "s" : ""}`} />
-        <Perk label="Featured eligible" value={current.perks.featuredEligible ? "Yes" : "No"} />
       </div>
 
       {/* Next level requirements */}

@@ -121,14 +121,6 @@ export function computeSellerCommissionMinorForLevel(
   return percentOfMinorHalfUp(subtotalMinor, effective);
 }
 
-/** Flat fee to feature a listing for a daily or weekly period (Prompt 15). */
-export type BoostDuration = "daily" | "weekly";
-
-export function computeBoostFeeMinor(duration: BoostDuration): number {
-  const { dailyFeeMinor, weeklyFeeMinor } = siteConfig.fees.boost;
-  return duration === "daily" ? dailyFeeMinor : weeklyFeeMinor;
-}
-
 /** Instant-payout fee = max(1% of amount, ₹50). Pure, minor units (Stream 6). */
 export function computeInstantPayoutFeeMinor(payoutAmountMinor: number): number {
   const { feePercent, minFeeMinor } = siteConfig.payouts.instant;

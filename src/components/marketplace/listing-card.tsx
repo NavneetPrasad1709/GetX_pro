@@ -32,8 +32,6 @@ type Props = {
   className?: string;
   /** set true for the first row of above-the-fold cards (LCP) */
   priority?: boolean;
-  /** server-set in the "Promoted" row only → renders the FTC-required label (Prompt 15) */
-  isPromoted?: boolean;
 };
 
 /**
@@ -47,7 +45,6 @@ export function ListingCard({
   listing,
   className,
   priority = false,
-  isPromoted = false,
 }: Props) {
   const {
     slug,
@@ -91,16 +88,8 @@ export function ListingCard({
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
 
-        {/* game tag (+ FTC-required "Promoted" label when in the paid row) */}
+        {/* game tag */}
         <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
-          {isPromoted ? (
-            <span
-              className="rounded-full bg-amber-500/85 px-2 py-0.5 text-[10px] font-bold tracking-wide text-black uppercase backdrop-blur-sm"
-              aria-label="Sponsored listing"
-            >
-              Promoted
-            </span>
-          ) : null}
           <span className="rounded-full bg-background/70 px-2.5 py-1 text-[11px] font-semibold text-foreground backdrop-blur-sm">
             {game}
           </span>

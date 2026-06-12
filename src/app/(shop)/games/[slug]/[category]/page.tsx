@@ -5,7 +5,6 @@ import {
   getCategoryListingsPage,
   getGameBySlug,
 } from "@/server/services/catalog";
-import { getFeaturedListings } from "@/server/services/marketplace";
 import { CATEGORY_KIND_COPY, getGameCategoryCopy } from "@/config/games";
 import { siteConfig } from "@/config/site";
 import { PageContainer } from "@/components/shared/page-container";
@@ -105,13 +104,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if (!game || !category) notFound();
 
   const page = parsePage(sp.page);
-  const [{ items, total, pageCount }, featured] = await Promise.all([
-    getCategoryListingsPage(category.id, page),
-    // Promoted row (Prompt 15) — scoped to this game + category kind, page 1 only.
-    page === 1
-      ? getFeaturedListings({ gameSlug: game.slug, type: category.kind, limit: 2 })
-      : Promise.resolve([]),
-  ]);
+  const { items, total, pageCount } = await getCategoryListingsPage(
+    category.id,
+    page,
+  );
 
   // Beyond the last page (and not page 1) → soft 404 (noindex) instead of an
   // endless empty ?page= space for crawlers.
@@ -154,21 +150,6 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             </p>
           </header>
         </div>
-
-        {/* Promoted row (Prompt 15) — FTC-labeled paid placement, page 1 only */}
-        {featured.length > 0 ? (
-          <section aria-label="Promoted listings">
-            <ListingGrid>
-              {featured.map((listing) => (
-                <ListingCard
-                  key={`cat-promoted-${listing.id}`}
-                  listing={listing}
-                  isPromoted
-                />
-              ))}
-            </ListingGrid>
-          </section>
-        ) : null}
 
         {items.length === 0 ? (
           <section aria-labelledby="category-demand" className="max-w-xl">

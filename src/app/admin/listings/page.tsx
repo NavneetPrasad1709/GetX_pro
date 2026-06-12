@@ -5,7 +5,6 @@ import { listAdminListings } from "@/server/services/admin";
 import { formatMoney } from "@/lib/money";
 import { AdminSearch } from "@/components/admin/admin-search";
 import { ListingRemoveButton } from "@/components/admin/listing-remove-button";
-import { ClearBoostButton } from "@/components/admin/clear-boost-button";
 
 export const metadata: Metadata = { title: "Listings — Admin" };
 
@@ -48,15 +47,9 @@ export default async function AdminListingsPage({ searchParams }: Props) {
                 <p className="mt-0.5 text-xs text-faint">
                   {l.sellerName} · {formatMoney(l.priceMinor, l.currency)} ·{" "}
                   <span className="uppercase">{l.status}</span>
-                  {l.isFeatured ? (
-                    <span className="ml-1 font-semibold text-amber-500">
-                      · Promoted
-                    </span>
-                  ) : null}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                {l.isFeatured ? <ClearBoostButton listingId={l.id} /> : null}
                 <ListingRemoveButton listingId={l.id} removed={l.status === "REMOVED"} />
               </div>
             </li>

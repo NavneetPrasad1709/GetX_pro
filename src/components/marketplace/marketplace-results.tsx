@@ -113,7 +113,7 @@ export async function MarketplaceResults({
   /** Forward-compatible: accepted so the page can pass it; not used yet. */
   facets?: FacetCounts;
 }) {
-  const { items, featured, total, page, pageCount } = await searchListings(filters);
+  const { items, total, page, pageCount } = await searchListings(filters);
   const filtered = hasActiveFilters(filters);
   const chips = buildChips(filters, games);
 
@@ -158,17 +158,6 @@ export async function MarketplaceResults({
           </div>
         ) : null}
       </div>
-
-      {/* Promoted band (Prompt 15) — paid placement, FTC-labeled, page 1 only */}
-      {featured.length > 0 ? (
-        <section aria-label="Promoted listings" className="flex flex-col gap-3">
-          <ListingGrid>
-            {featured.map((listing) => (
-              <ListingCard key={`promoted-${listing.id}`} listing={listing} isPromoted />
-            ))}
-          </ListingGrid>
-        </section>
-      ) : null}
 
       {items.length === 0 ? (
         filtered ? (

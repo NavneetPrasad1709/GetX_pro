@@ -168,7 +168,7 @@ async function searchListingsNewestBoosted(
   );
   const offset = (f.page - 1) * MARKETPLACE_PAGE_SIZE;
 
-  const [idRows, total, featured] = await Promise.all([
+  const [idRows, total] = await Promise.all([
     db.$queryRaw<{ id: string }[]>(Prisma.sql`
       SELECT l.id
       FROM "Listing" l
@@ -179,7 +179,6 @@ async function searchListingsNewestBoosted(
       LIMIT ${MARKETPLACE_PAGE_SIZE} OFFSET ${offset}
     `),
     db.listing.count({ where: buildWhere(f) }),
-    featuredForFilters(f),
   ]);
 
   const ids = idRows.map((r) => r.id);
@@ -196,7 +195,6 @@ async function searchListingsNewestBoosted(
 
   return {
     items: ordered.map(toListingCardData),
-    featured,
     total,
     page: f.page,
     pageCount: Math.max(1, Math.ceil(total / MARKETPLACE_PAGE_SIZE)),
@@ -206,47 +204,11 @@ async function searchListingsNewestBoosted(
 
 export type MarketplaceResultPage = {
   items: ListingCardData[];
-  /** Paid "Promoted" listings shown above organics (page 1 only) — Prompt 15. */
-  featured: ListingCardData[];
   total: number;
   page: number;
   pageCount: number;
   pageSize: number;
 };
-
-/**
- * Paid featured ("Promoted") listings (Prompt 15). Active boost = isFeatured +
- * boostExpiresAt in the future. Optionally scoped to a game/type and gated by a
- * minimum seller rating (homepage quality gate). Ordered by most-recently-boosted.
- */
-export async function getFeaturedListings(opts?: {
-  gameSlug?: string;
-  type?: CategoryKind;
-  minSellerRating?: number;
-  limit?: number;
-  now?: Date;
-}): Promise<ListingCardData[]> {
-  const now = opts?.now ?? new Date();
-  const where: Prisma.ListingWhereInput = {
-    status: ACTIVE,
-    isFeatured: true,
-    boostExpiresAt: { gt: now },
-    stock: { gt: 0 },
-  };
-  if (opts?.gameSlug) where.game = { slug: opts.gameSlug, isActive: true };
-  if (opts?.type) where.type = opts.type;
-  if (opts?.minSellerRating !== undefined) {
-    where.seller = { ratingAvg: { gte: opts.minSellerRating } };
-  }
-
-  const rows = await db.listing.findMany({
-    where,
-    orderBy: { boostExpiresAt: "desc" },
-    take: opts?.limit ?? siteConfig.fees.boost.maxFeaturedPerPage,
-    include: listingCardInclude,
-  });
-  return rows.map(toListingCardData);
-}
 
 /**
  * Related-listing rails for the listing page (Prompt 17) — drive session depth.
@@ -292,52 +254,6 @@ export const getMoreInCategory = cache(
   },
 );
 
-export type SpotlightSeller = {
-  id: string;
-  displayName: string;
-  image: string | null;
-  ratingAvg: number;
-  ratingCount: number;
-  totalSales: number;
-  sellerLevel: string;
-};
-
-/** Active spotlight-sponsored sellers (Prompt 15b, Stream 3) for the homepage rail. */
-export async function getSponsoredSellers(
-  limit = 3,
-  now = new Date(),
-): Promise<SpotlightSeller[]> {
-  const rows = await db.sellerProfile.findMany({
-    where: { isSponsored: true, sponsorshipExpiresAt: { gt: now } },
-    orderBy: { sponsorshipExpiresAt: "desc" },
-    take: limit,
-    select: {
-      id: true,
-      displayName: true,
-      ratingAvg: true,
-      ratingCount: true,
-      totalSales: true,
-      sellerLevel: true,
-      user: { select: { image: true } },
-    },
-  });
-  return rows.map((r) => ({
-    id: r.id,
-    displayName: r.displayName,
-    image: r.user.image,
-    ratingAvg: r.ratingAvg,
-    ratingCount: r.ratingCount,
-    totalSales: r.totalSales,
-    sellerLevel: r.sellerLevel,
-  }));
-}
-
-/** Featured row for the marketplace browse (page 1 only, scoped to active filters). */
-function featuredForFilters(f: MarketplaceFilters): Promise<ListingCardData[]> {
-  if (f.page > 1) return Promise.resolve([]); // promoted band only on page 1
-  return getFeaturedListings({ gameSlug: f.game, type: f.type });
-}
-
 /** One page of marketplace results for the given filters. */
 // Algolia sort → replica index name (price/recency). Other sorts use the main (trust-ranked) index.
 const SORT_REPLICA: Partial<Record<SortKey, string>> = {
@@ -376,7 +292,6 @@ async function searchListingsViaAlgolia(
     const total = res.nbHits ?? 0;
     const ids = res.hits.map((h) => h.objectID);
     const base = {
-      featured: await featuredForFilters(f),
       total,
       page: f.page,
       pageCount: Math.max(1, Math.ceil(total / MARKETPLACE_PAGE_SIZE)),
@@ -432,7 +347,7 @@ async function searchListingsPostgres(f: MarketplaceFilters): Promise<Marketplac
   }
 
   const where = buildWhere(f);
-  const [rows, total, featured] = await Promise.all([
+  const [rows, total] = await Promise.all([
     db.listing.findMany({
       where,
       orderBy: buildOrderBy(f.sort),
@@ -441,12 +356,10 @@ async function searchListingsPostgres(f: MarketplaceFilters): Promise<Marketplac
       include: listingCardInclude,
     }),
     db.listing.count({ where }),
-    featuredForFilters(f),
   ]);
 
   return {
     items: rows.map(toListingCardData),
-    featured,
     total,
     page: f.page,
     pageCount: Math.max(1, Math.ceil(total / MARKETPLACE_PAGE_SIZE)),

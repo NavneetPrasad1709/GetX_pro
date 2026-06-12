@@ -24,7 +24,6 @@ import {
   type OnboardingState,
 } from "@/components/seller/onboarding-checklist";
 import { FirstSaleCelebration } from "@/components/seller/first-sale-celebration";
-import { SponsorButton } from "@/components/seller/sponsor-button";
 
 export const metadata: Metadata = { title: "Seller overview" };
 
@@ -50,8 +49,6 @@ export default async function SellerOverviewPage() {
             firstSaleAt: true,
             subscriptionTier: true,
             subscriptionExpiresAt: true,
-            isSponsored: true,
-            sponsorshipExpiresAt: true,
             wallet: { select: { payoutMethodSet: true } },
           },
         },
@@ -79,10 +76,6 @@ export default async function SellerOverviewPage() {
     sp.subscriptionExpiresAt != null &&
     sp.subscriptionExpiresAt > now;
   const proDiscount = siteConfig.fees.subscription.proCommissionDiscount;
-  const isSpotlit =
-    sp?.isSponsored === true &&
-    sp.sponsorshipExpiresAt != null &&
-    sp.sponsorshipExpiresAt > now;
 
   const cards = [
     {
@@ -182,23 +175,6 @@ export default async function SellerOverviewPage() {
             </Link>
           </CardDescription>
         </CardHeader>
-      </Card>
-
-      {/* Spotlight sponsorship (Prompt 15b, Stream 3) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
-            {isSpotlit ? "You're in the Seller Spotlight" : "Get the Seller Spotlight"}
-          </CardTitle>
-          <CardDescription>
-            {isSpotlit && sp?.sponsorshipExpiresAt
-              ? `Featured on the homepage until ${new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(sp.sponsorshipExpiresAt)}.`
-              : `A scarce, homepage "Sponsored" slot (${formatMoney(siteConfig.fees.sponsorship.weeklyFeeMinor, "INR")}/week) — only ${siteConfig.fees.sponsorship.maxSponsoredSellers} sellers at a time. Needs ${siteConfig.fees.sponsorship.minSalesForSponsorship}+ sales, ${siteConfig.fees.sponsorship.minRatingForSponsorship}★+, and KYC.`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SponsorButton isActive={isSpotlit} />
-        </CardContent>
       </Card>
 
       <Card>

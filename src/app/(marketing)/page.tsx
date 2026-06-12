@@ -1,21 +1,12 @@
 import { HomeHero } from "@/components/home/home-hero";
 import { CategoryMegaGrid } from "@/components/home/category-mega-grid";
 import { BrowseGames } from "@/components/home/browse-games";
-import { FeaturedListingsRail } from "@/components/home/featured-listings-rail";
-import { SellerSpotlight } from "@/components/home/seller-spotlight";
 import { ProtectionSteps } from "@/components/home/protection-steps";
 import { WhyGetx } from "@/components/home/why-getx";
 import { SellerCta } from "@/components/home/seller-cta";
 import { getActiveGames } from "@/server/services/catalog";
-import {
-  getFeaturedListings,
-  getSponsoredSellers,
-  type SpotlightSeller,
-} from "@/server/services/marketplace";
-import { siteConfig } from "@/config/site";
 import { GAME_COPY, getGameCopy } from "@/config/games";
 import type { GameTileData } from "@/components/marketplace/game-card";
-import type { ListingCardData } from "@/components/marketplace/listing-card";
 
 // Game tiles change at most hourly — ISR keeps homepage TTFB <100ms from CDN edge.
 export const revalidate = 3600;
@@ -63,29 +54,11 @@ export default async function HomePage() {
     tiles = fallbackTiles();
   }
 
-  // Promoted listings (Prompt 15) — homepage placement is gated by a min seller
-  // rating (quality gate). Never blocks the homepage if the query fails.
-  let featured: ListingCardData[] = [];
-  let spotlight: SpotlightSeller[] = [];
-  try {
-    [featured, spotlight] = await Promise.all([
-      getFeaturedListings({
-        minSellerRating: siteConfig.fees.boost.homepageMinRating,
-        limit: 4,
-      }),
-      getSponsoredSellers(3),
-    ]);
-  } catch (error) {
-    console.error("[home] featured/spotlight unavailable:", error);
-  }
-
   return (
     <main className="flex flex-1 flex-col">
       <HomeHero />
       <CategoryMegaGrid />
       <BrowseGames games={tiles} />
-      <FeaturedListingsRail listings={featured} />
-      <SellerSpotlight sellers={spotlight} />
       <ProtectionSteps />
       <WhyGetx />
       <SellerCta />

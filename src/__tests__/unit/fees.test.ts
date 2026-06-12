@@ -4,7 +4,6 @@ import {
   computeSellerCommissionMinor,
   computeSellerCommissionMinorForLevel,
   effectiveSellerCommissionPct,
-  computeBoostFeeMinor,
   computeInstantPayoutFeeMinor,
 } from "@/lib/fees";
 import { siteConfig } from "@/config/site";
@@ -82,10 +81,6 @@ describe("computeSellerCommissionMinorForLevel", () => {
 });
 
 describe("flat fees", () => {
-  it("boost daily vs weekly", () => {
-    expect(computeBoostFeeMinor("daily")).toBe(siteConfig.fees.boost.dailyFeeMinor);
-    expect(computeBoostFeeMinor("weekly")).toBe(siteConfig.fees.boost.weeklyFeeMinor);
-  });
   it("instant payout = max(percent, floor)", () => {
     const { feePercent, minFeeMinor } = siteConfig.payouts.instant;
     expect(computeInstantPayoutFeeMinor(1000)).toBe(minFeeMinor); // floor wins
