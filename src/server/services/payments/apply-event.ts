@@ -297,11 +297,15 @@ export async function applyPaymentEvent(
         }
 
         case "CONFIRMED": {
+          // Seller delivery SLA (P4-T2): the clock starts at PAID — 6h for
+          // INSTANT (auto-delivered anyway), 48h for MANUAL.
+          const slaHours = order.listing.deliveryType === "INSTANT" ? 6 : 48;
+          const deliverByAt = new Date(Date.now() + slaHours * 60 * 60 * 1000);
           // CAS to PAID — under concurrent confirmations exactly one wins,
           // so the escrow hold below is written exactly once.
           const moved = await tx.order.updateMany({
             where: { id: order.id, status: { in: allowedFrom("PAID") } },
-            data: { status: "PAID", paymentProvider: event.provider },
+            data: { status: "PAID", paymentProvider: event.provider, deliverByAt },
           });
 
           if (moved.count === 0) {
