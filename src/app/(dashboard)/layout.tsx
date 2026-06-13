@@ -40,7 +40,7 @@ export default async function DashboardLayout({
       <SentryUserSync userId={session.user.id} email={session.user.email ?? null} />
       <FingerprintBeacon />
       <SentryErrorBoundary fallback={<DefaultFallback />}>{children}</SentryErrorBoundary>
-      <SupportWidget />
+      <SupportWidget liftForBottomNav />
     </AppShell>
   );
 }

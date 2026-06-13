@@ -8,7 +8,7 @@ import {
   MessageSquare, ChevronDown, ChevronRight, Store, Crosshair, Swords, Flame,
   Crown, Coins, Gem, TrendingUp, User, Sparkles, Ticket, Lock, Eye,
   Check, Star, CreditCard, Smartphone, Bitcoin, MessageCircle,
-  Gamepad2, type LucideIcon,
+  Gamepad2, Home, type LucideIcon,
 } from "lucide-react";
 import { DiscordIcon, XBrandIcon, TelegramIcon, InstagramIcon } from "@/components/shared/icons";
 
@@ -362,6 +362,15 @@ export function GetxHome() {
         </div>
         <div className="gx-copy">© 2026 GETX — built for gamers, secured by escrow.</div>
       </div></footer>
+
+      {/* ── mobile bottom app-nav (≤760px) ── */}
+      <nav className="gx-mnav" aria-label="Primary">
+        <Link href="/" className="gx-mn on"><Home className="gx-ic" /><span>Home</span></Link>
+        <Link href="/marketplace" className="gx-mn"><Search className="gx-ic" /><span>Browse</span></Link>
+        <Link href="/become-seller" className="gx-mn gx-mn-sell"><span className="gx-mfab"><Store className="gx-ic" /></span><span>Sell</span></Link>
+        <Link href="/messages" className="gx-mn"><MessageSquare className="gx-ic" /><span>Messages</span></Link>
+        <Link href="/dashboard" className="gx-mn"><User className="gx-ic" /><span>Account</span></Link>
+      </nav>
     </div>
   );
 }
@@ -405,7 +414,7 @@ background:var(--bg);color:var(--ink);font-family:var(--font-sans),Manrope,syste
 .gx-right{display:flex;align-items:center;gap:9px;margin-left:auto}
 .gx-ibtn{width:38px;height:38px;display:grid;place-items:center;border-radius:var(--r);color:var(--d-muted);position:relative;cursor:pointer}.gx-ibtn:hover{background:var(--d-surface-2);color:var(--d-ink)}
 .gx-dot{position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--green);border:2px solid var(--d-bg)}
-@media(max-width:760px){.gx-search{display:none}}
+@media(max-width:760px){.gx-head .gx-wrap{flex-wrap:wrap;height:auto;padding-top:10px;padding-bottom:10px;gap:10px}.gx-search{order:5;flex-basis:100%;max-width:none;height:46px}.gx-right{margin-left:auto}.gx-right .gx-out{display:none}}
 .gx-cat{background:var(--d-bg);border-bottom:1px solid var(--d-line)}
 .gx-cat .gx-wrap{display:flex;align-items:center;gap:3px;height:46px;overflow-x:auto}
 .gx-cat a{font-size:13.5px;font-weight:600;color:var(--d-muted);padding:7px 12px;border-radius:var(--r);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.gx-cat a:hover{color:var(--d-ink);background:var(--d-surface)}.gx-cat a .gx-ic-sm{color:var(--d-faint)}
@@ -417,6 +426,7 @@ background:var(--bg);color:var(--ink);font-family:var(--font-sans),Manrope,syste
 .gx-banner h1{font-size:clamp(28px,4.6vw,46px);max-width:18ch;margin:15px 0 0;color:#fff}
 .gx-banner p{color:#c4cbda;font-size:clamp(14px,1.7vw,17px);max-width:46ch;margin:12px 0 0}
 .gx-banner .gx-row{display:flex;gap:11px;margin-top:24px;flex-wrap:wrap}
+@media(max-width:600px){.gx-hero{padding:16px 0 0}.gx-banner{padding:30px 22px;border-radius:var(--r-lg)}.gx-banner .gx-row{flex-direction:column}.gx-banner .gx-row .gx-btn{width:100%}.gx-sec{padding:38px 0}}
 .gx-quick{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}@media(max-width:760px){.gx-quick{grid-template-columns:1fr}}
 .gx-qcard{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:13px 15px;transition:transform .15s,border-color .15s,box-shadow .15s;box-shadow:var(--sh-card)}
 .gx-qcard:hover{border-color:var(--line-2);transform:translateY(-3px);box-shadow:var(--sh-pop)}
@@ -499,4 +509,14 @@ background:var(--bg);color:var(--ink);font-family:var(--font-sans),Manrope,syste
 .gx-blurb{color:var(--d-muted);font-size:13px;margin-top:11px;max-width:30ch}
 .gx-socials{display:flex;gap:9px;margin-top:18px}.gx-soc{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--d-line);color:var(--d-muted);background:rgba(255,255,255,.02);transition:.18s}.gx-soc:hover{color:#fff;border-color:transparent;background:var(--grad-blue);transform:translateY(-3px);box-shadow:0 10px 22px -8px rgba(79,140,255,.6)}
 .gx-copy{border-top:1px solid var(--d-line);margin-top:40px;padding:20px 0;font-size:12px;color:var(--d-faint);text-align:center;position:relative;z-index:1}
+/* mobile bottom app-nav (≤760px) — app-like experience */
+.gx-mnav{display:none}
+@media(max-width:760px){
+.gx{padding-bottom:64px}
+.gx-mnav{display:flex;position:fixed;inset-inline:0;bottom:0;z-index:60;align-items:flex-end;justify-content:space-around;background:rgba(10,10,12,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--d-line);padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
+.gx-mn{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--d-faint);flex:1;padding:2px 0}
+.gx-mn .gx-ic{width:21px;height:21px;color:var(--d-muted)}
+.gx-mn.on{color:var(--blue)}.gx-mn.on .gx-ic{color:var(--blue)}
+.gx-mn-sell{justify-content:flex-end}.gx-mfab{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--grad-blue);margin-top:-26px;box-shadow:0 12px 26px -8px rgba(79,140,255,.75);border:4px solid var(--d-bg)}.gx-mfab .gx-ic{color:#fff;width:23px;height:23px}.gx-mn-sell span:last-child{margin-top:4px}
+}
 `;

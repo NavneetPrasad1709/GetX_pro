@@ -15,7 +15,8 @@ export default function ShopLayout({
       <MarketplaceHeader />
       <div className="flex flex-1 flex-col">{children}</div>
       <SlimFooter />
-      <SupportWidget />
+      {/* lifted so the launcher clears the listing buy-box / checkout pay bar on mobile */}
+      <SupportWidget liftForBottomNav />
     </>
   );
 }

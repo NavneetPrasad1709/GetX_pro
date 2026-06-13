@@ -24,7 +24,7 @@ type Role = "user" | "assistant";
 type ChatMessage = { id: number; role: Role; content: string };
 type SsePayload = { delta?: string; done?: boolean; escalated?: boolean; error?: string };
 
-export function SupportWidget() {
+export function SupportWidget({ liftForBottomNav = false }: { liftForBottomNav?: boolean } = {}) {
   const [open, setOpen] = useState(false);
   const [hidden, setHidden] = useState(false); // set when the API reports the feature is off (503)
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -193,7 +193,13 @@ export function SupportWidget() {
   const charTone = input.length >= WARN_CHARS ? "text-warning" : "text-faint";
 
   return (
-    <div className="fixed right-4 bottom-4 z-50 sm:right-6 sm:bottom-6">
+    <div
+      className={cn(
+        "fixed right-4 z-50 sm:right-6",
+        // On pages with a ≤900px bottom nav (dashboard), lift the launcher above it.
+        liftForBottomNav ? "bottom-[6rem] min-[901px]:bottom-6" : "bottom-4 sm:bottom-6",
+      )}
+    >
       {open ? (
         <div
           ref={panelRef}
@@ -203,7 +209,9 @@ export function SupportWidget() {
           className={cn(
             "flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl",
             // Mobile: near-full-width sheet; desktop: anchored panel.
-            "fixed inset-x-3 bottom-3 h-[70vh] max-h-[460px] sm:absolute sm:inset-auto sm:right-0 sm:bottom-14 sm:h-[520px] sm:w-[380px]",
+            liftForBottomNav
+              ? "fixed inset-x-3 bottom-[5.5rem] h-[66vh] max-h-[440px] min-[901px]:absolute min-[901px]:inset-auto min-[901px]:right-0 min-[901px]:bottom-14 min-[901px]:h-[520px] min-[901px]:w-[380px]"
+              : "fixed inset-x-3 bottom-3 h-[70vh] max-h-[460px] sm:absolute sm:inset-auto sm:right-0 sm:bottom-14 sm:h-[520px] sm:w-[380px]",
           )}
         >
           {/* Header */}
