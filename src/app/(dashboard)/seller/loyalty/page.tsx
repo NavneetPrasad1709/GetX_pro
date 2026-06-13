@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { SparklesIcon } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { siteConfig } from "@/config/site";
 import { getLoyaltyBalance, getLoyaltyHistory } from "@/server/services/loyalty";
 import { pointsToMinorUnits } from "@/config/loyalty";
 import { formatMoney } from "@/lib/money";
@@ -17,6 +19,7 @@ export const metadata: Metadata = { title: "Seller rewards", robots: { index: fa
 export const dynamic = "force-dynamic";
 
 export default async function SellerLoyaltyPage() {
+  if (!siteConfig.features.loyalty) notFound(); // rewards hidden for now (owner)
   const session = await requireUser();
   const [balance, history] = await Promise.all([
     getLoyaltyBalance(session.user.id),

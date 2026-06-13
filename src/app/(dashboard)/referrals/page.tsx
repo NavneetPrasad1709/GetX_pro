@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { siteConfig } from "@/config/site";
 import { getReferralStats } from "@/server/services/referral";
 import { referralConfig } from "@/config/referral";
 import { formatMoney } from "@/lib/money";
@@ -23,6 +25,7 @@ export const metadata: Metadata = {
  * referral history. Rewards accrue as fee-credit (paise) until Step 21 loyalty ships.
  */
 export default async function ReferralsPage() {
+  if (!siteConfig.features.referral) notFound(); // refer-and-earn hidden for now (owner)
   const session = await requireUser();
   const stats = await getReferralStats(session.user.id);
 

@@ -274,8 +274,10 @@ async function releaseOrder(
 
   // Loyalty earn (Step 21): buyer on subtotal, seller on net take. Idempotent (unique index +
   // skipDuplicates) so a retried release never double-awards and never throws inside this tx.
-  await awardPoints(tx, order.buyerId, buyerEarnPoints(subtotalMinor), "PURCHASE", orderId);
-  await awardPoints(tx, order.seller.userId, sellerEarnPoints(saleMinor), "SALE", orderId);
+  if (siteConfig.features.loyalty) {
+    await awardPoints(tx, order.buyerId, buyerEarnPoints(subtotalMinor), "PURCHASE", orderId);
+    await awardPoints(tx, order.seller.userId, sellerEarnPoints(saleMinor), "SALE", orderId);
+  }
 
   // Analytics (Step 31): the server-truth completion event — IDs + amount only, never PII.
   captureServerEvent("order_completed", order.buyerId, {
@@ -387,7 +389,7 @@ export async function confirmReceipt(
     // Step 22: order completed → notify buyer + seller (funds released).
     void notifyOrderEvent(orderId, "COMPLETED").catch(captureException);
     // Prompt 22: this may be the referred buyer's first completed order → award referrer (CAS-idempotent).
-    void checkAndAwardReferralBonus(buyerUserId).catch(captureException);
+    if (siteConfig.features.referral) void checkAndAwardReferralBonus(buyerUserId).catch(captureException);
   }
 }
 
@@ -673,7 +675,7 @@ export async function runAutoRelease(now = new Date()): Promise<AutoReleaseSumma
         // Step 22: auto-release completed this order → notify buyer + seller.
         void notifyOrderEvent(id, "COMPLETED").catch(captureException);
         // Prompt 22: may be the referred buyer's first completed order → award referrer.
-        void checkAndAwardReferralBonus(buyerId).catch(captureException);
+        if (siteConfig.features.referral) void checkAndAwardReferralBonus(buyerId).catch(captureException);
       }
     } catch (err) {
       console.error(`[auto-release] order ${id} failed`, err);

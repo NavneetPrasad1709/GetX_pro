@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/config/site";
 
 type SidebarItem = { href: string; label: string; icon: LucideIcon; soon?: boolean };
 type SidebarGroup = { heading?: string; items: SidebarItem[] };
@@ -43,8 +44,12 @@ function groupsFor(role: Role): SidebarGroup[] {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
     { href: "/orders", label: "Orders", icon: ShoppingBagIcon },
     { href: "/messages", label: "Messages", icon: MessageSquareIcon },
-    { href: "/loyalty", label: "Rewards", icon: SparklesIcon },
-    { href: "/referrals", label: "Refer & earn", icon: GiftIcon },
+    ...(siteConfig.features.loyalty
+      ? [{ href: "/loyalty", label: "Rewards", icon: SparklesIcon }]
+      : []),
+    ...(siteConfig.features.referral
+      ? [{ href: "/referrals", label: "Refer & earn", icon: GiftIcon }]
+      : []),
   ];
 
   if (role === "ADMIN") {
@@ -82,7 +87,9 @@ function groupsFor(role: Role): SidebarGroup[] {
           { href: "/seller/listings", label: "Listings", icon: PackageIcon },
           { href: "/seller/listings/new", label: "New listing", icon: PlusIcon },
           { href: "/seller/wallet", label: "Wallet", icon: WalletIcon },
-          { href: "/seller/loyalty", label: "Sale rewards", icon: SparklesIcon },
+          ...(siteConfig.features.loyalty
+            ? [{ href: "/seller/loyalty", label: "Sale rewards", icon: SparklesIcon }]
+            : []),
           { href: "/seller/guides", label: "Guides", icon: BookOpenIcon },
           { href: "/seller/subscription", label: "GETX Pro", icon: RocketIcon },
           { href: "/seller/verify", label: "Verify", icon: ShieldCheckIcon },

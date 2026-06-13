@@ -96,6 +96,14 @@ export const siteConfig = {
     markAllReadLimit: 10,
     markAllReadWindowMs: 60_000,
   },
+
+  // Feature flags — turn a whole feature off WITHOUT deleting code, so it can be
+  // re-enabled later with a one-line change. Owner asked to hide refer-and-earn
+  // and rewards/loyalty for now (2026-06-13) — set back to true to bring them back.
+  features: {
+    referral: false, // refer-and-earn: /referrals page, sidebar link, signup referral-code field
+    loyalty: false, // rewards/loyalty points: /loyalty + /seller/loyalty, sidebar links, checkout redeem
+  },
 } as const;
 
 export type SiteConfig = typeof siteConfig;

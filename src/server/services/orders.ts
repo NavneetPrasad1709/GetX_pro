@@ -13,6 +13,7 @@ import {
   computeRedemptionCap,
 } from "@/server/services/loyalty";
 import { pointsToMinorUnits, minorUnitsToPoints } from "@/config/loyalty";
+import { siteConfig } from "@/config/site";
 import { captureServerEvent } from "@/lib/posthog";
 
 /**
@@ -130,7 +131,7 @@ export async function createOrder(
     // — the seller's take and the escrow reconciliation stay untouched). Reusing an open order
     // preserves its earlier redemption rather than redeeming twice.
     let redeemPts = existing ? existing.loyaltyPointsRedeemed : 0;
-    if (!existing && input.redeemPoints && input.redeemPoints > 0) {
+    if (siteConfig.features.loyalty && !existing && input.redeemPoints && input.redeemPoints > 0) {
       const balance = await getLoyaltyBalance(user.id, tx);
       const cap = Math.min(
         computeRedemptionCap(subtotalMinor),

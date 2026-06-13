@@ -23,6 +23,7 @@ import {
 } from "@/server/services/users";
 import { attributeReferralAtSignup } from "@/server/services/referral";
 import { awardSignupBonus } from "@/server/services/loyalty";
+import { siteConfig } from "@/config/site";
 
 /**
  * Auth server actions. Every mutation here re-validates input with Zod,
@@ -80,9 +81,11 @@ export async function registerAction(raw: unknown): Promise<ActionResult> {
   try {
     const { userId, verifyUrl } = await registerUser(parsed.data);
     // Prompt 22: attribute the signup to a referrer (never throws; best-effort).
-    await attributeReferralAtSignup(userId, parsed.data.ref);
+    // Gated: refer-and-earn hidden for now (owner) — see siteConfig.features.referral.
+    if (siteConfig.features.referral) await attributeReferralAtSignup(userId, parsed.data.ref);
     // Step 21: 50-point welcome bonus (idempotent; never throws).
-    await awardSignupBonus(userId);
+    // Gated: rewards/loyalty hidden for now (owner) — see siteConfig.features.loyalty.
+    if (siteConfig.features.loyalty) await awardSignupBonus(userId);
     return { ok: true, devLink: isDev ? verifyUrl : null };
   } catch (err) {
     return toSafeError(err, "registerAction");

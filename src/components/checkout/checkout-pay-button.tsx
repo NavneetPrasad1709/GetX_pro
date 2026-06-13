@@ -8,6 +8,7 @@ import { startPaymentAction } from "@/server/actions/payments";
 import { formatMoney } from "@/lib/money";
 import { ctaVariants } from "@/components/shared/cta-link";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/config/site";
 
 const PROVIDERS: { value: PaymentProvider; label: string; hint: string }[] = [
   { value: "RAZORPAY", label: "UPI / Cards (Razorpay)", hint: "Pay in INR" },
@@ -179,7 +180,7 @@ export function CheckoutPayButton({
           ))}
         </fieldset>
 
-        {maxRedeemablePoints > 0 ? (
+        {siteConfig.features.loyalty && maxRedeemablePoints > 0 ? (
           <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-background p-3 transition-colors has-checked:border-primary/60 has-checked:bg-primary/5">
             <input
               type="checkbox"

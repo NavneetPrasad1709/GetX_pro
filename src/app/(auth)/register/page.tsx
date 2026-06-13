@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { RegisterForm } from "@/components/auth/register-form";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Create account",
@@ -31,7 +32,7 @@ export default async function RegisterPage({ searchParams }: Props) {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <OAuthButtons />
-        <RegisterForm referralCode={ref?.slice(0, 16)} />
+        <RegisterForm referralCode={siteConfig.features.referral ? ref?.slice(0, 16) : undefined} />
       </CardContent>
     </Card>
   );
