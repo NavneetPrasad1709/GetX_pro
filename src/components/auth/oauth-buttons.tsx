@@ -71,7 +71,7 @@ export function OAuthButtons({ callbackUrl }: { callbackUrl?: string }) {
               await signIn("google", { redirectTo });
             }}
           >
-            <Button type="submit" variant="outline" className="w-full">
+            <Button type="submit" variant="outline" className="h-11 w-full gap-2">
               <GoogleIcon /> Continue with Google
             </Button>
           </form>
@@ -83,7 +83,7 @@ export function OAuthButtons({ callbackUrl }: { callbackUrl?: string }) {
               await signIn("discord", { redirectTo });
             }}
           >
-            <Button type="submit" variant="outline" className="w-full">
+            <Button type="submit" variant="outline" className="h-11 w-full gap-2">
               <DiscordIcon /> Continue with Discord
             </Button>
           </form>

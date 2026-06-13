@@ -1,22 +1,27 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { Loader2Icon } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validators/auth";
 import { safeCallbackUrl } from "@/lib/utils";
 import { loginAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/auth/password-input";
 import { TurnstileField } from "@/components/auth/turnstile-field";
+
+const REMEMBER_KEY = "getx-remember-email";
 
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [remember, setRemember] = useState(true);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   const {
@@ -26,8 +31,22 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
+    mode: "onTouched", // real-time: validate on blur, then re-validate as they type
     defaultValues: { email: "", password: "" },
   });
+
+  // Prefill a remembered email (device-local convenience — never a secret).
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(REMEMBER_KEY);
+      if (saved) {
+        setValue("email", saved);
+        setRemember(true);
+      }
+    } catch {
+      /* localStorage blocked — ignore */
+    }
+  }, [setValue]);
 
   async function onSubmit(values: LoginInput) {
     setServerError(null);
@@ -38,14 +57,18 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
       setValue("turnstileToken", undefined);
       return;
     }
+    try {
+      if (remember) localStorage.setItem(REMEMBER_KEY, values.email);
+      else localStorage.removeItem(REMEMBER_KEY);
+    } catch {
+      /* ignore */
+    }
     router.push(safeCallbackUrl(callbackUrl));
     router.refresh(); // re-render server components (header) with the session
   }
 
   return (
     <form
-      // handleSubmit is invoked at event time (not render) — keeps the
-      // turnstile ref access out of render per react-hooks/refs.
       onSubmit={(e) => void handleSubmit(onSubmit)(e)}
       className="flex flex-col gap-4"
       noValidate
@@ -55,8 +78,10 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         <Input
           id="login-email"
           type="email"
+          inputMode="email"
           autoComplete="email"
           placeholder="you@example.com"
+          className="h-11"
           aria-invalid={!!errors.email}
           disabled={isSubmitting}
           {...register("email")}
@@ -78,10 +103,10 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
             Forgot password?
           </Link>
         </div>
-        <Input
+        <PasswordInput
           id="login-password"
-          type="password"
           autoComplete="current-password"
+          placeholder="Your password"
           aria-invalid={!!errors.password}
           disabled={isSubmitting}
           {...register("password")}
@@ -92,6 +117,16 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           </p>
         )}
       </div>
+
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm text-muted-foreground select-none">
+        <input
+          type="checkbox"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+          className="size-4 accent-primary"
+        />
+        Remember my email on this device
+      </label>
 
       <TurnstileField
         ref={turnstileRef}
@@ -107,15 +142,22 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Logging in…" : "Log in"}
+      <Button type="submit" disabled={isSubmitting} className="h-11 w-full">
+        {isSubmitting ? (
+          <>
+            <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
+            Logging in…
+          </>
+        ) : (
+          "Log in"
+        )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         New to GETX?{" "}
         <Link
           href="/register"
-          className="text-foreground underline underline-offset-4"
+          className="font-medium text-foreground underline underline-offset-4"
         >
           Create an account
         </Link>

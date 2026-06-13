@@ -64,8 +64,14 @@ export default async function VerifyEmailPage({
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          <Button render={<Link href="/login" />}>Log in</Button>
-          <Button variant="outline" render={<Link href="/" />}>
+          <Button render={<Link href="/login" />} className="h-11 w-full">
+            Log in
+          </Button>
+          <Button
+            variant="outline"
+            render={<Link href="/" />}
+            className="h-11 w-full"
+          >
             Back to home
           </Button>
         </CardContent>

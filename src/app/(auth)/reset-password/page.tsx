@@ -36,7 +36,10 @@ export default async function ResetPasswordPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button render={<Link href="/forgot-password" />}>
+          <Button
+            render={<Link href="/forgot-password" />}
+            className="h-11 w-full"
+          >
             Request reset link
           </Button>
         </CardContent>

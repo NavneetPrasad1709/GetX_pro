@@ -9,9 +9,13 @@ import {
   type ResetPasswordInput,
 } from "@/lib/validators/auth";
 import { resetPasswordAction } from "@/server/actions/auth";
+import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  PasswordInput,
+  PasswordStrength,
+} from "@/components/auth/password-input";
 
 export function ResetPasswordForm({
   email,
@@ -26,11 +30,15 @@ export function ResetPasswordForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
+    mode: "onTouched",
     defaultValues: { email, token, password: "" },
   });
+
+  const password = watch("password") ?? "";
 
   async function onSubmit(values: ResetPasswordInput) {
     setServerError(null);
@@ -51,19 +59,20 @@ export function ResetPasswordForm({
       {/* email + token ride along via defaultValues; the server re-validates both */}
       <div className="flex flex-col gap-2">
         <Label htmlFor="reset-password">New password</Label>
-        <Input
+        <PasswordInput
           id="reset-password"
-          type="password"
           autoComplete="new-password"
           placeholder="At least 8 characters, 1 letter + 1 number"
           aria-invalid={!!errors.password}
           disabled={isSubmitting}
           {...register("password")}
         />
-        {errors.password && (
+        {errors.password ? (
           <p role="alert" className="text-sm text-destructive">
             {errors.password.message}
           </p>
+        ) : (
+          <PasswordStrength value={password} />
         )}
       </div>
 
@@ -76,8 +85,15 @@ export function ResetPasswordForm({
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Resetting…" : "Reset password"}
+      <Button type="submit" disabled={isSubmitting} className="h-11 w-full">
+        {isSubmitting ? (
+          <>
+            <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
+            Resetting…
+          </>
+        ) : (
+          "Reset password"
+        )}
       </Button>
     </form>
   );

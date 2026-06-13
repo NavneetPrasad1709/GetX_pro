@@ -5,12 +5,16 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
-import { MailCheckIcon } from "lucide-react";
+import { MailCheckIcon, Loader2Icon } from "lucide-react";
 import { registerSchema, type RegisterInput } from "@/lib/validators/auth";
 import { registerAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  PasswordInput,
+  PasswordStrength,
+} from "@/components/auth/password-input";
 import { TurnstileField } from "@/components/auth/turnstile-field";
 import { DevLinkNotice } from "@/components/auth/dev-link-notice";
 
@@ -18,17 +22,22 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [devLink, setDevLink] = useState<string | null>(null);
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [agreed, setAgreed] = useState(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
+    mode: "onTouched", // real-time validation feedback
     defaultValues: { name: "", email: "", password: "", ref: referralCode },
   });
+
+  const password = watch("password") ?? "";
 
   async function onSubmit(values: RegisterInput) {
     setServerError(null);
@@ -48,41 +57,38 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
   if (submittedEmail) {
     return (
       <div className="flex flex-col gap-4 text-center">
-        <MailCheckIcon className="mx-auto size-10 text-primary" />
-        <h2 className="text-lg font-semibold">Check your email</h2>
+        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+          <MailCheckIcon className="size-7" aria-hidden="true" />
+        </span>
+        <h2 className="font-heading text-lg font-semibold">Check your email</h2>
         <p className="text-sm text-muted-foreground">
           We sent a verification link to{" "}
-          <span className="font-medium text-foreground">{submittedEmail}</span>
-          . You can log in right away — verifying unlocks selling.
+          <span className="font-medium text-foreground">{submittedEmail}</span>.
+          You can log in right away — verifying unlocks selling.
         </p>
         {devLink && (
           <DevLinkNotice url={devLink} label="Your verification link:" />
         )}
-        <Button render={<Link href="/login" />}>Go to login</Button>
+        <Button render={<Link href="/login" />} className="h-11 w-full">
+          Go to login
+        </Button>
       </div>
     );
   }
 
   return (
     <form
-      // handleSubmit is invoked at event time (not render) — keeps the
-      // turnstile ref access out of render per react-hooks/refs.
       onSubmit={(e) => void handleSubmit(onSubmit)(e)}
       className="flex flex-col gap-4"
       noValidate
     >
-      {referralCode ? (
-        <p className="rounded-lg bg-primary/10 p-3 text-sm text-primary">
-          🎁 Referral applied — you&apos;ll get welcome credit after sign-up.
-        </p>
-      ) : null}
-
       <div className="flex flex-col gap-2">
         <Label htmlFor="register-name">Name</Label>
         <Input
           id="register-name"
           autoComplete="name"
           placeholder="Ash Ketchum"
+          className="h-11"
           aria-invalid={!!errors.name}
           disabled={isSubmitting}
           {...register("name")}
@@ -99,8 +105,10 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
         <Input
           id="register-email"
           type="email"
+          inputMode="email"
           autoComplete="email"
           placeholder="you@example.com"
+          className="h-11"
           aria-invalid={!!errors.email}
           disabled={isSubmitting}
           {...register("email")}
@@ -114,21 +122,43 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="register-password">Password</Label>
-        <Input
+        <PasswordInput
           id="register-password"
-          type="password"
           autoComplete="new-password"
           placeholder="At least 8 characters, 1 letter + 1 number"
           aria-invalid={!!errors.password}
           disabled={isSubmitting}
           {...register("password")}
         />
-        {errors.password && (
+        {errors.password ? (
           <p role="alert" className="text-sm text-destructive">
             {errors.password.message}
           </p>
+        ) : (
+          <PasswordStrength value={password} />
         )}
       </div>
+
+      <label className="flex cursor-pointer items-start gap-2.5 text-sm text-muted-foreground select-none">
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+          disabled={isSubmitting}
+          className="mt-0.5 size-4 shrink-0 accent-primary"
+        />
+        <span>
+          I agree to GETX&apos;s{" "}
+          <Link
+            href="/terms"
+            target="_blank"
+            className="font-medium text-foreground underline underline-offset-4"
+          >
+            Terms of Service
+          </Link>
+          .
+        </span>
+      </label>
 
       <TurnstileField
         ref={turnstileRef}
@@ -144,15 +174,26 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Creating account…" : "Create account"}
+      <Button
+        type="submit"
+        disabled={isSubmitting || !agreed}
+        className="h-11 w-full"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
+            Creating account…
+          </>
+        ) : (
+          "Create account"
+        )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="text-foreground underline underline-offset-4"
+          className="font-medium text-foreground underline underline-offset-4"
         >
           Log in
         </Link>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2Icon } from "lucide-react";
 import {
   resendVerificationSchema,
   type ResendVerificationInput,
@@ -32,6 +33,7 @@ export function ResendVerificationForm({
     formState: { errors, isSubmitting },
   } = useForm<ResendVerificationInput>({
     resolver: zodResolver(resendVerificationSchema),
+    mode: "onTouched",
     defaultValues: { email: defaultEmail },
   });
 
@@ -70,8 +72,10 @@ export function ResendVerificationForm({
         <Input
           id="resend-email"
           type="email"
+          inputMode="email"
           autoComplete="email"
           placeholder="you@example.com"
+          className="h-11"
           aria-invalid={!!errors.email}
           disabled={isSubmitting}
           {...register("email")}
@@ -89,8 +93,20 @@ export function ResendVerificationForm({
         </p>
       )}
 
-      <Button type="submit" variant="outline" disabled={isSubmitting}>
-        {isSubmitting ? "Sending…" : "Resend verification link"}
+      <Button
+        type="submit"
+        variant="outline"
+        disabled={isSubmitting}
+        className="h-11 w-full"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
+            Sending…
+          </>
+        ) : (
+          "Resend verification link"
+        )}
       </Button>
     </form>
   );

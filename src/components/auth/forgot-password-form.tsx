@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
-import { MailCheckIcon } from "lucide-react";
+import { MailCheckIcon, Loader2Icon } from "lucide-react";
 import {
   forgotPasswordSchema,
   type ForgotPasswordInput,
@@ -30,6 +30,7 @@ export function ForgotPasswordForm() {
     formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
+    mode: "onTouched",
     defaultValues: { email: "" },
   });
 
@@ -56,7 +57,11 @@ export function ForgotPasswordForm() {
           It expires in 1 hour.
         </p>
         {devLink && <DevLinkNotice url={devLink} label="Your reset link:" />}
-        <Button variant="outline" render={<Link href="/login" />}>
+        <Button
+          variant="outline"
+          render={<Link href="/login" />}
+          className="h-11 w-full"
+        >
           Back to login
         </Button>
       </div>
@@ -76,8 +81,10 @@ export function ForgotPasswordForm() {
         <Input
           id="forgot-email"
           type="email"
+          inputMode="email"
           autoComplete="email"
           placeholder="you@example.com"
+          className="h-11"
           aria-invalid={!!errors.email}
           disabled={isSubmitting}
           {...register("email")}
@@ -103,8 +110,15 @@ export function ForgotPasswordForm() {
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Sending…" : "Send reset link"}
+      <Button type="submit" disabled={isSubmitting} className="h-11 w-full">
+        {isSubmitting ? (
+          <>
+            <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
+            Sending…
+          </>
+        ) : (
+          "Send reset link"
+        )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
