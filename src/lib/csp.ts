@@ -47,6 +47,8 @@ export function buildCsp(opts: { nonce?: string; isDev: boolean }): string {
   const socketWs = socketHttp ? socketHttp.replace(/^http/, "ws") : null;
   const turnstile = "https://challenges.cloudflare.com";
   const razorpay = "https://*.razorpay.com";
+  const sumsub = "https://*.sumsub.com"; // Sumsub KYC: SDK iframe + API + static assets
+  const sumsubWs = "wss://*.sumsub.com"; // Sumsub SDK websocket
 
   const scriptSrc = tokens(
     "'self'",
@@ -56,6 +58,7 @@ export function buildCsp(opts: { nonce?: string; isDev: boolean }): string {
     isDev ? "'unsafe-eval'" : null, // Next.js dev HMR needs eval
     turnstile,
     razorpay,
+    sumsub,
   );
 
   const connectSrc = tokens(
@@ -65,6 +68,8 @@ export function buildCsp(opts: { nonce?: string; isDev: boolean }): string {
     socketHttp,
     socketWs,
     razorpay,
+    sumsub,
+    sumsubWs,
     isDev ? "ws://localhost:*" : null,
     isDev ? "http://localhost:*" : null,
   );
@@ -76,10 +81,10 @@ export function buildCsp(opts: { nonce?: string; isDev: boolean }): string {
     `img-src 'self' data: blob: https:`, // R2, avatars, OG, data URIs
     `font-src 'self' data:`,
     `connect-src ${connectSrc}`,
-    `frame-src 'self' ${turnstile} ${razorpay}`, // Turnstile widget + Razorpay checkout
+    `frame-src 'self' ${turnstile} ${razorpay} ${sumsub}`, // Turnstile + Razorpay + Sumsub KYC iframe
     `worker-src 'self' blob:`, // service worker + web workers
     `manifest-src 'self'`,
-    `media-src 'self'`,
+    `media-src 'self' blob:`, // blob: for Sumsub liveness / camera capture
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
