@@ -53,7 +53,7 @@ export default async function VerifyEmailPage({
     return (
       <Card>
         <CardHeader className="items-center text-center">
-          <CheckCircle2Icon className="mx-auto size-10 text-primary" />
+          <CheckCircle2Icon className="mx-auto size-10 animate-in text-primary duration-500 zoom-in-50 fade-in" />
           <CardTitle className="text-xl">
             {outcome.status === "already-verified"
               ? "Email already verified"

@@ -57,7 +57,7 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
   if (submittedEmail) {
     return (
       <div className="flex flex-col gap-4 text-center">
-        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+        <span className="mx-auto grid size-14 animate-in place-items-center rounded-2xl bg-primary/10 text-primary duration-500 zoom-in-50 fade-in">
           <MailCheckIcon className="size-7" aria-hidden="true" />
         </span>
         <h2 className="font-heading text-lg font-semibold">Check your email</h2>

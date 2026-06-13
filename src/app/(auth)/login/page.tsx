@@ -53,12 +53,12 @@ export default async function LoginPage({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {justVerified && (
-          <p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">
+          <p className="animate-in rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary duration-300 fade-in slide-in-from-top-1">
             Email verified — you can log in now.
           </p>
         )}
         {justReset && (
-          <p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">
+          <p className="animate-in rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary duration-300 fade-in slide-in-from-top-1">
             Password updated — log in with your new password.
           </p>
         )}

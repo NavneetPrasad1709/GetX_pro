@@ -50,7 +50,7 @@ export function ForgotPasswordForm() {
   if (submitted) {
     return (
       <div className="flex flex-col gap-4 text-center">
-        <MailCheckIcon className="mx-auto size-10 text-primary" />
+        <MailCheckIcon className="mx-auto size-10 animate-in text-primary duration-500 zoom-in-50 fade-in" />
         <h2 className="text-lg font-semibold">Check your email</h2>
         <p className="text-sm text-muted-foreground">
           If an account exists for that email, we sent a password reset link.
