@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GETX — Color & UI Redesign Preview (SAMPLE)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   GETX redesign tokens (from COLOR_SYSTEM_REDESIGN.md)
+   Same brand: dark + blue #4d7cfe + Poppins — but with an
+   elevation ladder, structural trust-green, depth + shadows.
+   ============================================================ */
+:root{
+  /* elevation ladder */
+  --surface-0:#0a0b0d; --surface-1:#101218; --surface-2:#16181f;
+  --surface-3:#1d212a; --control:#1f232c; --sunken:#14161b;
+  /* text */
+  --fg:#f3f4f6; --fg-muted:#9ca1ab; --faint:#8a8f9a;
+  /* brand: blue = ACTION */
+  --primary:#4d7cfe; --primary-strong:#4169e8; --primary-strong-hover:#3a5fd9; --primary-hover:#5e89ff;
+  /* green = SAFETY (structural) */
+  --trust:#45b483; --trust-strong:#2e9e6e; --trust-bg:rgba(69,180,131,.12); --trust-border:rgba(69,180,131,.32);
+  /* amber = URGENCY/FEATURED */
+  --warm:#f0b429; --warm-bg:rgba(240,180,41,.12); --warm-border:rgba(240,180,41,.32);
+  /* status */
+  --info:#38bdf8; --info-bg:rgba(56,189,248,.12); --info-border:rgba(56,189,248,.30);
+  --danger:#ff5a76; --neutral:#9ca1ab;
+  /* tiers */
+  --tier-bronze:#c08457; --tier-silver:#aab2c0; --tier-gold:#f0b429; --tier-platinum:#5ec4d8; --tier-elite:#4d7cfe;
+  /* lines + depth */
+  --border:rgba(255,255,255,.07); --border-strong:rgba(255,255,255,.12); --hairline-top:rgba(255,255,255,.05);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 8px 24px -8px rgba(0,0,0,.55);
+  --shadow-lg:0 20px 48px -16px rgba(0,0,0,.65);
+  --glow:0 8px 26px -8px rgba(77,124,254,.55);
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:var(--surface-0); color:var(--fg);
+  line-height:1.6; -webkit-font-smoothing:antialiased;
+  position:relative; overflow-x:hidden;
+}
+/* atmosphere: faint noise overlay so surfaces never read perfectly flat */
+body::before{
+  content:""; position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+h1,h2,h3,h4,h5{font-family:Poppins,sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+a{color:inherit;text-decoration:none}
+.mono{font-family:'JetBrains Mono',monospace}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px;position:relative;z-index:2}
+.eyebrow{font-family:Poppins;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--primary)}
+.muted{color:var(--fg-muted)} .faint{color:var(--faint)}
+
+/* ---------- preview chrome ---------- */
+.preview-bar{
+  position:sticky;top:0;z-index:60;background:rgba(16,18,24,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.preview-bar .wrap{display:flex;align-items:center;gap:14px;height:48px;font-size:12.5px}
+.preview-bar b{font-family:Poppins;font-weight:700}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--warm);box-shadow:0 0 0 0 rgba(240,180,41,.5);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.section{padding:64px 0;border-top:1px solid var(--border)}
+.section--alt{background:var(--surface-1)}
+.section__head{margin-bottom:28px}
+.section__head h2{font-size:clamp(22px,3vw,30px);margin-top:6px}
+.section__head p{color:var(--fg-muted);max-width:60ch;margin-top:8px;font-size:14.5px}
+
+/* ---------- buttons / CTA hierarchy ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:Poppins;font-weight:600;
+  border-radius:10px;border:1px solid transparent;cursor:pointer;transition:all .16s ease;white-space:nowrap;font-size:14.5px}
+.btn--lg{height:48px;padding:0 22px;font-size:15.5px}
+.btn--md{height:44px;padding:0 18px}
+.btn--sm{height:36px;padding:0 14px;font-size:13.5px}
+.btn--primary{background:var(--primary-strong);color:#fff;box-shadow:var(--glow)}
+.btn--primary:hover{background:var(--primary-strong-hover);transform:translateY(-1px)}
+.btn--trust{background:var(--trust-strong);color:#04140d}
+.btn--trust:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn--secondary{background:var(--control);color:var(--fg);border-color:var(--border-strong)}
+.btn--secondary:hover{background:#262b35}
+.btn--ghost{background:transparent;color:var(--fg-muted)}
+.btn--ghost:hover{background:var(--control);color:var(--fg)}
+.btn--danger{background:rgba(255,90,118,.12);color:var(--danger)}
+
+/* ---------- pills / badges ---------- */
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:Poppins;font-weight:600;font-size:11.5px;
+  padding:4px 10px;border-radius:999px;border:1px solid var(--border)}
+.pill--glass{background:rgba(255,255,255,.04);color:var(--fg-muted);backdrop-filter:blur(8px)}
+.pill--info{background:var(--info-bg);border-color:var(--info-border);color:var(--info)}
+.pill--trust{background:var(--trust-bg);border-color:var(--trust-border);color:var(--trust)}
+.pill--warm{background:var(--warm-bg);border-color:var(--warm-border);color:var(--warm)}
+.pill--danger{background:rgba(255,90,118,.12);border-color:rgba(255,90,118,.3);color:var(--danger)}
+.pill--neutral{background:var(--control);color:var(--fg-muted)}
+
+.tier{display:inline-flex;align-items:center;gap:6px;font-family:Poppins;font-weight:700;font-size:11px;
+  padding:3px 9px;border-radius:7px;letter-spacing:.02em}
+.tier::before{content:"";width:7px;height:7px;border-radius:2px;background:currentColor}
+.tier--bronze{color:var(--tier-bronze);background:rgba(192,132,87,.12);border:1px solid rgba(192,132,87,.3)}
+.tier--silver{color:var(--tier-silver);background:rgba(170,178,192,.12);border:1px solid rgba(170,178,192,.3)}
+.tier--gold{color:var(--tier-gold);background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.3)}
+.tier--platinum{color:var(--tier-platinum);background:rgba(94,196,216,.12);border:1px solid rgba(94,196,216,.3)}
+.tier--elite{color:var(--tier-elite);background:linear-gradient(135deg,rgba(77,124,254,.18),rgba(94,137,255,.06));border:1px solid rgba(77,124,254,.4)}
+
+/* trust score pill (unified) */
+.tscore{display:inline-flex;align-items:center;gap:5px;font-family:Poppins;font-weight:700;font-size:12px;padding:3px 9px;border-radius:7px}
+.tscore--high{color:var(--trust);background:var(--trust-bg)}
+.tscore--mid{color:var(--primary);background:rgba(77,124,254,.12)}
+.tscore--low{color:var(--warm);background:var(--warm-bg)}
+.tscore--crit{color:var(--danger);background:rgba(255,90,118,.12)}
+
+/* ---------- card (one elevated system) ---------- */
+.card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm),inset 0 1px 0 var(--hairline-top);transition:transform .18s ease,box-shadow .18s ease}
+.card--hover:hover{transform:translateY(-3px);box-shadow:var(--shadow-md),inset 0 1px 0 var(--hairline-top)}
+.panel-trust{background:var(--trust-bg);border:1px solid var(--trust-border);border-radius:12px}
+
+/* ============================================================ HERO */
+.hero{position:relative;overflow:hidden;padding:44px 0 36px;text-align:center;border-top:none}
+.hero__bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hero__aurora{position:absolute;top:-18%;left:50%;width:78vw;height:60vh;transform:translateX(-50%);
+  filter:blur(90px);
+  background:radial-gradient(circle at 50% 42%,rgba(77,124,254,.30),rgba(69,180,131,.13) 46%,transparent 70%)}
+.hero__grid{position:absolute;inset:0;background-size:54px 54px;
+  background-image:linear-gradient(to right,rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.03) 1px,transparent 1px);
+  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 20%,#000,transparent 76%);mask-image:radial-gradient(ellipse 70% 60% at 50% 20%,#000,transparent 76%)}
+.hero h1{font-size:clamp(33px,5.4vw,52px);font-weight:800;max-width:18ch;margin:14px auto 0}
+.hero .grad{background:linear-gradient(100deg,var(--primary),var(--trust));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.sub{color:var(--fg-muted);max-width:44ch;margin:12px auto 0;font-size:clamp(15px,1.8vw,17px)}
+/* ONE big search */
+.search{display:flex;align-items:center;gap:0;max-width:640px;margin:22px auto 0;background:var(--surface-2);
+  border:1px solid var(--border-strong);border-radius:14px;box-shadow:var(--shadow-md);overflow:hidden;height:58px}
+.search .seldrop{display:flex;align-items:center;gap:8px;padding:0 16px;border-right:1px solid var(--border);color:var(--fg-muted);font-weight:600;font-size:14px;font-family:Poppins;height:100%;white-space:nowrap}
+.search input{flex:1;background:transparent;border:0;outline:none;color:var(--fg);font-size:15.5px;padding:0 16px;height:100%}
+.search input::placeholder{color:var(--faint)}
+.search .btn{margin:7px;border-radius:10px;height:44px}
+.hero__badges{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:16px}
+.peek{margin-top:14px;color:var(--faint);font-size:13px}
+
+/* ============================================================ PRODUCT RAIL */
+.rail{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.rail{grid-template-columns:repeat(2,1fr)}}
+.pcard{overflow:hidden;display:flex;flex-direction:column}
+.pcard__cover{position:relative;aspect-ratio:16/10;display:flex;align-items:flex-end;padding:10px}
+.pcard__heart{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+  background:rgba(10,11,13,.5);border:1px solid var(--border);backdrop-filter:blur(8px);color:var(--fg);cursor:pointer;transition:.15s}
+.pcard__heart:hover{color:var(--danger);border-color:rgba(255,90,118,.4)}
+.cv1{background:radial-gradient(120% 120% at 20% 0%,#1b2a4a,transparent),linear-gradient(135deg,#0e1730,#0a0b0d)}
+.cv2{background:radial-gradient(120% 120% at 20% 0%,#143324,transparent),linear-gradient(135deg,#0c1f17,#0a0b0d)}
+.cv3{background:radial-gradient(120% 120% at 20% 0%,#3a1430,transparent),linear-gradient(135deg,#23101e,#0a0b0d)}
+.cv4{background:radial-gradient(120% 120% at 20% 0%,#3a2e10,transparent),linear-gradient(135deg,#221c0c,#0a0b0d)}
+.pcard__game{font-family:Poppins;font-weight:700;font-size:12px;color:var(--fg);opacity:.92;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.pcard__body{padding:13px 14px 15px;display:flex;flex-direction:column;gap:9px}
+.pcard__title{font-family:Poppins;font-weight:600;font-size:14.5px;line-height:1.3}
+.pcard__meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.pcard__seller{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--fg-muted)}
+.avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--trust));flex:none}
+.pcard__foot{display:flex;align-items:center;justify-content:space-between;margin-top:2px}
+.price{font-family:Poppins;font-weight:800;font-size:19px}
+.price small{font-weight:600;color:var(--faint);font-size:12px}
+.proof{font-size:11.5px;color:var(--faint);display:flex;align-items:center;gap:5px}
+
+/* ============================================================ PDP */
+.pdp{display:grid;grid-template-columns:1.1fr .9fr;gap:24px}
+@media(max-width:900px){.pdp{grid-template-columns:1fr}}
+.pdp__gallery{aspect-ratio:4/3;border-radius:var(--radius);position:relative;display:flex;align-items:flex-end;padding:16px;
+  background:radial-gradient(120% 120% at 25% 0%,#1b2a4a,transparent),linear-gradient(135deg,#0e1730,#0a0b0d);border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.buybox{padding:20px;display:flex;flex-direction:column;gap:14px}
+.buybox h3{font-size:18px}
+.buybox .pdp-price{font-family:Poppins;font-weight:800;font-size:30px}
+.qty{display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:10px;overflow:hidden;width:fit-content}
+.qty button{width:40px;height:40px;background:var(--control);border:0;color:var(--fg);font-size:18px;cursor:pointer}
+.qty span{width:54px;text-align:center;font-family:Poppins;font-weight:600}
+.seal{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:12px;background:var(--trust-bg);border:1px solid var(--trust-border)}
+.seal__icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:rgba(69,180,131,.18);color:var(--trust);flex:none}
+.seal b{font-family:Poppins}
+.escrow{display:flex;flex-direction:column;gap:9px;padding:14px;border-radius:12px;background:var(--trust-bg);border:1px solid var(--trust-border)}
+.escrow .step{display:flex;align-items:center;gap:10px;font-size:13px}
+.escrow .num{width:22px;height:22px;border-radius:50%;background:rgba(69,180,131,.2);color:var(--trust);display:grid;place-items:center;font-weight:700;font-size:11px;font-family:Poppins;flex:none}
+.sellerrow{display:flex;align-items:center;gap:11px;padding:13px;border-radius:12px;background:var(--surface-1);border:1px solid var(--border)}
+
+/* swatches */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sw{border-radius:12px;border:1px solid var(--border);overflow:hidden;background:var(--surface-2);box-shadow:var(--shadow-sm)}
+.sw__chip{height:64px}
+.sw__label{padding:9px 11px;font-size:11.5px}
+.sw__label b{font-family:Poppins;font-weight:600;display:block;font-size:12.5px}
+
+/* elevation demo */
+.elev{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:760px){.elev{grid-template-columns:repeat(2,1fr)}}
+.elev .lvl{border-radius:12px;border:1px solid var(--border);padding:18px 14px;text-align:center;font-size:12px;color:var(--fg-muted)}
+.elev .lvl b{display:block;font-family:Poppins;color:var(--fg);font-size:13px;margin-bottom:3px}
+.l0{background:var(--surface-0)} .l1{background:var(--surface-1)}
+.l2{background:var(--surface-2);box-shadow:var(--shadow-sm),inset 0 1px 0 var(--hairline-top)}
+.l3{background:var(--surface-3);box-shadow:var(--shadow-md)}
+.lc{background:var(--control)}
+
+/* before/after */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:760px){.ba{grid-template-columns:1fr}}
+.ba__col h4{font-size:13px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.flat-card{background:#14161b;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px}
+.flat-card *{color:#9ca1ab}
+.tag-old{color:var(--danger);font-size:11px;font-weight:700;font-family:Poppins;text-transform:uppercase;letter-spacing:.06em}
+.tag-new{color:var(--trust);font-size:11px;font-weight:700;font-family:Poppins;text-transform:uppercase;letter-spacing:.06em}
+
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stack{display:flex;flex-direction:column;gap:10px}
+.foot{padding:34px 0;border-top:1px solid var(--border);color:var(--faint);font-size:12.5px;text-align:center}
+.logo{font-family:Poppins;font-weight:800;font-size:20px;letter-spacing:-.03em}
+.logo span{color:var(--primary)}
+</style>
+</head>
+<body>
+
+<!-- preview chrome -->
+<div class="preview-bar"><div class="wrap">
+  <span class="dot"></span>
+  <b>GETX — Redesign Preview</b>
+  <span class="muted">SAMPLE only · not yet applied to the live app · approve → we finalize</span>
+</div></div>
+
+<!-- ============================== HERO (shorter, ONE big search) -->
+<header class="hero">
+  <div class="hero__bg"><div class="hero__aurora"></div><div class="hero__grid"></div></div>
+  <div class="wrap">
+    <span class="pill pill--glass"><span class="dot" style="background:var(--trust)"></span> Now live · Escrow-protected &amp; <b style="color:var(--fg);font-weight:700">trusted sellers</b></span>
+    <h1>Buy &amp; sell game accounts, <span class="grad">safely</span>.</h1>
+    <p class="sub">Pay safely, get it instantly, and we hold the money in escrow until you're happy.</p>
+
+    <div class="search">
+      <div class="seldrop">All games ▾</div>
+      <input placeholder="Search Pokémon GO accounts, coins, boosting…" />
+      <button class="btn btn--primary">🔍 Search</button>
+    </div>
+
+    <div class="hero__badges">
+      <span class="pill pill--info">🛡 Escrow-protected</span>
+      <span class="pill pill--trust">↩ Money-back guarantee</span>
+      <span class="pill pill--warm">⚡ Instant delivery</span>
+      <span class="pill pill--glass">⚖ AI Dispute Judge</span>
+    </div>
+    <p class="peek">↓ Shorter hero — real listings start right below the fold</p>
+  </div>
+</header>
+
+<!-- ============================== FRESH LISTINGS (real product cards) -->
+<section class="section">
+  <div class="wrap">
+    <div class="section__head row" style="justify-content:space-between">
+      <div><span class="eyebrow">Fresh on GETX</span><h2>New &amp; trending listings</h2></div>
+      <a class="btn btn--secondary btn--sm">View all →</a>
+    </div>
+    <div class="rail">
+
+      <article class="card card--hover pcard">
+        <div class="pcard__cover cv1"><button class="pcard__heart" title="Save">♡</button><span class="pcard__game">Pokémon GO</span></div>
+        <div class="pcard__body">
+          <div class="pcard__title">Lv.45 Account · 3 Shiny Legendaries · 250k Stardust</div>
+          <div class="pcard__meta"><span class="pill pill--info">⚡ Instant</span><span class="pill pill--warm">1 of 1</span></div>
+          <div class="pcard__seller"><span class="avatar"></span> PoGoLegends <span class="tier tier--gold">GOLD</span> <span class="tscore tscore--high">🛡 92</span></div>
+          <div class="pcard__foot">
+            <div class="price">$74.99 <small></small></div>
+            <span class="proof">★ 4.9 · sold 47×</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card card--hover pcard">
+        <div class="pcard__cover cv2"><button class="pcard__heart" title="Save">♡</button><span class="pcard__game">Clash of Clans</span></div>
+        <div class="pcard__body">
+          <div class="pcard__title">TH15 Max · Legend League · 14 Heroes Maxed</div>
+          <div class="pcard__meta"><span class="pill pill--info">⚡ Instant</span><span class="pill pill--trust">Verified seller</span></div>
+          <div class="pcard__seller"><span class="avatar"></span> ClashKings <span class="tier tier--platinum">PLATINUM</span> <span class="tscore tscore--high">🛡 88</span></div>
+          <div class="pcard__foot">
+            <div class="price">$129.00</div>
+            <span class="proof">★ 5.0 · 12 viewing</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card card--hover pcard">
+        <div class="pcard__cover cv3"><button class="pcard__heart" title="Save">♡</button><span class="pcard__game">Valorant</span></div>
+        <div class="pcard__body">
+          <div class="pcard__title">Immortal 2 · 38 Skins · Reaver Vandal + Knife</div>
+          <div class="pcard__meta"><span class="pill pill--neutral">Manual · ~1h</span></div>
+          <div class="pcard__seller"><span class="avatar"></span> SkinVault <span class="tier tier--silver">SILVER</span> <span class="tscore tscore--mid">🛡 74</span></div>
+          <div class="pcard__foot">
+            <div class="price">$59.99</div>
+            <span class="proof">★ 4.7 · sold 18×</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card card--hover pcard">
+        <div class="pcard__cover cv4"><button class="pcard__heart" title="Save">♡</button><span class="pcard__game">Free Fire</span></div>
+        <div class="pcard__body">
+          <div class="pcard__title">1,060 Diamonds Top-up · Instant to your UID</div>
+          <div class="pcard__meta"><span class="pill pill--info">⚡ Instant</span><span class="pill pill--warm">Selling fast</span></div>
+          <div class="pcard__seller"><span class="avatar"></span> TopUpPro <span class="tier tier--bronze">BRONZE</span> <span class="tscore tscore--mid">🛡 68</span></div>
+          <div class="pcard__foot">
+            <div class="price">$9.49</div>
+            <span class="proof">★ 4.6 · sold 9×</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PDP buy box -->
+<section class="section section--alt">
+  <div class="wrap">
+    <div class="section__head"><span class="eyebrow">Listing detail</span><h2>Buy box — trust made visible</h2>
+      <p>Green = safety. The money-back seal sits right beside the buy button, and escrow is a bold panel — not faint grey text.</p></div>
+    <div class="pdp">
+      <div class="pdp__gallery"><span class="pcard__game">Pokémon GO · Lv.45 · 3 Shiny Legendaries</span></div>
+      <div class="card buybox">
+        <div class="row" style="justify-content:space-between">
+          <span class="pill pill--warm">1 of 1 — once it's gone, it's gone</span>
+          <span class="proof">👁 12 viewing this week</span>
+        </div>
+        <h3>Lv.45 Account · 3 Shiny Legendaries · 250k Stardust</h3>
+        <div class="pdp-price">$74.99</div>
+        <div class="row">
+          <div class="qty"><button>−</button><span>1</span><button>+</button></div>
+          <span class="faint" style="font-size:12.5px">+ 5% buyer protection fee at checkout</span>
+        </div>
+
+        <div class="seal">
+          <div class="seal__icon">🛡</div>
+          <div><b>100% Money-Back Guarantee</b><div class="faint" style="font-size:12px">Full refund incl. fees if not as described — decided in 48h.</div></div>
+        </div>
+
+        <button class="btn btn--primary btn--lg" style="width:100%">Buy now — $74.99</button>
+        <button class="btn btn--secondary btn--md" style="width:100%">💬 Chat with seller</button>
+
+        <div class="escrow">
+          <div class="row" style="gap:8px"><b style="color:var(--trust);font-family:Poppins">🔒 Protected by escrow</b></div>
+          <div class="step"><span class="num">1</span> You pay — we hold the money safely</div>
+          <div class="step"><span class="num">2</span> Seller delivers instantly</div>
+          <div class="step"><span class="num">3</span> Money released only when you confirm</div>
+        </div>
+
+        <div class="sellerrow">
+          <span class="avatar" style="width:38px;height:38px"></span>
+          <div style="flex:1">
+            <div class="row" style="gap:7px"><b style="font-family:Poppins;font-size:14px">PoGoLegends</b><span class="tier tier--gold">GOLD</span></div>
+            <div class="proof">★ 4.9 (212) · 340 sales · last sale 2h ago</div>
+          </div>
+          <span class="tscore tscore--high">🛡 92</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PALETTE -->
+<section class="section">
+  <div class="wrap">
+    <div class="section__head"><span class="eyebrow">Foundations</span><h2>The palette — disciplined, not flat</h2>
+      <p>One meaning per colour: <b style="color:var(--primary)">blue = action</b>, <b style="color:var(--trust)">green = safety</b>, <b style="color:var(--warm)">amber = urgency</b>, <b style="color:var(--info)">cyan = info</b>. Everything else is text &amp; lines.</p></div>
+    <div class="swatches">
+      <div class="sw"><div class="sw__chip" style="background:var(--primary-strong)"></div><div class="sw__label"><b>Primary / Action</b><span class="mono muted">#4169e8</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--trust)"></div><div class="sw__label"><b>Trust / Safety</b><span class="mono muted">#45b483</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--warm)"></div><div class="sw__label"><b>Urgency / Featured</b><span class="mono muted">#f0b429</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--info)"></div><div class="sw__label"><b>Info</b><span class="mono muted">#38bdf8</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--danger)"></div><div class="sw__label"><b>Danger</b><span class="mono muted">#ff5a76</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--surface-2);border-bottom:1px solid var(--border)"></div><div class="sw__label"><b>Card surface</b><span class="mono muted">#16181f</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--fg)"></div><div class="sw__label"><b>Text</b><span class="mono muted">#f3f4f6</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:var(--fg-muted)"></div><div class="sw__label"><b>Muted text</b><span class="mono muted">#9ca1ab</span></div></div>
+    </div>
+
+    <div class="section__head" style="margin-top:40px"><h2 style="font-size:20px">Elevation ladder — the depth fix</h2>
+      <p>The whole "flat / AI-looking" feeling came from one surface for everything. Now surfaces step up; cards lift off the canvas.</p></div>
+    <div class="elev">
+      <div class="lvl l0"><b>surface-0</b>app canvas</div>
+      <div class="lvl l1"><b>surface-1</b>section bands</div>
+      <div class="lvl l2"><b>surface-2</b>cards (lift)</div>
+      <div class="lvl l3"><b>surface-3</b>dialogs / sticky</div>
+      <div class="lvl lc"><b>control</b>inputs / chips</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== COMPONENTS -->
+<section class="section section--alt">
+  <div class="wrap">
+    <div class="section__head"><span class="eyebrow">Components</span><h2>Badges, tiers, CTAs</h2></div>
+
+    <div class="stack" style="gap:22px">
+      <div>
+        <div class="faint" style="font-size:12px;margin-bottom:9px">Trust score — one colour scale everywhere (pill = card = panel)</div>
+        <div class="row"><span class="tscore tscore--high">🛡 92 High</span><span class="tscore tscore--mid">🛡 74 Good</span><span class="tscore tscore--low">🛡 52 Building</span><span class="tscore tscore--crit">🛡 31 New</span></div>
+      </div>
+      <div>
+        <div class="faint" style="font-size:12px;margin-bottom:9px">Seller levels — tier colours from tokens (no more off-palette literals)</div>
+        <div class="row"><span class="tier tier--bronze">BRONZE</span><span class="tier tier--silver">SILVER</span><span class="tier tier--gold">GOLD</span><span class="tier tier--platinum">PLATINUM</span><span class="tier tier--elite">ELITE</span></div>
+      </div>
+      <div>
+        <div class="faint" style="font-size:12px;margin-bottom:9px">Order status — semantic tokens (info / success / warning / danger / neutral)</div>
+        <div class="row"><span class="pill pill--info">Paid</span><span class="pill pill--trust">Completed</span><span class="pill pill--warm">Action needed</span><span class="pill pill--danger">Disputed</span><span class="pill pill--neutral">Cancelled</span></div>
+      </div>
+      <div>
+        <div class="faint" style="font-size:12px;margin-bottom:9px">CTA hierarchy — bigger, clearer (44–48px tap targets)</div>
+        <div class="row"><button class="btn btn--primary btn--lg">Buy now</button><button class="btn btn--trust btn--md">Request payout</button><button class="btn btn--secondary btn--md">Save</button><button class="btn btn--ghost btn--md">Cancel</button><button class="btn btn--danger btn--md">Remove</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== BEFORE / AFTER -->
+<section class="section">
+  <div class="wrap">
+    <div class="section__head"><span class="eyebrow">The difference</span><h2>Before → After</h2>
+      <p>Same content, same brand. The new version has depth, a green safety panel, a visible guarantee, and a clear price/CTA — it stops reading as a flat template.</p></div>
+    <div class="ba">
+      <div class="ba__col">
+        <h4><span class="tag-old">● Before (flat)</span></h4>
+        <div class="flat-card">
+          <div style="font-family:Poppins;font-weight:600;color:#f3f4f6;font-size:14px">Lv.45 Pokémon GO Account</div>
+          <div style="margin-top:8px">Seller: PoGoLegends · Verified · Trust 92</div>
+          <div style="margin-top:8px;color:#f3f4f6;font-family:Poppins;font-weight:700;font-size:18px">₹6,199</div>
+          <div style="margin-top:10px;font-size:12px">Escrow protected — the seller receives nothing until you confirm.</div>
+          <button style="margin-top:12px;width:100%;height:34px;background:#4d7cfe;color:#fff;border:0;border-radius:8px;font-family:Poppins;font-weight:600">Buy now</button>
+        </div>
+      </div>
+      <div class="ba__col">
+        <h4><span class="tag-new">● After (elevated)</span></h4>
+        <div class="card pcard" style="max-width:none">
+          <div class="pcard__cover cv1" style="aspect-ratio:16/7"><button class="pcard__heart">♡</button><span class="pcard__game">Pokémon GO</span></div>
+          <div class="pcard__body">
+            <div class="pcard__title">Lv.45 Account · 3 Shiny Legendaries</div>
+            <div class="pcard__seller"><span class="avatar"></span> PoGoLegends <span class="tier tier--gold">GOLD</span> <span class="tscore tscore--high">🛡 92</span></div>
+            <div class="seal" style="padding:9px 11px"><div class="seal__icon" style="width:30px;height:30px">🛡</div><div><b style="font-size:13px">Money-back guarantee</b></div></div>
+            <div class="pcard__foot"><div class="price">$74.99</div><span class="proof">★ 4.9 · sold 47×</span></div>
+            <button class="btn btn--primary btn--md" style="width:100%">Buy now — $74.99</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot"><div class="wrap stack" style="align-items:center;gap:8px">
+  <div class="logo">GET<span>X</span></div>
+  <div>Redesign sample — dark + blue + Poppins kept · depth, trust-green &amp; USD added · no payment-method row.</div>
+  <div class="faint">© 2026 GETX — preview only.</div>
+</div></footer>
+
+</body>
+</html>

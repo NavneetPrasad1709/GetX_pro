@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GETX — How it works (section preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ===========================================================================
+   GETX "How it works" — auto-playing 4-step buyer flow with a live phone
+   mockup whose screen swaps per step. Locked design: Manrope, blue+green,
+   Lucide icons, no emoji, USD, neutral payment labels, free money-back.
+   =========================================================================== */
+:root{
+  --bg:#0d0f14; --card:#171a22; --card-2:#1c2029; --hover:#222734;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --ink:#eef1f6; --muted:#969db0; --faint:#646b7c;
+  --blue:#4d7cfe; --blue-hi:#6d92ff; --blue-soft:rgba(77,124,254,.13);
+  --green:#19c37d; --green-hi:#23d98c; --green-soft:rgba(25,195,125,.13); --green-bd:rgba(25,195,125,.34);
+  --amber:#f5b73d;
+  --c-pogo:#3b74f5; --c-val:#ff4655; --c-clash:#f5a623;
+  --r:10px; --r-lg:14px; --r-xl:18px; --r-pill:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;font-size:14.5px}
+h1,h2,h3,h4{font-weight:800;letter-spacing:-.022em;line-height:1.1}
+.wrap{max-width:1140px;margin:0 auto;padding:0 22px}
+.ic{width:17px;height:17px;stroke-width:2;vertical-align:middle}.ic-sm{width:14px;height:14px}.ic-xs{width:11px;height:11px}
+.muted{color:var(--muted)}.faint{color:var(--faint)}.mono{font-family:ui-monospace,'SF Mono',Menlo,monospace}
+
+/* section */
+.section{padding:78px 0;position:relative;overflow:hidden}
+.section::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 28% 36%,var(--blue-soft),transparent 64%)}
+.section>*{position:relative}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:42px}
+.head h2{font-size:clamp(28px,4.6vw,48px);max-width:14ch;line-height:.98}
+.head h2 em{font-style:italic;font-weight:300;color:var(--blue)}
+.head p{color:var(--muted);font-size:14.5px;max-width:34ch;margin-top:12px}
+.livepill{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:7px 13px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.livepill .blip{position:relative;width:7px;height:7px}
+.livepill .blip i{position:absolute;inset:0;border-radius:50%;background:var(--green)}
+.livepill .blip .ping{animation:ping 1.6s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{75%,100%{transform:scale(2.4);opacity:0}}
+
+/* layout split */
+.split{display:grid;grid-template-columns:1fr 360px;gap:54px;align-items:center}
+@media(max-width:900px){.split{grid-template-columns:1fr;gap:36px}.phonewrap{order:-1}}
+
+/* step list */
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{position:relative;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r-xl);
+  padding:18px 20px;cursor:pointer;overflow:hidden;transition:border-color .25s,box-shadow .25s,transform .2s}
+.step:hover{border-color:var(--line-2)}
+.step.active{box-shadow:0 16px 38px -16px rgba(77,124,254,.4),0 0 0 1.5px rgba(77,124,254,.55)}
+.step .top{display:flex;align-items:center;gap:16px}
+.step .num{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:15px;flex:none;
+  background:var(--blue-soft);color:var(--blue);transition:.3s}
+.step.active .num{background:var(--blue);color:#fff;box-shadow:0 6px 18px -5px rgba(77,124,254,.7)}
+.step.done .num{background:var(--green);color:#04140d}
+.step .ttl{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.step .ttl .ic{color:var(--faint)}.step.active .ttl .ic{color:var(--blue)}
+.step .ttl h3{font-size:16px;font-weight:700;color:var(--muted)}.step.active .ttl h3{color:var(--ink)}
+.step .bd{font-size:12.8px;color:var(--muted);line-height:1.5}
+.step .bar{position:absolute;left:0;bottom:0;height:2.5px;width:0;background:linear-gradient(90deg,var(--blue),var(--blue-hi));border-radius:0 3px 0 0}
+.step.active .bar.run{width:100%;transition:width 3s linear}
+
+/* phone */
+.phonewrap{display:flex;justify-content:center}
+.phone{position:relative;width:300px;height:600px;border-radius:46px;background:#0a0d14;padding:9px;
+  box-shadow:inset 0 0 0 2px #2a2f3a,inset 0 0 0 7px #05070c,0 50px 90px -30px rgba(0,0,0,.85),0 20px 40px -20px rgba(0,0,0,.7)}
+.screen{position:absolute;inset:9px;border-radius:38px;overflow:hidden;background:linear-gradient(180deg,#0b1020,#070a12)}
+.notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:96px;height:26px;background:#000;border-radius:14px;z-index:60;display:flex;align-items:center;justify-content:flex-end;padding-right:11px}
+.notch i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.glare{position:absolute;inset:0;z-index:40;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.07),transparent 42%)}
+.panes{position:absolute;inset:0}
+.pane{position:absolute;inset:0;padding:46px 16px 18px;opacity:0;transform:translateY(10px) scale(.99);transition:opacity .45s,transform .45s;pointer-events:none;display:flex;flex-direction:column}
+.pane.on{opacity:1;transform:none;pointer-events:auto}
+.plabel{font-size:8.5px;text-transform:uppercase;letter-spacing:.22em;color:rgba(255,255,255,.55);font-weight:700;margin-bottom:7px}
+/* phone bits */
+.psearch{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-pill);padding:8px 12px;margin-bottom:10px}
+.psearch .ic{color:rgba(255,255,255,.8)}.psearch span{font-size:10.5px;color:rgba(255,255,255,.7);font-weight:500}
+.listing{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px;margin-bottom:8px}
+.listing .thumb{aspect-ratio:16/9;border-radius:8px;margin-bottom:7px}
+.listing .lr{display:flex;align-items:center;justify-content:space-between}
+.listing .nm{font-size:10px;font-weight:700;color:rgba(255,255,255,.92)}
+.listing .pr{font-size:10.5px;font-weight:800;color:var(--blue-hi);font-family:ui-monospace,monospace}
+.listing .rt{display:flex;align-items:center;gap:3px;font-size:8.5px;color:rgba(255,255,255,.7);margin-top:3px}
+.listing .rt .ic{color:var(--amber);width:10px;height:10px}
+.pamt{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.02em}
+.pdesc{font-size:9.5px;color:rgba(255,255,255,.7);margin-bottom:14px}
+.pm{display:flex;align-items:center;justify-content:space-between;border-radius:10px;padding:10px 12px;margin-bottom:7px;font-size:10.5px;font-weight:600}
+.pm.act{background:var(--blue-soft);border:1px solid rgba(77,124,254,.5);color:#fff}
+.pm.idle{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.82)}
+.pm .l{display:flex;align-items:center;gap:8px}.pm .l .ic{width:14px;height:14px}
+.pm .chk{width:16px;height:16px;border-radius:50%;background:var(--blue);display:grid;place-items:center}.pm .chk .ic{color:#fff;width:10px;height:10px}
+.pm .dot{width:15px;height:15px;border-radius:50%;border:1.5px solid rgba(255,255,255,.25)}
+.pnote{display:inline-flex;align-items:center;gap:7px;background:var(--green-soft);border:1px solid var(--green-bd);border-radius:9px;padding:7px 11px;font-size:9.5px;font-weight:700;color:var(--green-hi);margin-top:auto}
+.pbtn{margin-top:8px;width:100%;border:0;border-radius:var(--r-pill);padding:11px;font-family:Manrope;font-weight:800;font-size:11.5px;cursor:pointer}
+.pbtn.blue{background:linear-gradient(180deg,var(--blue-hi),var(--blue));color:#fff;box-shadow:0 6px 16px -6px rgba(77,124,254,.6)}
+.pbtn.green{background:var(--green);color:#04140d}
+/* escrow + delivered */
+.lockwrap{position:relative;margin:18px auto 6px;width:72px;height:72px}
+.lockwrap .glow{position:absolute;inset:-12px;border-radius:50%;filter:blur(18px);opacity:.6}
+.lockwrap .orb{position:relative;width:72px;height:72px;border-radius:50%;display:grid;place-items:center}
+.lockwrap.blue .glow{background:var(--blue)}.lockwrap.blue .orb{background:linear-gradient(135deg,var(--blue-hi),var(--blue));box-shadow:0 0 26px rgba(77,124,254,.5)}
+.lockwrap.green .glow{background:var(--green)}.lockwrap.green .orb{background:var(--green);box-shadow:0 0 26px rgba(25,195,125,.55)}
+.lockwrap .orb .ic{color:#fff;width:30px;height:30px}.lockwrap.green .orb .ic{color:#04140d}
+.pane.center{align-items:center;text-align:center}
+.ph3{font-size:15px;font-weight:800;color:#fff}.psub{font-size:9.5px;color:rgba(255,255,255,.7);margin-top:3px}
+.insp{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:11px;margin-top:16px;text-align:left}
+.insp .ir{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:9px}
+.insp .ir .l{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-family:ui-monospace,monospace}
+.insp .ir .t{font-family:ui-monospace,monospace;color:var(--blue-hi);font-weight:800}
+.insp .track{height:4px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.insp .track i{display:block;height:100%;width:14%;background:linear-gradient(90deg,var(--blue),var(--blue-hi))}
+.cred{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:11px;margin-top:16px;text-align:left}
+.cred .lab{font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.6);margin-bottom:4px;font-weight:700}
+.cred .val{font-family:ui-monospace,monospace;font-size:10px;color:rgba(255,255,255,.92)}
+
+.pv{position:fixed;bottom:13px;left:50%;transform:translateX(-50%);z-index:80;background:rgba(20,22,28,.94);border:1px solid var(--line-2);border-radius:var(--r-pill);padding:7px 15px;font-size:11px;color:var(--muted)}.pv b{color:var(--blue)}
+@media(prefers-reduced-motion:reduce){.step.active .bar.run{transition:none;width:100%}}
+</style>
+</head>
+<body>
+
+<section class="section" id="how" aria-label="How GETX works">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <h2>From pick to play in <em>five minutes</em>.</h2>
+        <p>Watch the flow — each step shows the actual screen you&apos;ll see.</p>
+      </div>
+      <button class="livepill" id="liveToggle" aria-label="Pause or play demo">
+        <span class="blip"><span class="ping" style="position:absolute;inset:0;border-radius:50%;background:var(--green);opacity:.6"></span><i></i></span>
+        <span id="liveLabel">Live demo</span>
+        <i data-lucide="pause" class="ic-sm" id="liveIcon"></i>
+      </button>
+    </div>
+
+    <div class="split">
+      <!-- STEP LIST -->
+      <div class="steps" id="steps">
+        <button class="step" data-i="0">
+          <div class="top"><div class="num">01</div><div>
+            <div class="ttl"><i data-lucide="search" class="ic-sm"></i><h3>Browse drops</h3></div>
+            <div class="bd">Filter live listings by level, team, region or price. Verified sellers only.</div>
+          </div></div><span class="bar"></span>
+        </button>
+        <button class="step" data-i="1">
+          <div class="top"><div class="num">02</div><div>
+            <div class="ttl"><i data-lucide="wallet" class="ic-sm"></i><h3>Pay your way</h3></div>
+            <div class="bd">Cards, UPI or crypto — your payment routes straight into GETX escrow.</div>
+          </div></div><span class="bar"></span>
+        </button>
+        <button class="step" data-i="2">
+          <div class="top"><div class="num">03</div><div>
+            <div class="ttl"><i data-lucide="lock" class="ic-sm"></i><h3>Escrow holds</h3></div>
+            <div class="bd">The seller can&apos;t cash out until you confirm. 3-day inspection window.</div>
+          </div></div><span class="bar"></span>
+        </button>
+        <button class="step" data-i="3">
+          <div class="top"><div class="num">04</div><div>
+            <div class="ttl"><i data-lucide="zap" class="ic-sm"></i><h3>Get your account</h3></div>
+            <div class="bd">Median 5-min handover via encrypted chat. Login + recovery delivered.</div>
+          </div></div><span class="bar"></span>
+        </button>
+      </div>
+
+      <!-- PHONE -->
+      <div class="phonewrap">
+        <div class="phone">
+          <div class="screen">
+            <div class="notch"><i></i></div>
+            <div class="glare"></div>
+            <div class="panes" id="panes">
+
+              <!-- 0 Browse -->
+              <div class="pane on" data-i="0">
+                <div class="plabel">Marketplace</div>
+                <div class="psearch"><i data-lucide="search" class="ic-sm"></i><span>hundo mewtwo · lv 50</span></div>
+                <div class="listing"><div class="thumb" style="background:linear-gradient(135deg,#3b74f5,#142a5e)"></div><div class="lr"><span class="nm">Lv 50 Mystic · Hundo Mewtwo</span><span class="pr">$189</span></div><div class="rt"><i data-lucide="star" class="ic" fill="currentColor"></i>4.9 · Verified</div></div>
+                <div class="listing"><div class="thumb" style="background:linear-gradient(135deg,#f5a623,#6e4a0e)"></div><div class="lr"><span class="nm">14,500 PokéCoins · Auto</span><span class="pr">$62</span></div><div class="rt"><i data-lucide="star" class="ic" fill="currentColor"></i>5.0 · Verified</div></div>
+                <div class="listing"><div class="thumb" style="background:linear-gradient(135deg,#ff4655,#5e1620)"></div><div class="lr"><span class="nm">Lv 47 Valor · 200 shinies</span><span class="pr">$236</span></div><div class="rt"><i data-lucide="star" class="ic" fill="currentColor"></i>4.9 · Verified</div></div>
+              </div>
+
+              <!-- 1 Pay -->
+              <div class="pane" data-i="1">
+                <div class="plabel">Checkout</div>
+                <div class="pamt">$189</div>
+                <div class="pdesc">Lv 50 Mystic · Hundo Mewtwo</div>
+                <div class="pm act"><span class="l"><i data-lucide="credit-card" class="ic"></i> Card · •••• 4242</span><span class="chk"><i data-lucide="check" class="ic"></i></span></div>
+                <div class="pm idle"><span class="l"><i data-lucide="smartphone" class="ic"></i> UPI</span><span class="dot"></span></div>
+                <div class="pm idle"><span class="l"><i data-lucide="bitcoin" class="ic"></i> Crypto · USDT</span><span class="dot"></span></div>
+                <div class="pnote"><i data-lucide="shield-check" class="ic-sm"></i> Escrow-protected · free money-back</div>
+                <button class="pbtn blue">Pay $189</button>
+              </div>
+
+              <!-- 2 Escrow -->
+              <div class="pane center" data-i="2">
+                <div class="plabel">Order · GTX-08471</div>
+                <div class="lockwrap blue"><span class="glow"></span><span class="orb"><i data-lucide="lock" class="ic"></i></span></div>
+                <div class="ph3">Funds held safely</div>
+                <div class="psub">Seller can&apos;t access until you confirm</div>
+                <div class="insp">
+                  <div class="ir"><span class="l"><i data-lucide="eye" class="ic-xs"></i> Inspection</span><span class="t">2d 23h</span></div>
+                  <div class="track"><i></i></div>
+                </div>
+                <button class="pbtn green">Confirm delivery</button>
+              </div>
+
+              <!-- 3 Delivered -->
+              <div class="pane center" data-i="3">
+                <div class="lockwrap green" style="margin-top:30px"><span class="glow"></span><span class="orb"><i data-lucide="check" class="ic"></i></span></div>
+                <div class="ph3">Delivered.</div>
+                <div class="psub">In 4 min 22 sec</div>
+                <div class="cred">
+                  <div class="lab">Login</div>
+                  <div class="val">trainer_valor47@getx.live</div>
+                  <div class="val" style="color:rgba(255,255,255,.7)">PIN ••••••</div>
+                </div>
+                <div class="pnote" style="margin-top:14px"><i data-lucide="zap" class="ic-sm"></i> Seller paid · escrow released</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="pv"><b>GETX</b> · How it works · auto-play demo · sample</div>
+
+<script>
+  lucide.createIcons();
+  (function(){
+    var TOTAL=4, DUR=3000, active=-1, paused=false, timer=null;
+    var steps=[].slice.call(document.querySelectorAll('.step'));
+    var panes=[].slice.call(document.querySelectorAll('.pane'));
+    var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function setActive(i){
+      active=i;
+      steps.forEach(function(s,idx){
+        s.classList.toggle('active', idx===i);
+        s.classList.toggle('done', idx<i);
+        var num=s.querySelector('.num');
+        num.textContent = idx<i ? '' : ('0'+(idx+1));
+        if(idx<i && !num.querySelector('svg')){ num.innerHTML='<i data-lucide="check" class="ic-sm"></i>'; }
+        var bar=s.querySelector('.bar');
+        bar.classList.remove('run');
+      });
+      panes.forEach(function(p,idx){ p.classList.toggle('on', idx===i); });
+      // restart progress bar on active step
+      if(!paused && !reduce){
+        var bar=steps[i].querySelector('.bar');
+        void bar.offsetWidth; // reflow
+        bar.classList.add('run');
+      } else {
+        steps[i].querySelector('.bar').classList.add('run');
+      }
+      lucide.createIcons();
+    }
+    function next(){ setActive((active+1)%TOTAL); }
+    function start(){ stop(); if(reduce) return; timer=setInterval(next, DUR); }
+    function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+
+    steps.forEach(function(s){
+      var i=parseInt(s.dataset.i,10);
+      s.addEventListener('click', function(){ setActive(i); if(!paused) start(); });
+      s.addEventListener('mouseenter', function(){ setActive(i); });
+    });
+
+    var sec=document.getElementById('how');
+    sec.addEventListener('mouseenter', function(){ paused=true; stop(); setLive(); });
+    sec.addEventListener('mouseleave', function(){ paused=false; start(); setLive(); });
+
+    var toggle=document.getElementById('liveToggle');
+    function setLive(){
+      document.getElementById('liveLabel').textContent = paused ? 'Paused' : 'Live demo';
+      document.getElementById('liveIcon').setAttribute('data-lucide', paused ? 'play' : 'pause');
+      lucide.createIcons();
+    }
+    toggle.addEventListener('click', function(e){
+      e.stopPropagation();
+      paused=!paused; if(paused){ stop(); } else { start(); } setLive();
+    });
+
+    setActive(0); start();
+  })();
+</script>
+</body>
+</html>

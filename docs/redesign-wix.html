@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GETX — The safest place to buy &amp; sell game accounts</title>
+<meta name="description" content="Escrow on every order, ID-verified sellers, instant delivery, free money-back. The safest place to buy and sell game accounts, items and top-ups." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ============================================================================
+   GETX — DIRECTION B · "WIX STUDIO EDITORIAL"
+   Award-site energy. Asymmetric editorial grid, oversized display type that
+   breaks the grid, gradient-mesh + hand-drawn CSS/SVG hero artwork (no photos),
+   overlapping layers, confident color & negative space.
+   Display: Bricolage Grotesque · Body: Inter · Data: JetBrains Mono
+   No images. No emoji. Lucide line-icons only. USD.
+   ========================================================================== */
+:root{
+  /* ink + paper */
+  --bg:#070810;
+  --bg-1:#0b0d18;
+  --paper:#f6f4ee;        /* editorial light blocks */
+  --paper-ink:#0b0c14;
+  --ink:#f4f5fb;
+  --ink-2:#a6abc4;
+  --ink-3:#6d7290;
+  /* brand */
+  --blue:#5b7cff;
+  --violet:#a06bff;
+  --mint:#36e0a8;
+  --lime:#c8ff4d;
+  --coral:#ff6b8a;
+  --grad:linear-gradient(112deg,#5b7cff 0%,#a06bff 55%,#ff6b8a 110%);
+  --grad-cool:linear-gradient(120deg,#5b7cff,#36e0a8);
+  --grad-text:linear-gradient(96deg,#9fb4ff 0%,#c9a3ff 45%,#7af0c4 100%);
+  /* lines + glass */
+  --line:rgba(255,255,255,.09);
+  --line-2:rgba(255,255,255,.16);
+  --glass:rgba(255,255,255,.045);
+  --glass-2:rgba(255,255,255,.07);
+  /* shape */
+  --r-sm:10px; --r-md:16px; --r-lg:24px; --r-xl:34px; --r-pill:999px;
+  --sh:0 30px 70px -30px rgba(0,0,0,.85);
+  --sh-glow:0 30px 80px -30px rgba(91,124,255,.7);
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background-image:
+    radial-gradient(60vw 60vh at 88% -12%,rgba(160,107,255,.18),transparent 60%),
+    radial-gradient(55vw 50vh at -8% 8%,rgba(91,124,255,.16),transparent 58%),
+    radial-gradient(45vw 45vh at 50% 120%,rgba(54,224,168,.10),transparent 60%);
+}
+h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;line-height:.98;letter-spacing:-.03em}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+::selection{background:rgba(160,107,255,.4);color:#fff}
+
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px;position:relative}
+.ic{width:20px;height:20px;stroke-width:1.85;vertical-align:middle}
+.ic-sm{width:16px;height:16px}.ic-lg{width:26px;height:26px}
+.grad-text{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.dim{color:var(--ink-2)}.faint{color:var(--ink-3)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2)}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--blue)}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-family:'Bricolage Grotesque';font-weight:600;border-radius:var(--r-pill);border:1px solid transparent;cursor:pointer;transition:.22s var(--ease);white-space:nowrap}
+.btn-lg{height:58px;padding:0 30px;font-size:16px}
+.btn-md{height:48px;padding:0 22px;font-size:15px}
+.btn-sm{height:40px;padding:0 16px;font-size:14px}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:var(--sh-glow)}
+.btn-primary:hover{transform:translateY(-3px);filter:brightness(1.07)}
+.btn-solid{background:var(--ink);color:#0b0c14}
+.btn-solid:hover{transform:translateY(-3px);background:#fff}
+.btn-glass{background:var(--glass);color:var(--ink);border-color:var(--line-2);backdrop-filter:blur(12px)}
+.btn-glass:hover{background:var(--glass-2);transform:translateY(-2px)}
+.btn-dark{background:var(--paper-ink);color:#fff}
+.btn-dark:hover{transform:translateY(-3px);background:#1a1c2b}
+
+/* ---- chips / badges ---- */
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 14px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--glass);color:var(--ink-2);transition:.2s}
+.chip:hover{color:var(--ink);border-color:var(--line-2)}
+.chip .ic{color:var(--blue)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono';font-size:11px;font-weight:600;padding:4px 9px;border-radius:7px;letter-spacing:.02em}
+.badge-verified{color:var(--mint);background:rgba(54,224,168,.12);border:1px solid rgba(54,224,168,.32)}
+.badge-instant{color:#6fc8ff;background:rgba(91,160,255,.12);border:1px solid rgba(91,160,255,.32)}
+.lvl-gold{color:#ffcf52;background:rgba(255,207,82,.12);border:1px solid rgba(255,207,82,.3);font-family:'JetBrains Mono';font-size:11px;font-weight:600;padding:3px 9px;border-radius:7px;display:inline-flex;gap:5px;align-items:center}
+.stars{display:inline-flex;gap:1px;color:#ffcf52}
+
+/* ===========================================================================
+   NAV
+   =========================================================================== */
+.nav{position:sticky;top:0;z-index:90;backdrop-filter:blur(18px);background:rgba(7,8,16,.72);border-bottom:1px solid var(--line);transition:.3s}
+.nav .wrap{display:flex;align-items:center;gap:30px;height:74px}
+.brand{font-family:'Bricolage Grotesque';font-weight:800;font-size:25px;letter-spacing:-.05em;display:flex;align-items:center;gap:9px}
+.brand .mark{width:28px;height:28px;display:grid;place-items:center}
+.brand b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav .links{display:flex;gap:28px}
+.nav .links a{font-size:14.5px;font-weight:500;color:var(--ink-2);position:relative;padding:4px 0}
+.nav .links a::after{content:"";position:absolute;left:0;bottom:-2px;width:0;height:2px;background:var(--grad);transition:.25s}
+.nav .links a:hover{color:var(--ink)}.nav .links a:hover::after{width:100%}
+.nav .sp{flex:1}
+.nav .acts{display:flex;align-items:center;gap:12px}
+@media(max-width:940px){.nav .links{display:none}.nav .acts .hide-sm{display:none}}
+
+/* ===========================================================================
+   HERO — asymmetric editorial, oversized type breaks the grid
+   =========================================================================== */
+.hero{position:relative;padding:72px 0 60px;overflow:hidden}
+.hero__mesh{position:absolute;inset:0;z-index:0;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:drift 22s var(--ease) infinite alternate}
+.blob.b1{width:520px;height:520px;background:radial-gradient(circle,#5b7cff,transparent 65%);top:-160px;right:-80px}
+.blob.b2{width:440px;height:440px;background:radial-gradient(circle,#a06bff,transparent 65%);top:120px;right:180px;animation-delay:-6s}
+.blob.b3{width:380px;height:380px;background:radial-gradient(circle,#36e0a8,transparent 65%);bottom:-160px;left:-60px;animation-delay:-12s}
+@keyframes drift{to{transform:translate(-40px,40px) scale(1.12)}}
+.hero__grid-lines{position:absolute;inset:0;z-index:0;opacity:.5;background-size:58px 58px;
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 40% 30%,#000,transparent 78%);
+  mask-image:radial-gradient(ellipse 90% 70% at 40% 30%,#000,transparent 78%)}
+.hero .wrap{position:relative;z-index:2}
+.hero__top{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:28px}
+.hero__layout{display:grid;grid-template-columns:1.18fr .82fr;gap:50px;align-items:start}
+@media(max-width:1000px){.hero__layout{grid-template-columns:1fr;gap:40px}}
+
+.hero h1{font-size:clamp(54px,9.4vw,128px);font-weight:800;letter-spacing:-.045em;margin:6px 0 0}
+.hero h1 .ln{display:block;overflow:hidden}
+.hero h1 .ln span{display:block;transform:translateY(110%);animation:rise .9s var(--ease) forwards}
+.hero h1 .ln:nth-child(2) span{animation-delay:.08s}
+.hero h1 .ln:nth-child(3) span{animation-delay:.16s}
+@keyframes rise{to{transform:translateY(0)}}
+.hero h1 em{font-style:normal;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* outline display word — editorial flourish */
+.hero h1 .out{-webkit-text-stroke:1.6px rgba(255,255,255,.6);color:transparent;-webkit-background-clip:initial}
+.hero__lead{max-width:50ch;color:var(--ink-2);font-size:clamp(16px,1.7vw,19px);margin-top:26px}
+.hero__lead b{color:var(--ink);font-weight:600}
+
+/* search bar */
+.search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--line-2);border-radius:var(--r-pill);box-shadow:var(--sh);max-width:580px;margin-top:30px;height:66px;padding:8px 8px 8px 22px;backdrop-filter:blur(14px)}
+.search .ic{color:var(--ink-3);flex:none}
+.search input{flex:1;background:transparent;border:0;outline:none;color:var(--ink);font-size:16px}
+.search input::placeholder{color:var(--ink-3)}
+.search .btn{flex:none}
+.hero__suggest{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px;align-items:center}
+.hero__suggest .lbl{font-size:13px;color:var(--ink-3);margin-right:2px}
+.pill{font-size:13px;font-weight:500;padding:6px 13px;border-radius:var(--r-pill);border:1px solid var(--line);color:var(--ink-2);transition:.2s;cursor:pointer}
+.pill:hover{color:var(--ink);border-color:var(--blue);background:rgba(91,124,255,.1)}
+.hero__rating{margin-top:26px;display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-2)}
+
+/* ----- HERO ART: hand-drawn escrow "vault" card, no photos ----- */
+.art{position:relative;min-height:480px}
+.art__card{position:relative;z-index:3;background:linear-gradient(165deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid var(--line-2);border-radius:var(--r-xl);padding:26px;backdrop-filter:blur(20px);box-shadow:var(--sh);animation:floatY 8s var(--ease) infinite alternate}
+@keyframes floatY{to{transform:translateY(-14px)}}
+.art__hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.art__hd .t{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px}
+.art__hd .t .ico{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:rgba(54,224,168,.14);color:var(--mint);border:1px solid rgba(54,224,168,.3)}
+/* escrow flow rail */
+.flow{display:flex;align-items:center;justify-content:space-between;margin:22px 4px 18px;position:relative}
+.flow::before{content:"";position:absolute;left:8%;right:8%;top:18px;height:2px;background:linear-gradient(90deg,var(--mint),var(--blue),var(--ink-3))}
+.flow .node{position:relative;display:flex;flex-direction:column;align-items:center;gap:9px;z-index:1;flex:1}
+.flow .node .dot{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--bg-1);border:2px solid var(--line-2);color:var(--ink-3)}
+.flow .node.on .dot{border-color:var(--mint);color:var(--mint);background:rgba(54,224,168,.12);box-shadow:0 0 0 6px rgba(54,224,168,.08)}
+.flow .node .lb{font-size:11px;color:var(--ink-3);font-weight:500;text-align:center}
+.flow .node.on .lb{color:var(--ink)}
+.art__amt{display:flex;align-items:baseline;justify-content:space-between;padding:16px 18px;border-radius:var(--r-md);background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.art__amt .k{font-size:12.5px;color:var(--ink-3)}
+.art__amt .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:30px}
+.art__amt .v small{font-size:14px;color:var(--ink-3);font-weight:500}
+.art__foot{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:12.5px;color:var(--ink-2)}
+.art__foot .ic{color:var(--mint)}
+/* floating mini chips around the card */
+.float-chip{position:absolute;z-index:4;background:rgba(11,13,24,.86);border:1px solid var(--line-2);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;backdrop-filter:blur(12px);box-shadow:var(--sh);animation:floatY 6s var(--ease) infinite alternate}
+.float-chip .ic{width:18px;height:18px}
+.fc-1{top:-22px;left:-30px;animation-delay:-2s}
+.fc-1 .ic{color:var(--mint)}
+.fc-2{bottom:44px;right:-34px;animation-delay:-4s}
+.fc-2 .ic{color:var(--blue)}
+.fc-3{bottom:-20px;left:24px;animation-delay:-1s}
+.fc-3 .ic{color:var(--violet)}
+@media(max-width:1000px){.fc-1{left:0}.fc-2{right:0}.art{min-height:auto;margin-top:8px}}
+@media(max-width:560px){.float-chip{display:none}}
+/* decorative big outline ring behind art */
+.art__ring{position:absolute;width:420px;height:420px;border:1px solid var(--line);border-radius:50%;top:30px;right:-90px;z-index:1}
+.art__ring::after{content:"";position:absolute;inset:46px;border:1px dashed rgba(255,255,255,.07);border-radius:50%}
+
+/* ===========================================================================
+   MARQUEE / GAME RAIL (editorial ticker)
+   =========================================================================== */
+.ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(255,255,255,.015);overflow:hidden;padding:18px 0}
+.ticker__track{display:flex;gap:56px;width:max-content;animation:scroll 30s linear infinite}
+.ticker:hover .ticker__track{animation-play-state:paused}
+@keyframes scroll{to{transform:translateX(-50%)}}
+.ticker__item{display:flex;align-items:center;gap:12px;font-family:'Bricolage Grotesque';font-weight:600;font-size:18px;color:var(--ink-2);white-space:nowrap}
+.ticker__item .ic{color:var(--blue);width:18px;height:18px}
+.ticker__item .dot{width:5px;height:5px;border-radius:50%;background:var(--ink-3)}
+
+/* ===========================================================================
+   SECTION SCAFFOLD
+   =========================================================================== */
+section{position:relative}
+.sec{padding:100px 0}
+.sec-head{max-width:760px;margin-bottom:48px}
+.sec-head h2{font-size:clamp(34px,5vw,60px);margin-top:18px;letter-spacing:-.04em}
+.sec-head p{color:var(--ink-2);font-size:17px;margin-top:18px;max-width:56ch}
+.kicker-num{font-family:'JetBrains Mono';font-size:12px;color:var(--ink-3)}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(34px);transition:.8s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* ===========================================================================
+   STAT BAND — oversized numbers, editorial
+   =========================================================================== */
+.stats{padding:64px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px}
+@media(max-width:860px){.stats__grid{grid-template-columns:repeat(2,1fr);gap:36px 24px}}
+.stat .n{font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(40px,5.5vw,64px);letter-spacing:-.05em;line-height:1;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .l{margin-top:12px;color:var(--ink-2);font-size:14px;display:flex;align-items:center;gap:8px}
+.stat .l .ic{width:16px;height:16px;color:var(--mint)}
+
+/* ===========================================================================
+   BROWSE BY GAME — asymmetric mosaic
+   =========================================================================== */
+.games{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(170px,auto);gap:18px}
+.game{position:relative;overflow:hidden;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));padding:24px;display:flex;flex-direction:column;justify-content:flex-end;transition:.3s var(--ease);min-height:170px}
+.game:hover{transform:translateY(-6px);border-color:var(--line-2);box-shadow:var(--sh)}
+.game .gmesh{position:absolute;inset:0;z-index:0;opacity:.6;transition:.4s}
+.game:hover .gmesh{opacity:1;transform:scale(1.08)}
+.game__body{position:relative;z-index:1}
+.game .gtag{position:absolute;top:18px;left:18px;z-index:1;font-family:'JetBrains Mono';font-size:11px;color:var(--ink-2);background:rgba(7,8,16,.5);border:1px solid var(--line);padding:4px 9px;border-radius:7px;backdrop-filter:blur(6px)}
+.game h3{font-size:23px;letter-spacing:-.03em}
+.game .meta{margin-top:8px;font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.game .go{position:absolute;top:18px;right:18px;z-index:1;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;color:var(--ink-2);background:rgba(7,8,16,.4);transition:.25s}
+.game:hover .go{background:var(--ink);color:#0b0c14;transform:rotate(-45deg)}
+/* spans for asymmetry */
+.game.feat{grid-column:span 3;grid-row:span 2;min-height:356px}
+.game.wide{grid-column:span 3}
+.game.std{grid-column:span 2}
+@media(max-width:900px){.games{grid-template-columns:repeat(2,1fr)}.game.feat{grid-column:span 2;grid-row:auto;min-height:230px}.game.wide{grid-column:span 2}.game.std{grid-column:span 1}}
+@media(max-width:520px){.games{grid-template-columns:1fr}.game,.game.std,.game.wide,.game.feat{grid-column:span 1}}
+
+/* ===========================================================================
+   LISTINGS — fresh drops
+   =========================================================================== */
+.listings{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:1040px){.listings{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.listings{grid-template-columns:1fr}}
+.lcard{position:relative;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(170deg,rgba(255,255,255,.05),rgba(255,255,255,.012));overflow:hidden;transition:.28s var(--ease);display:flex;flex-direction:column}
+.lcard:hover{transform:translateY(-7px);border-color:var(--line-2);box-shadow:var(--sh)}
+.lcard__art{position:relative;height:148px;overflow:hidden;border-bottom:1px solid var(--line)}
+.lcard__badges{position:absolute;top:12px;left:12px;display:flex;gap:7px;z-index:2}
+.lcard__game{position:absolute;bottom:12px;left:14px;z-index:2;font-family:'JetBrains Mono';font-size:11px;color:var(--ink-2);letter-spacing:.04em}
+.lcard__body{padding:16px 16px 18px;display:flex;flex-direction:column;gap:12px;flex:1}
+.lcard__title{font-family:'Bricolage Grotesque';font-weight:600;font-size:16px;line-height:1.25;letter-spacing:-.02em}
+.lcard__seller{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.lcard__seller .av{width:24px;height:24px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:700;font-size:11px;color:#fff;flex:none}
+.lcard__foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line)}
+.lcard__price{font-family:'Bricolage Grotesque';font-weight:800;font-size:22px;letter-spacing:-.03em}
+.lcard__price small{font-size:12px;color:var(--ink-3);font-weight:500}
+.lcard__buy{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--line-2);color:var(--ink);transition:.22s}
+.lcard:hover .lcard__buy{background:var(--grad);border-color:transparent;transform:rotate(-45deg)}
+
+/* ===========================================================================
+   WHY SAFER — editorial split, big numbers
+   =========================================================================== */
+.why{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+@media(max-width:820px){.why{grid-template-columns:1fr}}
+.wcard{position:relative;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(165deg,rgba(255,255,255,.045),rgba(255,255,255,.01));padding:34px;overflow:hidden;transition:.3s var(--ease)}
+.wcard:hover{transform:translateY(-5px);border-color:var(--line-2)}
+.wcard .wno{position:absolute;top:18px;right:24px;font-family:'Bricolage Grotesque';font-weight:800;font-size:74px;line-height:1;color:rgba(255,255,255,.04);letter-spacing:-.05em}
+.wcard .wic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:rgba(91,124,255,.12);border:1px solid rgba(91,124,255,.28);color:var(--blue);margin-bottom:20px}
+.wcard.mint .wic{background:rgba(54,224,168,.12);border-color:rgba(54,224,168,.28);color:var(--mint)}
+.wcard.violet .wic{background:rgba(160,107,255,.12);border-color:rgba(160,107,255,.28);color:var(--violet)}
+.wcard.coral .wic{background:rgba(255,107,138,.12);border-color:rgba(255,107,138,.28);color:var(--coral)}
+.wcard h3{font-size:24px;letter-spacing:-.03em}
+.wcard p{color:var(--ink-2);font-size:14.5px;margin-top:12px;max-width:42ch}
+.wcard .wlink{margin-top:18px;display:inline-flex;align-items:center;gap:7px;font-family:'Bricolage Grotesque';font-weight:600;font-size:14px;color:var(--ink)}
+.wcard .wlink .ic{width:16px;height:16px;transition:.25s}
+.wcard:hover .wlink .ic{transform:translateX(4px)}
+
+/* ===========================================================================
+   HOW ESCROW WORKS — light paper block (editorial contrast)
+   =========================================================================== */
+.paper{background:var(--paper);color:var(--paper-ink);border-radius:var(--r-xl);padding:clamp(40px,6vw,80px);position:relative;overflow:hidden}
+.paper .eyebrow{color:#5a607a}.paper .eyebrow::before{background:var(--blue)}
+.paper h2{color:var(--paper-ink);font-size:clamp(34px,5vw,58px)}
+.paper .lead{color:#454b63;font-size:17px;margin-top:18px;max-width:54ch}
+.paper__deco{position:absolute;top:-120px;right:-100px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(91,124,255,.22),transparent 65%);filter:blur(20px)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:54px;position:relative}
+@media(max-width:820px){.steps{grid-template-columns:1fr;gap:18px}}
+.step{position:relative;padding:30px;border-radius:var(--r-lg);background:#fff;border:1px solid rgba(11,12,20,.08);box-shadow:0 24px 50px -34px rgba(11,12,20,.35);transition:.3s var(--ease)}
+.step:hover{transform:translateY(-6px)}
+.step .sno{font-family:'JetBrains Mono';font-size:12px;font-weight:600;color:var(--blue);letter-spacing:.1em}
+.step .sic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#0b0c14;color:#fff;margin:16px 0 18px}
+.step.s2 .sic{background:var(--blue)}
+.step.s3 .sic{background:linear-gradient(120deg,var(--mint),var(--blue));color:#06120d}
+.step h3{font-size:21px;color:var(--paper-ink);letter-spacing:-.02em}
+.step p{color:#545a72;font-size:14px;margin-top:10px}
+.step .tag{margin-top:16px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--blue);background:rgba(91,124,255,.1);padding:5px 11px;border-radius:var(--r-pill)}
+.step.s3 .tag{color:#0b8f63;background:rgba(54,224,168,.16)}
+/* connector arrows */
+.step .arrow{position:absolute;top:54px;right:-22px;z-index:3;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid rgba(11,12,20,.1);display:grid;place-items:center;color:#0b0c14}
+@media(max-width:820px){.step .arrow{display:none}}
+
+/* ===========================================================================
+   TESTIMONIALS
+   =========================================================================== */
+.quotes{columns:3;column-gap:22px}
+@media(max-width:920px){.quotes{columns:2}}
+@media(max-width:600px){.quotes{columns:1}}
+.quote{break-inside:avoid;margin-bottom:22px;padding:28px;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.01));transition:.3s var(--ease)}
+.quote:hover{transform:translateY(-5px);border-color:var(--line-2)}
+.quote .qm{color:var(--violet);margin-bottom:14px}
+.quote p{font-size:15px;line-height:1.6;color:var(--ink)}
+.quote .who{display:flex;align-items:center;gap:11px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.quote .who .av{width:38px;height:38px;border-radius:50%;background:var(--grad-cool);display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:700;font-size:14px;color:#06120d;flex:none}
+.quote .who .nm{font-family:'Bricolage Grotesque';font-weight:600;font-size:14px}
+.quote .who .vb{font-size:11.5px;color:var(--mint);display:flex;align-items:center;gap:4px}
+.quote .who .vb .ic{width:13px;height:13px}
+
+/* ===========================================================================
+   CTA BAND
+   =========================================================================== */
+.cta{position:relative;border-radius:var(--r-xl);padding:clamp(48px,7vw,96px) clamp(28px,5vw,72px);overflow:hidden;border:1px solid var(--line-2);text-align:center;background:linear-gradient(160deg,rgba(91,124,255,.16),rgba(160,107,255,.1) 55%,rgba(255,107,138,.08))}
+.cta__mesh{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.8}
+.cta__mesh .blob{opacity:.4}
+.cta .wrap-in{position:relative;z-index:1}
+.cta h2{font-size:clamp(40px,7vw,82px);letter-spacing:-.045em}
+.cta h2 em{font-style:normal;background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cta p{color:var(--ink-2);font-size:18px;margin:22px auto 0;max-width:50ch}
+.cta__acts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
+.cta__note{margin-top:22px;font-size:13px;color:var(--ink-3);display:flex;gap:8px;justify-content:center;align-items:center}
+.cta__note .ic{color:var(--mint);width:15px;height:15px}
+
+/* ===========================================================================
+   FAQ
+   =========================================================================== */
+.faq__grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:start}
+@media(max-width:860px){.faq__grid{grid-template-columns:1fr;gap:28px}}
+.faq__list{display:flex;flex-direction:column;gap:12px}
+.fitem{border:1px solid var(--line);border-radius:var(--r-md);background:var(--glass);overflow:hidden;transition:.25s}
+.fitem[open]{border-color:var(--line-2);background:var(--glass-2)}
+.fitem summary{list-style:none;cursor:pointer;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-family:'Bricolage Grotesque';font-weight:600;font-size:16.5px}
+.fitem summary::-webkit-details-marker{display:none}
+.fitem summary .pl{width:30px;height:30px;border-radius:9px;border:1px solid var(--line-2);display:grid;place-items:center;color:var(--ink-2);flex:none;transition:.3s}
+.fitem[open] summary .pl{transform:rotate(45deg);background:var(--grad);border-color:transparent;color:#fff}
+.fitem .ans{padding:0 22px 22px;color:var(--ink-2);font-size:14.5px;line-height:1.65}
+
+/* ===========================================================================
+   FOOTER
+   =========================================================================== */
+.foot{border-top:1px solid var(--line);padding:72px 0 36px;margin-top:40px;position:relative}
+.foot__top{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:36px}
+@media(max-width:920px){.foot__top{grid-template-columns:1fr 1fr;gap:32px}}
+@media(max-width:520px){.foot__top{grid-template-columns:1fr}}
+.foot__brand p{color:var(--ink-2);font-size:14px;margin:16px 0 22px;max-width:34ch}
+.foot__pay{display:flex;flex-wrap:wrap;gap:10px}
+.paychip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;color:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-pill);padding:8px 13px;background:var(--glass)}
+.paychip .ic{width:15px;height:15px;color:var(--mint)}
+.fcol h4{font-family:'Bricolage Grotesque';font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:16px}
+.fcol a{display:block;font-size:14px;color:var(--ink-2);margin-bottom:11px;transition:.2s}
+.fcol a:hover{color:var(--ink);transform:translateX(3px)}
+.foot__bottom{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:54px;padding-top:28px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+.foot__socials{display:flex;gap:10px}
+.foot__socials a{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);transition:.25s}
+.foot__socials a:hover{color:#fff;border-color:var(--line-2);background:var(--glass-2);transform:translateY(-3px)}
+
+/* utility */
+.center{text-align:center}
+.mt-cta{display:flex;justify-content:center;margin-top:44px}
+@media(max-width:600px){.sec{padding:72px 0}.hero{padding:48px 0 40px}}
+</style>
+</head>
+<body>
+
+<!-- ======================= NAV ======================= -->
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <span class="mark"><i data-lucide="hexagon" style="color:var(--blue)"></i></span>
+      GET<b>X</b>
+    </a>
+    <div class="links">
+      <a href="#games">Marketplace</a>
+      <a href="#fresh">Fresh drops</a>
+      <a href="#safe">Why safer</a>
+      <a href="#escrow">How escrow works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="sp"></div>
+    <div class="acts">
+      <a class="btn btn-glass btn-sm hide-sm" href="#"><i data-lucide="store" class="ic-sm"></i> Sell</a>
+      <a class="btn btn-glass btn-sm hide-sm" href="#">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="#">Get started <i data-lucide="arrow-up-right" class="ic-sm"></i></a>
+    </div>
+  </div>
+</nav>
+
+<!-- ======================= HERO ======================= -->
+<header class="hero">
+  <div class="hero__mesh">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  </div>
+  <div class="hero__grid-lines"></div>
+
+  <div class="wrap">
+    <div class="hero__top">
+      <span class="eyebrow">The trust-first marketplace</span>
+      <div class="chip"><i data-lucide="shield-check" class="ic-sm"></i> Escrow protects every single order</div>
+    </div>
+
+    <div class="hero__layout">
+      <!-- LEFT: oversized type that breaks the grid -->
+      <div>
+        <h1>
+          <span class="ln"><span>The <span class="out">safest</span></span></span>
+          <span class="ln"><span>place to <em>trade</em></span></span>
+          <span class="ln"><span>game accounts.</span></span>
+        </h1>
+
+        <p class="hero__lead">
+          Buy &amp; sell accounts, items, currency and top-ups with zero anxiety.
+          <b>Escrow on every order</b>, ID-verified sellers, instant delivery, and a
+          <b>free money-back guarantee</b> — built in, never an add-on.
+        </p>
+
+        <form class="search" onsubmit="return false">
+          <i data-lucide="search" class="ic"></i>
+          <input type="text" placeholder="Search Pokémon GO, Valorant, accounts, top-ups…" aria-label="Search the marketplace" />
+          <button class="btn btn-primary btn-md" type="submit">Search</button>
+        </form>
+
+        <div class="hero__suggest">
+          <span class="lbl">Trending:</span>
+          <span class="pill">Pokémon GO</span>
+          <span class="pill">Valorant skins</span>
+          <span class="pill">Free Fire diamonds</span>
+          <span class="pill">Clash of Clans TH15</span>
+        </div>
+
+        <div class="hero__rating">
+          <span class="stars" aria-label="4.9 out of 5">
+            <i data-lucide="star" class="ic-sm" fill="currentColor"></i><i data-lucide="star" class="ic-sm" fill="currentColor"></i><i data-lucide="star" class="ic-sm" fill="currentColor"></i><i data-lucide="star" class="ic-sm" fill="currentColor"></i><i data-lucide="star" class="ic-sm" fill="currentColor"></i>
+          </span>
+          <span><b style="color:var(--ink)">4.9 / 5</b> · 99.4% dispute-free · 248K+ orders delivered</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: hand-drawn escrow vault card (pure CSS/SVG, no photos) -->
+      <div class="art">
+        <div class="art__ring"></div>
+
+        <div class="float-chip fc-1"><i data-lucide="badge-check" class="ic"></i> ID-verified seller</div>
+        <div class="float-chip fc-2"><i data-lucide="zap" class="ic"></i> Delivered in 2m</div>
+        <div class="float-chip fc-3"><i data-lucide="rotate-ccw" class="ic"></i> Free money-back</div>
+
+        <div class="art__card">
+          <div class="art__hd">
+            <div class="t"><span class="ico"><i data-lucide="lock" class="ic-sm"></i></span> Escrow protection</div>
+            <span class="badge badge-verified"><i data-lucide="shield-check" class="ic-sm"></i> Active</span>
+          </div>
+
+          <div class="flow">
+            <div class="node on"><span class="dot"><i data-lucide="wallet" class="ic-sm"></i></span><span class="lb">You pay</span></div>
+            <div class="node on"><span class="dot"><i data-lucide="vault" class="ic-sm"></i></span><span class="lb">Held safe</span></div>
+            <div class="node"><span class="dot"><i data-lucide="package-check" class="ic-sm"></i></span><span class="lb">Delivered</span></div>
+            <div class="node"><span class="dot"><i data-lucide="circle-check-big" class="ic-sm"></i></span><span class="lb">Released</span></div>
+          </div>
+
+          <div class="art__amt">
+            <span class="k">Protected in escrow</span>
+            <span class="v">$74.99 <small>USD</small></span>
+          </div>
+
+          <div class="art__foot">
+            <i data-lucide="info" class="ic-sm"></i>
+            Funds release to the seller only after you confirm delivery.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= TICKER ======================= -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    <span class="ticker__item"><i data-lucide="shield-check" class="ic"></i> Escrow on every order</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="badge-check" class="ic"></i> ID-verified sellers</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="zap" class="ic"></i> Instant delivery</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="rotate-ccw" class="ic"></i> Free money-back</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="scale" class="ic"></i> AI Dispute Judge</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="shield-check" class="ic"></i> Escrow on every order</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="badge-check" class="ic"></i> ID-verified sellers</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="zap" class="ic"></i> Instant delivery</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="rotate-ccw" class="ic"></i> Free money-back</span><span class="dot"></span>
+    <span class="ticker__item"><i data-lucide="scale" class="ic"></i> AI Dispute Judge</span><span class="dot"></span>
+  </div>
+</div>
+
+<!-- ======================= STAT BAND ======================= -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stats__grid">
+      <div class="stat reveal"><div class="n">248K+</div><div class="l"><i data-lucide="package-check" class="ic"></i> Orders delivered</div></div>
+      <div class="stat reveal"><div class="n">$42M+</div><div class="l"><i data-lucide="lock" class="ic"></i> Protected by escrow</div></div>
+      <div class="stat reveal"><div class="n">3,100+</div><div class="l"><i data-lucide="badge-check" class="ic"></i> ID-verified sellers</div></div>
+      <div class="stat reveal"><div class="n">99.4%</div><div class="l"><i data-lucide="shield-check" class="ic"></i> Dispute-free orders</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= BROWSE BY GAME ======================= -->
+<section class="sec" id="games">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker-num">01 — Marketplace</span>
+      <h2>Pick your game.<br>Trade like a pro.</h2>
+      <p>Five tight-knit communities, deep liquidity, and verified sellers in each. Quality over quantity — every listing is escrow-protected.</p>
+    </div>
+
+    <div class="games reveal">
+      <!-- FEATURED -->
+      <a class="game feat" href="#" style="--c1:#5b7cff;--c2:#a06bff">
+        <span class="gmesh" style="background:radial-gradient(120% 90% at 80% 10%,rgba(91,124,255,.4),transparent 60%),radial-gradient(90% 90% at 0% 100%,rgba(160,107,255,.3),transparent 60%)"></span>
+        <span class="gtag">FLAGSHIP COMMUNITY</span>
+        <span class="go"><i data-lucide="arrow-up-right" class="ic-sm"></i></span>
+        <div class="game__body">
+          <h3>Pokémon GO</h3>
+          <div class="meta"><i data-lucide="layers" class="ic-sm" style="color:var(--blue)"></i> 8,400+ listings · shinies, legendaries, level-45 accounts</div>
+        </div>
+      </a>
+
+      <a class="game wide" href="#">
+        <span class="gmesh" style="background:radial-gradient(110% 120% at 90% 0%,rgba(255,107,138,.32),transparent 60%)"></span>
+        <span class="gtag">STRATEGY</span>
+        <span class="go"><i data-lucide="arrow-up-right" class="ic-sm"></i></span>
+        <div class="game__body">
+          <h3>Clash of Clans</h3>
+          <div class="meta"><i data-lucide="castle" class="ic-sm" style="color:var(--coral)"></i> TH9–TH15 · Legend League bases</div>
+        </div>
+      </a>
+
+      <a class="game std" href="#">
+        <span class="gmesh" style="background:radial-gradient(120% 120% at 10% 0%,rgba(54,224,168,.3),transparent 60%)"></span>
+        <span class="gtag">FPS</span>
+        <span class="go"><i data-lucide="arrow-up-right" class="ic-sm"></i></span>
+        <div class="game__body">
+          <h3>Valorant</h3>
+          <div class="meta"><i data-lucide="crosshair" class="ic-sm" style="color:var(--mint)"></i> Ranked · skins</div>
+        </div>
+      </a>
+
+      <a class="game std" href="#">
+        <span class="gmesh" style="background:radial-gradient(120% 120% at 90% 100%,rgba(255,207,82,.28),transparent 60%)"></span>
+        <span class="gtag">BATTLE ROYALE</span>
+        <span class="go"><i data-lucide="arrow-up-right" class="ic-sm"></i></span>
+        <div class="game__body">
+          <h3>Free Fire</h3>
+          <div class="meta"><i data-lucide="flame" class="ic-sm" style="color:#ffcf52"></i> Diamonds · top-ups</div>
+        </div>
+      </a>
+
+      <a class="game std" href="#">
+        <span class="gmesh" style="background:radial-gradient(120% 120% at 50% 0%,rgba(160,107,255,.3),transparent 60%)"></span>
+        <span class="gtag">BATTLE ROYALE</span>
+        <span class="go"><i data-lucide="arrow-up-right" class="ic-sm"></i></span>
+        <div class="game__body">
+          <h3>PUBG Mobile</h3>
+          <div class="meta"><i data-lucide="target" class="ic-sm" style="color:var(--violet)"></i> UC · ranked accounts</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FRESH LISTINGS ======================= -->
+<section class="sec" id="fresh" style="padding-top:20px">
+  <div class="wrap">
+    <div class="sec-head reveal" style="display:flex;align-items:flex-end;justify-content:space-between;max-width:none;gap:24px;flex-wrap:wrap">
+      <div style="max-width:560px">
+        <span class="kicker-num">02 — Live now</span>
+        <h2>Fresh drops</h2>
+        <p>Hand-picked listings going live this hour. Every one is escrow-protected and money-back guaranteed.</p>
+      </div>
+      <a class="btn btn-glass btn-md" href="#">Browse all listings <i data-lucide="arrow-right" class="ic-sm"></i></a>
+    </div>
+
+    <div class="listings reveal">
+      <!-- 1 -->
+      <article class="lcard">
+        <div class="lcard__art" style="background:radial-gradient(120% 120% at 80% 0%,rgba(91,124,255,.42),transparent 60%),radial-gradient(120% 120% at 0% 100%,rgba(160,107,255,.3),transparent 60%),#0b0d18">
+          <div class="lcard__badges"><span class="badge badge-verified"><i data-lucide="shield-check" class="ic-sm"></i> Verified</span><span class="badge badge-instant"><i data-lucide="zap" class="ic-sm"></i> Instant</span></div>
+          <span class="lcard__game">POKÉMON GO</span>
+        </div>
+        <div class="lcard__body">
+          <div class="lcard__title">Lv.45 Pokémon GO · 3 Shiny Legendaries</div>
+          <div class="lcard__seller"><span class="av">PG</span> PoGoLegends <span class="lvl-gold"><i data-lucide="crown" class="ic-sm"></i> Gold</span></div>
+          <div class="lcard__seller"><span class="stars"><i data-lucide="star" class="ic-sm" fill="currentColor"></i></span> 4.9 · 47 sold</div>
+          <div class="lcard__foot">
+            <div class="lcard__price">$74.99 <small>USD</small></div>
+            <a class="lcard__buy" href="#" aria-label="Buy"><i data-lucide="arrow-up-right" class="ic-sm"></i></a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 2 -->
+      <article class="lcard">
+        <div class="lcard__art" style="background:radial-gradient(120% 120% at 20% 0%,rgba(255,107,138,.4),transparent 60%),radial-gradient(120% 120% at 100% 100%,rgba(255,207,82,.22),transparent 60%),#0b0d18">
+          <div class="lcard__badges"><span class="badge badge-verified"><i data-lucide="shield-check" class="ic-sm"></i> Verified</span></div>
+          <span class="lcard__game">CLASH OF CLANS</span>
+        </div>
+        <div class="lcard__body">
+          <div class="lcard__title">TH15 Clash of Clans · Legend League</div>
+          <div class="lcard__seller"><span class="av">CW</span> ClashWizard <span class="lvl-gold"><i data-lucide="crown" class="ic-sm"></i> Gold</span></div>
+          <div class="lcard__seller"><span class="stars"><i data-lucide="star" class="ic-sm" fill="currentColor"></i></span> 4.8 · 112 sold</div>
+          <div class="lcard__foot">
+            <div class="lcard__price">$129.00 <small>USD</small></div>
+            <a class="lcard__buy" href="#" aria-label="Buy"><i data-lucide="arrow-up-right" class="ic-sm"></i></a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 3 -->
+      <article class="lcard">
+        <div class="lcard__art" style="background:radial-gradient(120% 120% at 80% 0%,rgba(54,224,168,.38),transparent 60%),radial-gradient(120% 120% at 0% 100%,rgba(91,124,255,.3),transparent 60%),#0b0d18">
+          <div class="lcard__badges"><span class="badge badge-verified"><i data-lucide="shield-check" class="ic-sm"></i> Verified</span><span class="badge badge-instant"><i data-lucide="zap" class="ic-sm"></i> Instant</span></div>
+          <span class="lcard__game">VALORANT</span>
+        </div>
+        <div class="lcard__body">
+          <div class="lcard__title">Valorant Immortal 2 · 38 Skins</div>
+          <div class="lcard__seller"><span class="av">AS</span> AimSecure <span class="lvl-gold"><i data-lucide="crown" class="ic-sm"></i> Gold</span></div>
+          <div class="lcard__seller"><span class="stars"><i data-lucide="star" class="ic-sm" fill="currentColor"></i></span> 5.0 · 64 sold</div>
+          <div class="lcard__foot">
+            <div class="lcard__price">$59.99 <small>USD</small></div>
+            <a class="lcard__buy" href="#" aria-label="Buy"><i data-lucide="arrow-up-right" class="ic-sm"></i></a>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4 -->
+      <article class="lcard">
+        <div class="lcard__art" style="background:radial-gradient(120% 120% at 20% 0%,rgba(255,207,82,.36),transparent 60%),radial-gradient(120% 120% at 100% 100%,rgba(255,107,138,.26),transparent 60%),#0b0d18">
+          <div class="lcard__badges"><span class="badge badge-verified"><i data-lucide="shield-check" class="ic-sm"></i> Verified</span><span class="badge badge-instant"><i data-lucide="zap" class="ic-sm"></i> Instant</span></div>
+          <span class="lcard__game">FREE FIRE</span>
+        </div>
+        <div class="lcard__body">
+          <div class="lcard__title">Free Fire 1,060 Diamonds top-up</div>
+          <div class="lcard__seller"><span class="av">FF</span> FireForge <span class="lvl-gold"><i data-lucide="crown" class="ic-sm"></i> Gold</span></div>
+          <div class="lcard__seller"><span class="stars"><i data-lucide="star" class="ic-sm" fill="currentColor"></i></span> 4.9 · 318 sold</div>
+          <div class="lcard__foot">
+            <div class="lcard__price">$9.49 <small>USD</small></div>
+            <a class="lcard__buy" href="#" aria-label="Buy"><i data-lucide="arrow-up-right" class="ic-sm"></i></a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= WHY SAFER ======================= -->
+<section class="sec" id="safe">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker-num">03 — Trust engine</span>
+      <h2>Why GETX is the<br>safer place to trade.</h2>
+      <p>Other marketplaces leave you hoping. We engineer trust into every step — so buying a $129 account feels as safe as buying a coffee.</p>
+    </div>
+
+    <div class="why reveal">
+      <div class="wcard mint">
+        <span class="wno">01</span>
+        <div class="wic"><i data-lucide="lock" class="ic-lg"></i></div>
+        <h3>Escrow on every order</h3>
+        <p>Your money is held safely the moment you pay. It only reaches the seller after you confirm the goods are exactly as described.</p>
+        <span class="wlink">Free on every order <i data-lucide="arrow-right" class="ic"></i></span>
+      </div>
+
+      <div class="wcard">
+        <span class="wno">02</span>
+        <div class="wic"><i data-lucide="badge-check" class="ic-lg"></i></div>
+        <h3>ID-verified sellers</h3>
+        <p>Every seller passes identity verification before listing. Reputation, level and sales history are public — no anonymous strangers.</p>
+        <span class="wlink">3,100+ verified <i data-lucide="arrow-right" class="ic"></i></span>
+      </div>
+
+      <div class="wcard violet">
+        <span class="wno">03</span>
+        <div class="wic"><i data-lucide="scale" class="ic-lg"></i></div>
+        <h3>AI Dispute Judge</h3>
+        <p>If something goes wrong, our AI reviews the full chat and evidence in minutes — fair, fast, and consistent. Humans review the edge cases.</p>
+        <span class="wlink">Resolved in minutes <i data-lucide="arrow-right" class="ic"></i></span>
+      </div>
+
+      <div class="wcard coral">
+        <span class="wno">04</span>
+        <div class="wic"><i data-lucide="rotate-ccw" class="ic-lg"></i></div>
+        <h3>Free money-back guarantee</h3>
+        <p>Not as described or never delivered? You get your money back — full stop. No paid add-on, no fine print. It is built into every order.</p>
+        <span class="wlink">Always included <i data-lucide="arrow-right" class="ic"></i></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= HOW ESCROW WORKS (light paper block) ======================= -->
+<section class="sec" id="escrow">
+  <div class="wrap">
+    <div class="paper reveal">
+      <div class="paper__deco"></div>
+      <span class="eyebrow">04 — How escrow works</span>
+      <h2>Three steps.<br>Zero anxiety.</h2>
+      <p class="lead">Escrow is just a safe middle. We hold the money until you have what you paid for — then, and only then, the seller gets paid.</p>
+
+      <div class="steps">
+        <div class="step s1">
+          <div class="arrow"><i data-lucide="arrow-right" class="ic-sm"></i></div>
+          <span class="sno">STEP 01</span>
+          <div class="sic"><i data-lucide="wallet" class="ic"></i></div>
+          <h3>You pay into escrow</h3>
+          <p>Checkout with UPI / Cards or Crypto. Your funds are locked safely — the seller cannot touch them yet.</p>
+          <span class="tag"><i data-lucide="lock" class="ic-sm"></i> Funds protected</span>
+        </div>
+
+        <div class="step s2">
+          <div class="arrow"><i data-lucide="arrow-right" class="ic-sm"></i></div>
+          <span class="sno">STEP 02</span>
+          <div class="sic"><i data-lucide="package-check" class="ic"></i></div>
+          <h3>Seller delivers</h3>
+          <p>Account details or items arrive — often instantly. You check everything is exactly as described in the listing.</p>
+          <span class="tag"><i data-lucide="zap" class="ic-sm"></i> Often instant</span>
+        </div>
+
+        <div class="step s3">
+          <span class="sno">STEP 03</span>
+          <div class="sic"><i data-lucide="circle-check-big" class="ic"></i></div>
+          <h3>You confirm, funds release</h3>
+          <p>Happy? Release the funds with one tap. Not as described? Open a dispute and your money-back guarantee kicks in.</p>
+          <span class="tag"><i data-lucide="shield-check" class="ic-sm"></i> Or full refund</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= TESTIMONIALS ======================= -->
+<section class="sec" id="reviews">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="kicker-num">05 — Verified buyers</span>
+      <h2>Trusted by traders<br>who don't trust easily.</h2>
+      <p>Real reviews from verified buyers — people who completed an escrow-protected order on GETX.</p>
+    </div>
+
+    <div class="quotes reveal">
+      <figure class="quote">
+        <div class="qm"><i data-lucide="quote" class="ic-lg"></i></div>
+        <p>Bought a Lv.45 Pokémon GO account with 3 shinies. Escrow held my $74.99 until I logged in and checked everything. Released in two minutes. This is how it should work everywhere.</p>
+        <figcaption class="who"><span class="av">RK</span><div><div class="nm">Rahul K.</div><div class="vb"><i data-lucide="badge-check" class="ic"></i> Verified buyer · Pokémon GO</div></div></figcaption>
+      </figure>
+
+      <figure class="quote">
+        <div class="qm"><i data-lucide="quote" class="ic-lg"></i></div>
+        <p>I've been burned on other sites. Here the seller was ID-verified with 100+ sales, and my money sat safe in escrow the whole time. Zero stress.</p>
+        <figcaption class="who"><span class="av">MA</span><div><div class="nm">Maya A.</div><div class="vb"><i data-lucide="badge-check" class="ic"></i> Verified buyer · Valorant</div></div></figcaption>
+      </figure>
+
+      <figure class="quote">
+        <div class="qm"><i data-lucide="quote" class="ic-lg"></i></div>
+        <p>One item didn't match the listing. Opened a dispute, the AI Judge reviewed the chat, and I had a full refund the same day. Free money-back is the real deal.</p>
+        <figcaption class="who"><span class="av">JT</span><div><div class="nm">Jordan T.</div><div class="vb"><i data-lucide="badge-check" class="ic"></i> Verified buyer · Free Fire</div></div></figcaption>
+      </figure>
+
+      <figure class="quote">
+        <div class="qm"><i data-lucide="quote" class="ic-lg"></i></div>
+        <p>As a seller, getting paid the moment the buyer confirms is huge. ID verification keeps the scammers out, so genuine sellers like me actually get a fair shot.</p>
+        <figcaption class="who"><span class="av">PG</span><div><div class="nm">PoGoLegends</div><div class="vb"><i data-lucide="badge-check" class="ic"></i> Verified seller · Gold</div></div></figcaption>
+      </figure>
+
+      <figure class="quote">
+        <div class="qm"><i data-lucide="quote" class="ic-lg"></i></div>
+        <p>TH15 Legend League base, $129, delivered instantly. The escrow flow was so clear I knew exactly what was happening at every step. Felt premium.</p>
+        <figcaption class="who"><span class="av">SV</span><div><div class="nm">Sven L.</div><div class="vb"><i data-lucide="badge-check" class="ic"></i> Verified buyer · Clash of Clans</div></div></figcaption>
+      </figure>
+
+      <figure class="quote">
+        <div class="qm"><i data-lucide="quote" class="ic-lg"></i></div>
+        <p>Top-ups in seconds, prices in plain USD, no shady redirects. The whole thing just feels safe and well-made. Already my go-to.</p>
+        <figcaption class="who"><span class="av">DC</span><div><div class="nm">Diego C.</div><div class="vb"><i data-lucide="badge-check" class="ic"></i> Verified buyer · PUBG Mobile</div></div></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= CTA ======================= -->
+<section class="sec" style="padding-top:0">
+  <div class="wrap">
+    <div class="cta reveal">
+      <div class="cta__mesh"><div class="blob b1"></div><div class="blob b2"></div></div>
+      <div class="wrap-in">
+        <h2>Trade with <em>zero anxiety.</em></h2>
+        <p>Join 248K+ orders delivered safely. Escrow protects every trade, sellers are ID-verified, and money-back is always free.</p>
+        <div class="cta__acts">
+          <a class="btn btn-primary btn-lg" href="#">Start buying <i data-lucide="arrow-up-right" class="ic"></i></a>
+          <a class="btn btn-glass btn-lg" href="#"><i data-lucide="store" class="ic"></i> Become a seller</a>
+        </div>
+        <div class="cta__note"><i data-lucide="shield-check" class="ic"></i> No fee to browse · Free money-back on every order · Prices in USD</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FAQ ======================= -->
+<section class="sec" id="faq" style="padding-top:0">
+  <div class="wrap">
+    <div class="faq__grid">
+      <div class="reveal">
+        <span class="kicker-num">06 — FAQ</span>
+        <h2 style="font-size:clamp(34px,4.6vw,52px);margin-top:16px;letter-spacing:-.04em">Still got<br>questions?</h2>
+        <p class="dim" style="margin-top:18px;font-size:16px">Everything you need to know before your first safe trade. Can't find it? Our support team replies fast.</p>
+        <a class="btn btn-glass btn-md" href="#" style="margin-top:24px"><i data-lucide="life-buoy" class="ic-sm"></i> Talk to support</a>
+      </div>
+
+      <div class="faq__list reveal">
+        <details class="fitem" open>
+          <summary>What exactly is escrow, and is it really free?<span class="pl"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+          <div class="ans">Escrow is a safe middle. When you pay, GETX holds your money instead of handing it straight to the seller. The seller only gets paid after you confirm you received exactly what was described. It is on every order, always free — never a paid add-on.</div>
+        </details>
+        <details class="fitem">
+          <summary>How fast is delivery?<span class="pl"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+          <div class="ans">Many listings are marked Instant and deliver in minutes through our automated system. For others, the seller delivers directly in chat. Either way, your money stays protected in escrow until you confirm.</div>
+        </details>
+        <details class="fitem">
+          <summary>What if the account or item isn't as described?<span class="pl"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+          <div class="ans">Open a dispute. Our AI Dispute Judge reviews the listing, chat and evidence in minutes, with humans on the edge cases. If you were wronged, your free money-back guarantee returns your funds in full.</div>
+        </details>
+        <details class="fitem">
+          <summary>How do you keep scammers out?<span class="pl"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+          <div class="ans">Every seller is ID-verified before they can list. Reputation, level and full sales history are public, and our trust engine continuously scores sellers. Combined with escrow, the incentive to scam simply disappears.</div>
+        </details>
+        <details class="fitem">
+          <summary>Which payment methods can I use?<span class="pl"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+          <div class="ans">Pay with UPI / Cards or Crypto (USDT · BTC · ETH). All checkouts run over a secure, SSL-encrypted connection, and prices are shown in USD.</div>
+        </details>
+        <details class="fitem">
+          <summary>Can I sell on GETX too?<span class="pl"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+          <div class="ans">Absolutely. Verify your identity, create a listing, and you're live. You get paid the moment the buyer confirms delivery — fast, fair payouts that make sellers feel like CEOs.</div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FOOTER ======================= -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__top">
+      <div class="foot__brand">
+        <a class="brand" href="#"><span class="mark"><i data-lucide="hexagon" style="color:var(--blue)"></i></span> GET<b>X</b></a>
+        <p>The safest place to buy &amp; sell game accounts, items and top-ups — escrow on every order.</p>
+        <div class="foot__pay">
+          <span class="paychip"><i data-lucide="lock" class="ic"></i> UPI / Cards</span>
+          <span class="paychip"><i data-lucide="bitcoin" class="ic"></i> Crypto · USDT · BTC · ETH</span>
+          <span class="paychip"><i data-lucide="shield-check" class="ic"></i> SSL secure checkout</span>
+        </div>
+      </div>
+
+      <div class="fcol">
+        <h4>Marketplace</h4>
+        <a href="#">Pokémon GO</a><a href="#">Clash of Clans</a><a href="#">Valorant</a><a href="#">Free Fire</a><a href="#">PUBG Mobile</a>
+      </div>
+      <div class="fcol">
+        <h4>Trust</h4>
+        <a href="#">How escrow works</a><a href="#">Money-back guarantee</a><a href="#">ID verification</a><a href="#">AI Dispute Judge</a>
+      </div>
+      <div class="fcol">
+        <h4>Sell</h4>
+        <a href="#">Become a seller</a><a href="#">Seller dashboard</a><a href="#">Payouts</a><a href="#">Seller levels</a>
+      </div>
+      <div class="fcol">
+        <h4>Company</h4>
+        <a href="#">About</a><a href="#">Support</a><a href="#">Terms</a><a href="#">Privacy</a>
+      </div>
+    </div>
+
+    <div class="foot__bottom">
+      <span>© 2026 GETX · getx.live — All rights reserved. Prices in USD.</span>
+      <div class="foot__socials">
+        <a href="#" aria-label="Discord"><i data-lucide="message-circle" class="ic-sm"></i></a>
+        <a href="#" aria-label="X"><i data-lucide="twitter" class="ic-sm"></i></a>
+        <a href="#" aria-label="YouTube"><i data-lucide="youtube" class="ic-sm"></i></a>
+        <a href="#" aria-label="Instagram"><i data-lucide="instagram" class="ic-sm"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Lucide icons
+  lucide.createIcons();
+
+  // Scroll reveal
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.14,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // Nav condense on scroll
+  const nav=document.getElementById('nav');
+  addEventListener('scroll',()=>{ nav.style.boxShadow = scrollY>10 ? '0 10px 30px -20px rgba(0,0,0,.8)' : 'none'; },{passive:true});
+</script>
+</body>
+</html>

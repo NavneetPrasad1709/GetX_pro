@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GETX — Redesign v2 (Tactical Trade Terminal)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ===========================================================================
+   GETX // REDESIGN v2 — "Tactical Trade Terminal"
+   Concept: a gaming-account marketplace that feels like a high-end trading
+   terminal crossed with a loot inventory. Dark + electric-blue + trust-green
+   kept, but executed with: a technical display face (Chakra Petch), mono data,
+   cut-corner HUD frames, loot-RARITY language, real line icons (no emoji),
+   scanline + grain texture, and staggered entrance motion.
+   =========================================================================== */
+:root{
+  /* canvas + elevation (cool-tinted black, never flat) */
+  --bg:#07090c; --s1:#0c0f14; --s2:#11151c; --s3:#181d26; --ctl:#1d2330; --sunken:#0a0c10;
+  /* ink */
+  --ink:#eef1f6; --ink-dim:#9aa3b2; --ink-faint:#6b7policy; --ink-faint:#6f7787;
+  /* signal colors */
+  --blue:#4d7cfe; --blue-hi:#6f9bff; --blue-deep:#2f55d6;
+  --green:#34d399; --green-deep:#0f7a55; --green-bg:rgba(52,211,153,.10); --green-bd:rgba(52,211,153,.34);
+  --amber:#ffb020; --amber-bg:rgba(255,176,32,.10); --amber-bd:rgba(255,176,32,.34);
+  --cyan:#38bdf8;
+  --red:#ff5470;
+  /* loot rarity (content classification only) */
+  --r-common:#8a93a3; --r-rare:#4d9bff; --r-epic:#b06bff; --r-legend:#ffb020; --r-mythic:#ff5470;
+  /* lines */
+  --line:rgba(255,255,255,.08); --line-hi:rgba(255,255,255,.16);
+  --glow-blue:0 0 0 1px rgba(77,124,254,.35),0 14px 40px -14px rgba(77,124,254,.55);
+  --shadow:0 18px 50px -22px rgba(0,0,0,.8);
+  --cut:12px; /* HUD corner cut */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;position:relative;
+}
+/* texture: grain + faint scanlines so surfaces read engineered, not flat */
+body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.04;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+body::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.18) 3px 4px)}
+
+h1,h2,h3,h4{font-family:'Chakra Petch',sans-serif;font-weight:700;letter-spacing:-.01em;line-height:1.06}
+.mono{font-family:'IBM Plex Mono',monospace}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+.kicker{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:var(--blue)}
+.kicker .bar{display:inline-block;width:22px;height:1px;background:var(--blue);vertical-align:middle;margin-right:9px}
+.dim{color:var(--ink-dim)} .faint{color:var(--ink-faint)}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* HUD cut-corner frame */
+.hud{position:relative;background:var(--s2);border:1px solid var(--line);
+  clip-path:polygon(0 var(--cut),var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%);}
+.hud::before{content:"";position:absolute;top:0;left:var(--cut);right:0;height:1px;background:linear-gradient(90deg,var(--line-hi),transparent 40%)}
+
+/* preview chrome */
+.pv{position:sticky;top:0;z-index:60;background:rgba(8,10,13,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.pv .wrap{display:flex;align-items:center;gap:14px;height:46px;font-size:12px}
+.pv b{font-family:'Chakra Petch'}
+.live{display:inline-flex;align-items:center;gap:7px;color:var(--green);font-family:'IBM Plex Mono';font-size:11px;letter-spacing:.1em}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.35}}
+
+/* nav */
+.nav{border-bottom:1px solid var(--line);background:rgba(8,10,13,.6)}
+.nav .wrap{display:flex;align-items:center;gap:26px;height:64px}
+.brand{font-family:'Chakra Petch';font-weight:700;font-size:22px;letter-spacing:.02em;display:flex;align-items:center;gap:2px}
+.brand .x{display:inline-grid;place-items:center;width:24px;height:24px;background:var(--blue);color:#fff;
+  clip-path:polygon(0 6px,6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);font-size:15px;margin-left:1px}
+.nav a.link{font-family:'IBM Plex Mono';font-size:12.5px;letter-spacing:.06em;color:var(--ink-dim);text-transform:uppercase}
+.nav a.link:hover{color:var(--ink)}
+.nav .spacer{flex:1}
+.icon-btn{width:38px;height:38px;display:grid;place-items:center;color:var(--ink-dim);border:1px solid var(--line);background:var(--s1);cursor:pointer;
+  clip-path:polygon(0 5px,5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%)}
+.icon-btn:hover{color:var(--ink);border-color:var(--line-hi)}
+
+svg.i{width:18px;height:18px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+svg.i--sm{width:14px;height:14px} svg.i--lg{width:22px;height:22px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-family:'Chakra Petch';font-weight:600;
+  letter-spacing:.02em;cursor:pointer;border:1px solid transparent;transition:.16s;white-space:nowrap;
+  clip-path:polygon(0 8px,8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+.btn--lg{height:52px;padding:0 26px;font-size:15px}
+.btn--md{height:46px;padding:0 20px;font-size:14px}
+.btn--sm{height:38px;padding:0 16px;font-size:13px}
+.btn--primary{background:var(--blue);color:#fff;box-shadow:var(--glow-blue)}
+.btn--primary:hover{background:var(--blue-hi);transform:translateY(-1px)}
+.btn--trust{background:var(--green);color:#04140d}
+.btn--trust:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn--line{background:transparent;color:var(--ink);border-color:var(--line-hi)}
+.btn--line:hover{background:var(--ctl)}
+.btn--ghost{background:var(--ctl);color:var(--ink-dim)}
+.btn--ghost:hover{color:var(--ink)}
+
+/* tags */
+.tag{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono';font-weight:500;font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border:1px solid var(--line)}
+.tag--blue{color:var(--blue);border-color:rgba(77,124,254,.4);background:rgba(77,124,254,.08)}
+.tag--green{color:var(--green);border-color:var(--green-bd);background:var(--green-bg)}
+.tag--amber{color:var(--amber);border-color:var(--amber-bd);background:var(--amber-bg)}
+.tag--cyan{color:var(--cyan);border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.08)}
+.tag--mute{color:var(--ink-dim);background:var(--ctl)}
+
+/* rarity tier chip */
+.rar{font-family:'Chakra Petch';font-weight:700;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px}
+.rar--common{color:var(--r-common);background:rgba(138,147,163,.12)}
+.rar--rare{color:var(--r-rare);background:rgba(77,155,255,.12)}
+.rar--epic{color:var(--r-epic);background:rgba(176,107,255,.14)}
+.rar--legend{color:var(--r-legend);background:rgba(255,176,32,.14)}
+.rar--mythic{color:var(--r-mythic);background:rgba(255,84,112,.14)}
+
+/* seller level + trust score (mono, tabular) */
+.lvl{font-family:'Chakra Petch';font-weight:700;font-size:10.5px;letter-spacing:.1em;padding:2px 7px;display:inline-flex;gap:5px;align-items:center}
+.lvl::before{content:"";width:6px;height:6px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:currentColor}
+.lvl--bronze{color:#c08457} .lvl--silver{color:#aab2c0} .lvl--gold{color:#ffce4d} .lvl--plat{color:#5ec4d8} .lvl--elite{color:var(--blue-hi)}
+.ts{font-family:'IBM Plex Mono';font-weight:600;font-size:12px;display:inline-flex;align-items:center;gap:5px}
+.ts--hi{color:var(--green)} .ts--mid{color:var(--blue)} .ts--lo{color:var(--amber)} .ts--crit{color:var(--red)}
+
+section{padding:74px 0;border-top:1px solid var(--line)}
+.alt{background:var(--s1)}
+.head{margin-bottom:34px}
+.head h2{font-size:clamp(24px,3.4vw,34px);margin-top:10px}
+.head p{color:var(--ink-dim);max-width:62ch;margin-top:10px;font-size:14.5px}
+
+/* ============ HERO (asymmetric, editorial) ============ */
+.hero{position:relative;overflow:hidden;border-top:none;padding:60px 0 0}
+.hero__bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hero__glow{position:absolute;top:-22%;right:-8%;width:60vw;height:70vh;filter:blur(100px);opacity:.9;
+  background:radial-gradient(circle at 60% 40%,rgba(77,124,254,.34),rgba(52,211,153,.12) 48%,transparent 72%)}
+.hero__grid{position:absolute;inset:0;background-size:48px 48px;opacity:.6;
+  background-image:linear-gradient(to right,rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.035) 1px,transparent 1px);
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 70% 10%,#000,transparent 80%);mask-image:radial-gradient(ellipse 90% 70% at 70% 10%,#000,transparent 80%)}
+.hero__in{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+@media(max-width:920px){.hero__in{grid-template-columns:1fr;gap:28px}}
+.hero h1{font-size:clamp(38px,5.6vw,62px);font-weight:700;margin-top:16px;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;color:var(--blue);position:relative}
+.hero h1 .grad{background:linear-gradient(100deg,var(--blue-hi),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{color:var(--ink-dim);max-width:46ch;margin-top:16px;font-size:16.5px}
+.search{display:flex;align-items:stretch;margin-top:26px;background:var(--s2);border:1px solid var(--line-hi);height:60px;max-width:560px;
+  clip-path:polygon(0 10px,10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
+.search .cat{display:flex;align-items:center;gap:8px;padding:0 16px;border-right:1px solid var(--line);color:var(--ink-dim);font-family:'IBM Plex Mono';font-size:12px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.search input{flex:1;background:transparent;border:0;outline:none;color:var(--ink);font-size:15px;padding:0 16px;font-family:'IBM Plex Sans'}
+.search input::placeholder{color:var(--ink-faint)}
+.search .go{margin:8px;height:44px}
+.hero__chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+/* featured drop card */
+.drop{padding:0;overflow:hidden;--cut:14px}
+.drop__top{height:4px;background:linear-gradient(90deg,var(--r-legend),transparent)}
+.drop__hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0}
+.drop__art{margin:12px 16px 0;height:150px;position:relative;display:flex;align-items:flex-end;padding:12px;
+  background:radial-gradient(120% 120% at 20% 0%,#2a2140,transparent),linear-gradient(135deg,#171029,#0a0b0d);
+  border:1px solid var(--line);clip-path:polygon(0 8px,8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+.drop__art .badge{position:absolute;top:10px;right:10px}
+.drop__bd{padding:14px 16px 18px}
+.drop__title{font-family:'Chakra Petch';font-weight:600;font-size:16px;margin-bottom:10px}
+.drop__row{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.price{font-family:'IBM Plex Mono';font-weight:600;font-size:24px;letter-spacing:-.01em}
+.price small{color:var(--ink-faint);font-size:12px;font-weight:400}
+.serial{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--ink-faint);letter-spacing:.1em}
+
+/* ticker */
+.ticker{margin-top:48px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--s1)}
+.ticker .wrap{display:flex;flex-wrap:wrap;gap:0;padding:0}
+.tk{flex:1;min-width:160px;padding:18px 22px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.tk b{font-family:'IBM Plex Mono';font-weight:600;font-size:21px;letter-spacing:-.01em}
+.tk span{font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+
+/* ============ INVENTORY grid ============ */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.slot{overflow:hidden;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s;--cut:11px}
+.slot:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.slot__bar{height:3px}
+.bar--legend{background:linear-gradient(90deg,var(--r-legend),transparent)}
+.bar--epic{background:linear-gradient(90deg,var(--r-epic),transparent)}
+.bar--rare{background:linear-gradient(90deg,var(--r-rare),transparent)}
+.bar--common{background:linear-gradient(90deg,var(--r-common),transparent)}
+.slot__art{aspect-ratio:16/10;position:relative;display:flex;align-items:flex-end;padding:11px;border-bottom:1px solid var(--line)}
+.a1{background:radial-gradient(120% 120% at 20% 0%,#1c2b4d,transparent),linear-gradient(135deg,#0e1730,#0a0b0d)}
+.a2{background:radial-gradient(120% 120% at 20% 0%,#143527,transparent),linear-gradient(135deg,#0b1f17,#0a0b0d)}
+.a3{background:radial-gradient(120% 120% at 20% 0%,#2a1540,transparent),linear-gradient(135deg,#1a0f2a,#0a0b0d)}
+.a4{background:radial-gradient(120% 120% at 20% 0%,#3a2a10,transparent),linear-gradient(135deg,#221a0b,#0a0b0d)}
+.slot__game{font-family:'Chakra Petch';font-weight:600;font-size:11px;letter-spacing:.04em;text-shadow:0 1px 10px rgba(0,0,0,.7)}
+.slot__heart{position:absolute;top:9px;right:9px;width:32px;height:32px;display:grid;place-items:center;color:var(--ink);
+  background:rgba(7,9,12,.55);border:1px solid var(--line);backdrop-filter:blur(8px);cursor:pointer;
+  clip-path:polygon(0 5px,5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%)}
+.slot__heart:hover{color:var(--red);border-color:rgba(255,84,112,.5)}
+.slot__bd{padding:13px 14px 15px;display:flex;flex-direction:column;gap:10px}
+.slot__title{font-family:'Chakra Petch';font-weight:600;font-size:14px;line-height:1.3}
+.attrs{display:flex;flex-wrap:wrap;gap:6px}
+.attr{font-family:'IBM Plex Mono';font-size:10px;color:var(--ink-dim);background:var(--ctl);padding:3px 7px;letter-spacing:.04em}
+.seller{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-dim)}
+.av{width:22px;height:22px;background:linear-gradient(135deg,var(--blue),var(--green));flex:none;
+  clip-path:polygon(0 5px,5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%)}
+.slot__foot{display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid var(--line);padding-top:11px}
+.proof{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--ink-faint);display:flex;align-items:center;gap:5px}
+
+/* ============ PDP ============ */
+.pdp{display:grid;grid-template-columns:1.05fr .95fr;gap:26px}
+@media(max-width:920px){.pdp{grid-template-columns:1fr}}
+.gal{aspect-ratio:4/3;position:relative;display:flex;align-items:flex-end;padding:16px;--cut:14px;
+  background:radial-gradient(120% 120% at 22% 0%,#1c2b4d,transparent),linear-gradient(135deg,#0e1730,#0a0b0d)}
+.gal__top{position:absolute;top:0;left:14px;right:0;height:4px;background:linear-gradient(90deg,var(--r-legend),transparent)}
+.buy{padding:22px;display:flex;flex-direction:column;gap:15px;--cut:14px}
+.buy .topline{display:flex;align-items:center;justify-content:space-between}
+.buy h3{font-size:19px}
+.buy .pp{font-family:'IBM Plex Mono';font-weight:600;font-size:34px;letter-spacing:-.02em}
+.qty{display:inline-flex;border:1px solid var(--line-hi)}
+.qty button{width:42px;height:42px;background:var(--ctl);border:0;color:var(--ink);font-size:18px;cursor:pointer}
+.qty span{width:52px;display:grid;place-items:center;font-family:'IBM Plex Mono';font-weight:600}
+.seal{display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--green-bg);border:1px dashed var(--green-bd)}
+.seal__b{width:42px;height:42px;display:grid;place-items:center;color:var(--green);border:1px solid var(--green-bd);flex:none;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.escrow{padding:15px;background:var(--green-bg);border:1px solid var(--green-bd);--cut:12px}
+.escrow .hd{display:flex;align-items:center;gap:9px;color:var(--green);font-family:'Chakra Petch';font-weight:600;font-size:13px;letter-spacing:.04em;margin-bottom:13px}
+.escrow .track{height:4px;background:rgba(52,211,153,.2);margin:0 0 13px;position:relative}
+.escrow .track i{position:absolute;left:0;top:0;height:100%;width:34%;background:var(--green)}
+.estep{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-dim);padding:3px 0}
+.estep .n{width:20px;height:20px;display:grid;place-items:center;font-family:'IBM Plex Mono';font-size:10px;color:var(--green);border:1px solid var(--green-bd);flex:none}
+.estep.on{color:var(--ink)} .estep.on .n{background:var(--green);color:#04140d;border-color:var(--green)}
+.dossier{display:flex;align-items:center;gap:12px;padding:13px;background:var(--s1);border:1px solid var(--line);--cut:10px}
+.dossier .av{width:40px;height:40px}
+
+/* ============ SYSTEM ============ */
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.sw{border:1px solid var(--line);overflow:hidden;--cut:8px}
+.sw .c{height:58px} .sw .l{padding:8px 10px;font-family:'IBM Plex Mono';font-size:10.5px;color:var(--ink-dim)}
+.sw .l b{display:block;font-family:'Chakra Petch';color:var(--ink);font-size:11px;letter-spacing:.04em;margin-bottom:2px}
+.elev{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:760px){.elev{grid-template-columns:repeat(2,1fr)}}
+.elev div{padding:20px 12px;text-align:center;font-family:'IBM Plex Mono';font-size:10px;color:var(--ink-dim);letter-spacing:.08em;border:1px solid var(--line)}
+.elev div b{display:block;font-family:'Chakra Petch';color:var(--ink);font-size:12px;margin-bottom:4px;letter-spacing:.02em}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.stack{display:flex;flex-direction:column;gap:24px}
+
+/* before/after */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:760px){.ba{grid-template-columns:1fr}}
+.flat{background:#14161b;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;color:#9ca1ab}
+
+/* entrance motion */
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+.d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.2s}.d4{animation-delay:.28s}.d5{animation-delay:.36s}
+@media(prefers-reduced-motion:reduce){.rise{animation:none}}
+
+.foot{padding:40px 0;border-top:1px solid var(--line);text-align:center;color:var(--ink-faint);font-family:'IBM Plex Mono';font-size:11.5px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+
+<!-- icon defs -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/></symbol>
+<symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="1.5"/><path d="M8 10.5V7a4 4 0 018 0v3.5"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.3-9.3-8.3C1.2 8.9 2.7 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.3 0 4.8 3.4 3.3 6.2C19 15.7 12 20 12 20z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.4 4.1 1.2 6L12 16.8 6.6 19.5l1.2-6L3.4 9.3l6-.7L12 3z"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5z"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-refund" viewBox="0 0 24 24"><path d="M4 12a8 8 0 108-8M4 12V6m0 6h6"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M7 20h10M5 8h14M5 8l-2.5 6a3 3 0 005 0L5 8zm14 0l-2.5 6a3 3 0 005 0L19 8z"/></symbol>
+</defs></svg>
+
+<div class="pv"><div class="wrap">
+  <span class="live"><i></i>SAMPLE v2</span>
+  <b>GETX // Tactical Trade Terminal</b>
+  <span class="dim">bolder direction · no emoji · loot-rarity · approve → finalize</span>
+</div></div>
+
+<!-- NAV -->
+<div class="nav"><div class="wrap">
+  <div class="brand">GET<span class="x">X</span></div>
+  <a class="link">Marketplace</a><a class="link">Games</a><a class="link">Guides</a>
+  <div class="spacer"></div>
+  <button class="icon-btn"><svg class="i"><use href="#i-chat"/></svg></button>
+  <button class="icon-btn"><svg class="i"><use href="#i-shield"/></svg></button>
+  <a class="btn btn--primary btn--sm">Sell</a>
+</div></div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero__bg"><div class="hero__glow"></div><div class="hero__grid"></div></div>
+  <div class="wrap">
+    <div class="hero__in">
+      <div>
+        <div class="kicker rise d1"><span class="bar"></span>Escrow-secured marketplace</div>
+        <h1 class="rise d2">Trade game accounts<br>like <span class="grad">loot</span>, settle them <em>safely</em>.</h1>
+        <p class="lead rise d3">Every drop is escrow-locked. We hold the funds, verify the seller, and only release when you confirm. Built for gamers, not paperwork.</p>
+        <div class="search rise d3">
+          <div class="cat">All games <svg class="i i--sm"><use href="#i-chevron"/></svg></div>
+          <input placeholder="Search Pokémon GO accounts, coins, boosting…" />
+          <button class="btn btn--primary go"><svg class="i i--sm"><use href="#i-search"/></svg> Search</button>
+        </div>
+        <div class="hero__chips rise d4">
+          <span class="tag tag--blue"><svg class="i i--sm"><use href="#i-lock"/></svg> Escrow-locked</span>
+          <span class="tag tag--green"><svg class="i i--sm"><use href="#i-refund"/></svg> Money-back</span>
+          <span class="tag tag--amber"><svg class="i i--sm"><use href="#i-bolt"/></svg> Instant delivery</span>
+          <span class="tag tag--mute"><svg class="i i--sm"><use href="#i-scale"/></svg> AI Dispute Judge</span>
+        </div>
+      </div>
+
+      <!-- featured drop card -->
+      <div class="hud drop rise d5">
+        <div class="drop__top"></div>
+        <div class="drop__hd"><span class="rar rar--legend">Legendary</span><span class="serial">#GX-4471</span></div>
+        <div class="drop__art">
+          <span class="slot__heart" style="top:10px;right:10px"><svg class="i i--sm"><use href="#i-heart"/></svg></span>
+          <span class="slot__game">Pokémon GO</span>
+        </div>
+        <div class="drop__bd">
+          <div class="drop__title">Lv.45 · 3 Shiny Legendaries · 250k Stardust</div>
+          <div class="row" style="gap:8px"><span class="tag tag--cyan"><svg class="i i--sm"><use href="#i-bolt"/></svg> Instant</span><span class="tag tag--amber">1 of 1</span></div>
+          <div class="drop__row">
+            <div class="seller"><span class="av"></span> PoGoLegends <span class="lvl lvl--gold">Gold</span></div>
+            <span class="ts ts--hi"><svg class="i i--sm"><use href="#i-shield"/></svg> 92</span>
+          </div>
+          <div class="drop__row" style="margin-top:14px">
+            <div class="price">$74.99</div>
+            <a class="btn btn--primary btn--md">Buy now <svg class="i i--sm"><use href="#i-arrow"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- live ticker -->
+  <div class="ticker"><div class="wrap">
+    <div class="tk"><b class="tnum" style="color:var(--green)">2,481</b><span>Orders settled</span></div>
+    <div class="tk"><b class="tnum">312</b><span>Verified sellers</span></div>
+    <div class="tk"><b class="tnum" style="color:var(--blue-hi)">$1.24M</b><span>Escrow protected</span></div>
+    <div class="tk" style="border-right:none"><b class="tnum" style="color:var(--green)">99.2%</b><span>Dispute-free</span></div>
+  </div></div>
+</header>
+
+<!-- INVENTORY -->
+<section>
+  <div class="wrap">
+    <div class="head" style="display:flex;align-items:flex-end;justify-content:space-between">
+      <div><div class="kicker"><span class="bar"></span>Live inventory</div><h2>Fresh drops</h2></div>
+      <a class="btn btn--line btn--sm">View all <svg class="i i--sm"><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="grid">
+
+      <article class="hud slot">
+        <div class="slot__bar bar--legend"></div>
+        <div class="slot__art a1"><span class="slot__heart"><svg class="i i--sm"><use href="#i-heart"/></svg></span><span class="slot__game">Pokémon GO</span></div>
+        <div class="slot__bd">
+          <div class="row" style="gap:6px"><span class="rar rar--legend">Legendary</span><span class="tag tag--cyan">Instant</span></div>
+          <div class="slot__title">Lv.45 · 3 Shiny Legendaries</div>
+          <div class="attrs"><span class="attr">250K DUST</span><span class="attr">LVL 45</span><span class="attr">FULL ACCESS</span></div>
+          <div class="seller"><span class="av"></span> PoGoLegends <span class="lvl lvl--gold">Gold</span> <span class="ts ts--hi"><svg class="i i--sm"><use href="#i-shield"/></svg>92</span></div>
+          <div class="slot__foot"><div class="price">$74.99</div><span class="proof"><svg class="i i--sm"><use href="#i-star"/></svg>4.9 · 47 sold</span></div>
+        </div>
+      </article>
+
+      <article class="hud slot">
+        <div class="slot__bar bar--epic"></div>
+        <div class="slot__art a2"><span class="slot__heart"><svg class="i i--sm"><use href="#i-heart"/></svg></span><span class="slot__game">Clash of Clans</span></div>
+        <div class="slot__bd">
+          <div class="row" style="gap:6px"><span class="rar rar--epic">Epic</span><span class="tag tag--green">Verified</span></div>
+          <div class="slot__title">TH15 Max · Legend League</div>
+          <div class="attrs"><span class="attr">TH15</span><span class="attr">14 HEROES</span><span class="attr">MAXED</span></div>
+          <div class="seller"><span class="av"></span> ClashKings <span class="lvl lvl--plat">Platinum</span> <span class="ts ts--hi"><svg class="i i--sm"><use href="#i-shield"/></svg>88</span></div>
+          <div class="slot__foot"><div class="price">$129.00</div><span class="proof"><svg class="i i--sm"><use href="#i-eye"/></svg>12 viewing</span></div>
+        </div>
+      </article>
+
+      <article class="hud slot">
+        <div class="slot__bar bar--rare"></div>
+        <div class="slot__art a3"><span class="slot__heart"><svg class="i i--sm"><use href="#i-heart"/></svg></span><span class="slot__game">Valorant</span></div>
+        <div class="slot__bd">
+          <div class="row" style="gap:6px"><span class="rar rar--rare">Rare</span><span class="tag tag--mute">Manual ~1h</span></div>
+          <div class="slot__title">Immortal 2 · 38 Skins</div>
+          <div class="attrs"><span class="attr">IMMORTAL</span><span class="attr">REAVER SET</span><span class="attr">KNIFE</span></div>
+          <div class="seller"><span class="av"></span> SkinVault <span class="lvl lvl--silver">Silver</span> <span class="ts ts--mid"><svg class="i i--sm"><use href="#i-shield"/></svg>74</span></div>
+          <div class="slot__foot"><div class="price">$59.99</div><span class="proof"><svg class="i i--sm"><use href="#i-star"/></svg>4.7 · 18 sold</span></div>
+        </div>
+      </article>
+
+      <article class="hud slot">
+        <div class="slot__bar bar--common"></div>
+        <div class="slot__art a4"><span class="slot__heart"><svg class="i i--sm"><use href="#i-heart"/></svg></span><span class="slot__game">Free Fire</span></div>
+        <div class="slot__bd">
+          <div class="row" style="gap:6px"><span class="rar rar--common">Top-up</span><span class="tag tag--cyan">Instant</span><span class="tag tag--amber">Hot</span></div>
+          <div class="slot__title">1,060 Diamonds · to your UID</div>
+          <div class="attrs"><span class="attr">1060 DIAMONDS</span><span class="attr">DIRECT</span></div>
+          <div class="seller"><span class="av"></span> TopUpPro <span class="lvl lvl--bronze">Bronze</span> <span class="ts ts--mid"><svg class="i i--sm"><use href="#i-shield"/></svg>68</span></div>
+          <div class="slot__foot"><div class="price">$9.49</div><span class="proof"><svg class="i i--sm"><use href="#i-star"/></svg>4.6 · 9 sold</span></div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- PDP -->
+<section class="alt">
+  <div class="wrap">
+    <div class="head"><div class="kicker"><span class="bar"></span>Listing</div><h2>The buy terminal</h2>
+      <p>Trust is the interface, not a footnote — escrow runs as a live HUD, and the money-back guarantee is a stamped seal beside the buy button.</p></div>
+    <div class="pdp">
+      <div class="hud gal"><div class="gal__top"></div><span class="slot__game">Pokémon GO · Lv.45 · Legendary</span></div>
+      <div class="hud buy">
+        <div class="topline"><span class="rar rar--legend">Legendary · 1 of 1</span><span class="proof"><svg class="i i--sm"><use href="#i-eye"/></svg>12 viewing this week</span></div>
+        <h3>Lv.45 · 3 Shiny Legendaries · 250k Stardust</h3>
+        <div class="pp">$74.99</div>
+        <div class="row"><div class="qty"><button>−</button><span>1</span><button>+</button></div><span class="faint mono" style="font-size:11.5px">+5% buyer protection at checkout</span></div>
+
+        <div class="seal">
+          <div class="seal__b"><svg class="i i--lg"><use href="#i-shield-check"/></svg></div>
+          <div><b style="font-family:'Chakra Petch';font-size:14px;color:var(--green)">100% Money-Back Guarantee</b><div class="faint" style="font-size:12px">Full refund incl. fees if not as described — settled in 48h.</div></div>
+        </div>
+
+        <a class="btn btn--primary btn--lg" style="width:100%">Buy now — $74.99</a>
+        <a class="btn btn--line btn--md" style="width:100%"><svg class="i i--sm"><use href="#i-chat"/></svg> Chat with seller</a>
+
+        <div class="escrow">
+          <div class="hd"><svg class="i i--sm"><use href="#i-lock"/></svg> Escrow status</div>
+          <div class="track"><i></i></div>
+          <div class="estep on"><span class="n">1</span> You pay — funds locked in escrow</div>
+          <div class="estep"><span class="n">2</span> Seller delivers instantly</div>
+          <div class="estep"><span class="n">3</span> Released only when you confirm</div>
+        </div>
+
+        <div class="dossier">
+          <span class="av"></span>
+          <div style="flex:1"><div class="row" style="gap:7px"><b style="font-family:'Chakra Petch';font-size:14px">PoGoLegends</b><span class="lvl lvl--gold">Gold</span></div><div class="proof" style="margin-top:2px"><svg class="i i--sm"><use href="#i-star"/></svg>4.9 (212) · 340 sales · last sale 2h ago</div></div>
+          <span class="ts ts--hi"><svg class="i i--sm"><use href="#i-shield"/></svg>92</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SYSTEM -->
+<section>
+  <div class="wrap">
+    <div class="head"><div class="kicker"><span class="bar"></span>Design system</div><h2>The kit</h2></div>
+    <div class="stack">
+      <div>
+        <div class="faint mono" style="font-size:11px;letter-spacing:.1em;margin-bottom:11px">SIGNAL COLOURS — one meaning each</div>
+        <div class="sw-grid">
+          <div class="hud sw"><div class="c" style="background:var(--blue)"></div><div class="l"><b>Action</b>#4d7cfe</div></div>
+          <div class="hud sw"><div class="c" style="background:var(--green)"></div><div class="l"><b>Trust</b>#34d399</div></div>
+          <div class="hud sw"><div class="c" style="background:var(--amber)"></div><div class="l"><b>Urgency</b>#ffb020</div></div>
+          <div class="hud sw"><div class="c" style="background:var(--cyan)"></div><div class="l"><b>Info</b>#38bdf8</div></div>
+          <div class="hud sw"><div class="c" style="background:var(--red)"></div><div class="l"><b>Danger</b>#ff5470</div></div>
+          <div class="hud sw"><div class="c" style="background:var(--s2);border-bottom:1px solid var(--line)"></div><div class="l"><b>Surface</b>#11151c</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="faint mono" style="font-size:11px;letter-spacing:.1em;margin-bottom:11px">LOOT RARITY — listing classification (gamers get it instantly)</div>
+        <div class="row"><span class="rar rar--common">Common</span><span class="rar rar--rare">Rare</span><span class="rar rar--epic">Epic</span><span class="rar rar--legend">Legendary</span><span class="rar rar--mythic">Mythic</span></div>
+      </div>
+      <div>
+        <div class="faint mono" style="font-size:11px;letter-spacing:.1em;margin-bottom:11px">ELEVATION LADDER — depth kills the flat look</div>
+        <div class="elev">
+          <div style="background:var(--bg)"><b>canvas</b>00</div>
+          <div style="background:var(--s1)"><b>band</b>01</div>
+          <div class="hud" style="background:var(--s2)"><b>card</b>02</div>
+          <div style="background:var(--s3);box-shadow:var(--shadow)"><b>overlay</b>03</div>
+          <div style="background:var(--ctl)"><b>control</b>—</div>
+        </div>
+      </div>
+      <div>
+        <div class="faint mono" style="font-size:11px;letter-spacing:.1em;margin-bottom:11px">SELLER LEVELS · TRUST · CTAs</div>
+        <div class="row" style="gap:14px">
+          <span class="lvl lvl--bronze">Bronze</span><span class="lvl lvl--silver">Silver</span><span class="lvl lvl--gold">Gold</span><span class="lvl lvl--plat">Platinum</span><span class="lvl lvl--elite">Elite</span>
+          <span style="width:1px;height:20px;background:var(--line)"></span>
+          <span class="ts ts--hi"><svg class="i i--sm"><use href="#i-shield"/></svg>92</span><span class="ts ts--mid"><svg class="i i--sm"><use href="#i-shield"/></svg>74</span><span class="ts ts--lo"><svg class="i i--sm"><use href="#i-shield"/></svg>52</span>
+        </div>
+        <div class="row" style="margin-top:14px"><a class="btn btn--primary btn--md">Buy now</a><a class="btn btn--trust btn--md">Request payout</a><a class="btn btn--line btn--md">Save</a><a class="btn btn--ghost btn--md">Cancel</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE/AFTER -->
+<section class="alt">
+  <div class="wrap">
+    <div class="head"><div class="kicker"><span class="bar"></span>The difference</div><h2>Before → After</h2></div>
+    <div class="ba">
+      <div>
+        <div class="mono" style="font-size:11px;color:var(--red);letter-spacing:.12em;margin-bottom:12px">● BEFORE — flat / generic</div>
+        <div class="flat">
+          <div style="font-family:Poppins,sans-serif;font-weight:600;color:#f3f4f6;font-size:14px">Lv.45 Pokémon GO Account</div>
+          <div style="margin-top:8px;font-size:13px">PoGoLegends · Verified · Trust 92</div>
+          <div style="margin-top:8px;color:#f3f4f6;font-weight:700;font-size:18px">₹6,199</div>
+          <div style="margin-top:10px;font-size:12px">🛡 Escrow protected — seller receives nothing until you confirm.</div>
+          <button style="margin-top:12px;width:100%;height:34px;background:#4d7cfe;color:#fff;border:0;border-radius:8px;font-weight:600">Buy now</button>
+        </div>
+      </div>
+      <div>
+        <div class="mono" style="font-size:11px;color:var(--green);letter-spacing:.12em;margin-bottom:12px">● AFTER — engineered / on-brand</div>
+        <article class="hud slot" style="max-width:none">
+          <div class="slot__bar bar--legend"></div>
+          <div class="slot__art a1" style="aspect-ratio:16/6"><span class="slot__heart"><svg class="i i--sm"><use href="#i-heart"/></svg></span><span class="slot__game">Pokémon GO</span></div>
+          <div class="slot__bd">
+            <div class="row" style="gap:6px"><span class="rar rar--legend">Legendary</span><span class="serial">#GX-4471</span></div>
+            <div class="slot__title">Lv.45 · 3 Shiny Legendaries</div>
+            <div class="seller"><span class="av"></span> PoGoLegends <span class="lvl lvl--gold">Gold</span> <span class="ts ts--hi"><svg class="i i--sm"><use href="#i-shield"/></svg>92</span></div>
+            <div class="seal" style="padding:9px 11px"><div class="seal__b" style="width:30px;height:30px"><svg class="i i--sm"><use href="#i-shield-check"/></svg></div><b style="font-family:'Chakra Petch';font-size:12.5px;color:var(--green)">Money-back guarantee</b></div>
+            <div class="slot__foot"><div class="price">$74.99</div><a class="btn btn--primary btn--sm">Buy now</a></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="foot">GETX // REDESIGN v2 — CHAKRA PETCH + IBM PLEX · LOOT-RARITY · CUT-CORNER HUD · USD · NO PAYMENT ROW · SAMPLE ONLY</div>
+
+</body>
+</html>

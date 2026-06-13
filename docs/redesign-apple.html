@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>GETX — The safest place to buy &amp; sell game accounts</title>
+<meta name="description" content="Escrow on every order, ID-verified sellers, instant delivery, free money-back. The safest place to buy and sell game accounts, items, currency and boosting." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ===========================================================================
+   GETX — Direction A · "APPLE KEYNOTE"
+   Ultra-refined, minimal, luxurious. Near-black premium canvas, ONE subtle
+   gradient glow, massive whitespace, a huge confident type scale, restrained
+   palette, soft elevation (no harsh borders), centered editorial composition.
+   No images / no emoji. Visual interest = type, color, gradient mesh,
+   glass, abstract CSS/SVG shapes, depth, motion. Lucide line-icons only.
+   =========================================================================== */
+
+:root{
+  /* canvas — near-black, faintly cool */
+  --bg:#070708;
+  --bg-raise:#0c0c0e;
+  --bg-glass:rgba(255,255,255,.035);
+  --bg-glass-2:rgba(255,255,255,.06);
+
+  /* ink */
+  --ink:#f6f6f7;
+  --ink-soft:#b9b9c0;
+  --ink-dim:#86868b;       /* apple's exact secondary grey */
+  --ink-faint:#5a5a61;
+
+  /* accent — a single luminous mist (cool aurora), used sparingly */
+  --halo-1:#7c9cff;        /* periwinkle */
+  --halo-2:#9d7cff;        /* violet */
+  --halo-3:#5fe0c0;        /* mint, the "trust" pulse */
+  --line:rgba(255,255,255,.08);
+  --line-soft:rgba(255,255,255,.055);
+  --line-strong:rgba(255,255,255,.14);
+
+  /* type scale (perfect-fourth-ish, fluid) */
+  --t-mega:clamp(52px,10.5vw,132px);
+  --t-h1:clamp(40px,6.4vw,80px);
+  --t-h2:clamp(30px,4.4vw,52px);
+  --t-h3:clamp(21px,2.4vw,27px);
+  --t-lead:clamp(17px,1.7vw,21px);
+  --t-body:16px;
+  --t-sm:13.5px;
+  --t-xs:12px;
+
+  /* radius */
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-xl:30px; --r-pill:999px;
+
+  /* elevation — soft, no harsh borders */
+  --sh-1:0 1px 0 rgba(255,255,255,.04) inset, 0 18px 50px -28px rgba(0,0,0,.9);
+  --sh-2:0 1px 0 rgba(255,255,255,.05) inset, 0 40px 90px -40px rgba(0,0,0,.95);
+  --sh-glow:0 30px 80px -30px rgba(124,156,255,.45);
+
+  /* spacing rhythm */
+  --gut:clamp(20px,5vw,40px);
+  --sec:clamp(96px,15vw,200px);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  font-family:'Manrope',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.65;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden; letter-spacing:-.01em;
+}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(124,156,255,.3);color:#fff}
+:focus-visible{outline:2px solid var(--halo-1);outline-offset:3px;border-radius:6px}
+
+/* ---- the single ambient glow + faint grain, fixed behind everything ---- */
+.atmos{position:fixed;inset:0;z-index:-2;pointer-events:none}
+.atmos::before{ /* the ONE subtle gradient glow */
+  content:"";position:absolute;left:50%;top:-18vh;transform:translateX(-50%);
+  width:120vw;height:90vh;
+  background:
+    radial-gradient(46% 60% at 50% 0%, rgba(124,156,255,.20), transparent 70%),
+    radial-gradient(34% 46% at 24% 8%, rgba(157,124,255,.13), transparent 72%),
+    radial-gradient(30% 40% at 80% 4%, rgba(95,224,192,.10), transparent 72%);
+  filter:blur(8px);
+}
+.atmos::after{ /* faint film grain for premium texture (pure CSS, no image) */
+  content:"";position:absolute;inset:0;opacity:.035;mix-blend-mode:screen;
+  background-image:repeating-radial-gradient(circle at 13px 17px, rgba(255,255,255,.6) 0 .4px, transparent .8px 3px);
+  background-size:3px 3px;
+}
+
+.wrap{max-width:1160px;margin:0 auto;padding:0 var(--gut)}
+.wrap-narrow{max-width:820px;margin:0 auto;padding:0 var(--gut)}
+
+/* type helpers */
+.serif{font-family:'Newsreader',Georgia,serif;font-weight:400}
+.kicker{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:var(--t-xs);font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-dim);
+}
+.kicker .dotpulse{width:6px;height:6px;border-radius:50%;background:var(--halo-3);box-shadow:0 0 0 0 rgba(95,224,192,.5);animation:pulse 2.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,224,192,.45)}70%{box-shadow:0 0 0 8px rgba(95,224,192,0)}100%{box-shadow:0 0 0 0 rgba(95,224,192,0)}}
+.grad-ink{
+  background:linear-gradient(102deg,#fff 0%,#c9d2ff 42%,#a9f0dd 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.dim{color:var(--ink-dim)} .soft{color:var(--ink-soft)}
+.tnum{font-variant-numeric:tabular-nums}
+
+.ic{width:19px;height:19px;stroke-width:1.7;flex:none}
+.ic-sm{width:15px;height:15px;stroke-width:1.8}
+.ic-lg{width:26px;height:26px;stroke-width:1.5}
+
+/* buttons — soft, glassy, no harsh borders */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  font-weight:600;font-size:15px;letter-spacing:-.01em;cursor:pointer;border:0;
+  border-radius:var(--r-pill);transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,background .25s,color .25s;
+  white-space:nowrap}
+.btn-lg{height:56px;padding:0 30px}
+.btn-light{background:var(--ink);color:#0a0a0b}
+.btn-light:hover{transform:translateY(-2px) scale(1.012);box-shadow:0 18px 40px -18px rgba(255,255,255,.4)}
+.btn-glass{background:var(--bg-glass-2);color:var(--ink);backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.btn-glass:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--ink-soft)}
+.btn-ghost:hover{color:var(--ink)}
+
+/* pills / chips / badges */
+.pill{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 15px;border-radius:var(--r-pill);
+  font-size:var(--t-sm);font-weight:600;color:var(--ink-soft);
+  background:var(--bg-glass);box-shadow:inset 0 0 0 1px var(--line-soft);backdrop-filter:blur(10px)}
+.pill .ic-sm{color:var(--halo-1)}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.02em;
+  padding:4px 9px;border-radius:8px}
+.tag-verify{color:#9af0d8;background:rgba(95,224,192,.1);box-shadow:inset 0 0 0 1px rgba(95,224,192,.26)}
+.tag-instant{color:#bcd0ff;background:rgba(124,156,255,.1);box-shadow:inset 0 0 0 1px rgba(124,156,255,.26)}
+.tag-gold{color:#ffd98a;background:rgba(255,200,90,.1);box-shadow:inset 0 0 0 1px rgba(255,200,90,.26)}
+.stars{display:inline-flex;gap:1px;color:#ffce6b}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal[data-d="1"]{transition-delay:.08s}.reveal[data-d="2"]{transition-delay:.16s}
+.reveal[data-d="3"]{transition-delay:.24s}.reveal[data-d="4"]{transition-delay:.32s}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;transition:none}*{animation:none!important}}
+
+/* ============================== NAV ============================== */
+.nav{position:sticky;top:0;z-index:80;transition:background .4s,box-shadow .4s}
+.nav.scrolled{background:rgba(7,7,8,.72);backdrop-filter:saturate(180%) blur(20px);box-shadow:0 1px 0 var(--line)}
+.nav .row{display:flex;align-items:center;gap:30px;height:68px}
+.brand{font-weight:800;font-size:21px;letter-spacing:-.03em;display:flex;align-items:center;gap:9px}
+.brand .mark{width:26px;height:26px;display:grid;place-items:center}
+.brand b{font-weight:800}
+.nav .links{display:flex;gap:30px;margin-left:8px}
+.nav .links a{font-size:14.5px;font-weight:500;color:var(--ink-soft);transition:color .2s}
+.nav .links a:hover{color:var(--ink)}
+.nav .sp{flex:1}
+.nav .act{display:flex;align-items:center;gap:14px}
+.nav .signin{font-size:14.5px;font-weight:600;color:var(--ink-soft)}
+.nav .signin:hover{color:var(--ink)}
+.btn-nav{height:42px;padding:0 20px;font-size:14px}
+@media(max-width:880px){.nav .links{display:none}.nav .signin{display:none}}
+
+/* ============================== HERO ============================== */
+.hero{position:relative;text-align:center;padding:clamp(56px,11vw,118px) 0 clamp(60px,9vw,96px)}
+/* abstract drawn-in-CSS orbital rings behind headline (no image) */
+.hero .rings{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:min(118vw,1080px);height:min(118vw,1080px);z-index:-1;pointer-events:none;opacity:.5}
+.hero .rings span{position:absolute;inset:0;margin:auto;border-radius:50%;border:1px solid var(--line-soft)}
+.hero .rings span:nth-child(1){width:38%;height:38%}
+.hero .rings span:nth-child(2){width:64%;height:64%}
+.hero .rings span:nth-child(3){width:90%;height:90%}
+.hero .rings span:nth-child(4){width:118%;height:118%}
+.hero .rings .orb{width:9px;height:9px;border-radius:50%;border:0;background:var(--halo-3);box-shadow:0 0 18px 3px rgba(95,224,192,.6);
+  inset:auto;left:50%;top:7%;margin:0;transform-origin:50% 658%;animation:spin 26s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.hero .kicker{margin-bottom:26px}
+.hero h1{font-size:var(--t-mega);font-weight:800;letter-spacing:-.045em;line-height:.95;margin:0 auto;max-width:14ch}
+.hero .sub{font-size:var(--t-lead);color:var(--ink-dim);max-width:50ch;margin:30px auto 0;line-height:1.55}
+.hero .sub b{color:var(--ink-soft);font-weight:600}
+
+/* search — the hero centerpiece */
+.searchwrap{max-width:680px;margin:42px auto 0;position:relative}
+.search{display:flex;align-items:center;height:68px;padding:8px 8px 8px 22px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.045);backdrop-filter:blur(18px);
+  box-shadow:inset 0 0 0 1px var(--line-strong), var(--sh-2);transition:box-shadow .4s,transform .4s}
+.search:focus-within{box-shadow:inset 0 0 0 1px rgba(124,156,255,.5), 0 30px 80px -28px rgba(124,156,255,.4);transform:translateY(-1px)}
+.search .ic{color:var(--ink-dim)}
+.search input{flex:1;background:transparent;border:0;outline:none;color:var(--ink);
+  font-size:16.5px;font-family:inherit;padding:0 14px;letter-spacing:-.01em}
+.search input::placeholder{color:var(--ink-faint)}
+.search .go{height:52px;width:52px;border-radius:50%;flex:none}
+@media(max-width:600px){.search .go{width:auto;padding:0 18px;border-radius:var(--r-pill)}.search .go span{display:none}}
+.suggest{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px}
+.suggest a{font-size:13px;color:var(--ink-dim);padding:7px 14px;border-radius:var(--r-pill);
+  background:var(--bg-glass);box-shadow:inset 0 0 0 1px var(--line-soft);transition:.2s}
+.suggest a:hover{color:var(--ink);background:var(--bg-glass-2)}
+
+.hero .assure{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;margin-top:38px}
+.hero .assure span{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-dim);font-weight:500}
+.hero .assure .ic-sm{color:var(--halo-3)}
+
+/* ============================== STAT BAND ============================== */
+.band{padding:clamp(40px,6vw,64px) 0;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.stats .s{padding:14px 10px;position:relative}
+.stats .s:not(:last-child)::after{content:"";position:absolute;right:0;top:24%;height:52%;width:1px;background:var(--line-soft)}
+.stats .s b{display:block;font-size:clamp(30px,4.6vw,46px);font-weight:800;letter-spacing:-.04em;line-height:1;
+  font-variant-numeric:tabular-nums}
+.stats .s i{display:block;font-style:normal;color:var(--ink-dim);font-size:13px;margin-top:11px;letter-spacing:.01em}
+@media(max-width:680px){.stats{grid-template-columns:repeat(2,1fr);gap:18px}.stats .s:nth-child(2)::after{display:none}}
+
+/* ============================== SECTION SHELL ============================== */
+section{padding:var(--sec) 0;position:relative}
+.head{max-width:680px}
+.head.center{margin:0 auto;text-align:center}
+.head h2{font-size:var(--t-h2);font-weight:800;letter-spacing:-.04em;line-height:1.04;margin-top:18px}
+.head p{color:var(--ink-dim);font-size:var(--t-lead);margin-top:20px;line-height:1.55}
+.head .em{font-family:'Newsreader',serif;font-style:italic;font-weight:400}
+
+/* ============================== BROWSE GAMES ============================== */
+.games{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:56px}
+@media(max-width:920px){.games{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.games{grid-template-columns:repeat(2,1fr)}}
+.game{position:relative;border-radius:var(--r-lg);padding:22px 20px 20px;min-height:178px;
+  display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012));
+  box-shadow:inset 0 0 0 1px var(--line-soft);transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s}
+.game::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .5s;
+  background:radial-gradient(120% 80% at 50% -10%,var(--gx,rgba(124,156,255,.22)),transparent 60%)}
+.game:hover{transform:translateY(-6px);box-shadow:inset 0 0 0 1px var(--line-strong),var(--sh-2)}
+.game:hover::before{opacity:1}
+.game .gi{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+  background:var(--bg-glass-2);box-shadow:inset 0 0 0 1px var(--line-soft);color:var(--gx-ink,#bcd0ff)}
+.game h4{font-size:16px;font-weight:700;letter-spacing:-.02em;margin-top:auto}
+.game .meta{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.game .meta span{font-size:12px;color:var(--ink-dim)}
+.game .arrow{color:var(--ink-faint);transition:transform .4s,color .3s}
+.game:hover .arrow{transform:translateX(3px);color:var(--ink-soft)}
+
+/* ============================== LISTINGS ============================== */
+.toprow{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.viewall{display:inline-flex;align-items:center;gap:7px;font-size:14.5px;font-weight:600;color:var(--ink-soft)}
+.viewall:hover{color:var(--ink)}.viewall .ic-sm{transition:transform .3s}.viewall:hover .ic-sm{transform:translateX(3px)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px}
+@media(max-width:980px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.cards{grid-template-columns:1fr}}
+.lc{position:relative;border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.01));
+  box-shadow:inset 0 0 0 1px var(--line-soft);transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s}
+.lc:hover{transform:translateY(-6px);box-shadow:inset 0 0 0 1px var(--line-strong),var(--sh-2)}
+/* abstract drawn "cover" — gradient mesh + glyph, no image */
+.lc .cover{position:relative;height:128px;border-radius:var(--r-md);overflow:hidden;display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--line-soft)}
+.lc .cover .glyph{color:rgba(255,255,255,.9);opacity:.9;filter:drop-shadow(0 6px 18px rgba(0,0,0,.4))}
+.lc .cover .grid-lines{position:absolute;inset:0;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);
+  background-size:22px 22px;-webkit-mask-image:radial-gradient(70% 70% at 50% 40%,#000,transparent);mask-image:radial-gradient(70% 70% at 50% 40%,#000,transparent)}
+.lc .cover .tags{position:absolute;top:11px;left:11px;display:flex;gap:6px;z-index:2}
+.lc .cat{font-size:11.5px;font-weight:600;color:var(--ink-dim);margin-top:15px;letter-spacing:.02em}
+.lc h4{font-size:16px;font-weight:700;letter-spacing:-.02em;margin-top:6px;line-height:1.3}
+.lc .seller{display:flex;align-items:center;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.lc .av{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:800;color:#0a0a0b}
+.lc .sname{font-size:12.5px;font-weight:600}
+.lc .smeta{font-size:11.5px;color:var(--ink-dim);display:flex;align-items:center;gap:5px}
+.lc .foot{display:flex;align-items:flex-end;justify-content:space-between;margin-top:16px}
+.lc .price{font-size:23px;font-weight:800;letter-spacing:-.03em}
+.lc .price s{font-size:13px;color:var(--ink-faint);font-weight:500;margin-right:6px}
+.lc .buy{height:38px;width:38px;border-radius:50%;display:grid;place-items:center;flex:none;
+  background:var(--ink);color:#0a0a0b;transition:transform .3s}
+.lc:hover .buy{transform:scale(1.08)}
+
+/* ============================== WHY SAFER ============================== */
+.why{display:grid;grid-template-columns:1.15fr 1fr;gap:clamp(40px,7vw,90px);align-items:center}
+@media(max-width:920px){.why{grid-template-columns:1fr;gap:50px}}
+.pillars{display:grid;gap:14px}
+.pillar{position:relative;border-radius:var(--r-lg);padding:24px 24px 24px 22px;display:flex;gap:18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.01));
+  box-shadow:inset 0 0 0 1px var(--line-soft);transition:box-shadow .4s,transform .4s}
+.pillar:hover{transform:translateX(4px);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.pillar .pi{width:46px;height:46px;flex:none;border-radius:14px;display:grid;place-items:center;
+  background:var(--bg-glass-2);box-shadow:inset 0 0 0 1px var(--line-soft);color:var(--halo-3)}
+.pillar h4{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.pillar p{font-size:14px;color:var(--ink-dim);margin-top:6px;line-height:1.55}
+.pillar .pn{position:absolute;top:18px;right:22px;font-family:'Newsreader',serif;font-size:15px;color:var(--ink-faint);font-style:italic}
+
+/* ============================== ESCROW STEPS ============================== */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:62px;position:relative}
+@media(max-width:760px){.steps{grid-template-columns:1fr;gap:14px}}
+.step{padding:0 30px;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;right:0;top:30px;bottom:0;width:1px;background:var(--line-soft)}
+@media(max-width:760px){.step{padding:0}.step::after{display:none!important}}
+.step .num{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:17px;
+  background:var(--bg-glass-2);box-shadow:inset 0 0 0 1px var(--line-strong);color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.step .si{color:var(--halo-1);margin:22px 0 4px}
+.step h4{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-top:14px}
+.step p{font-size:14.5px;color:var(--ink-dim);margin-top:8px;line-height:1.6;max-width:30ch}
+
+/* ============================== TESTIMONIALS ============================== */
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+@media(max-width:880px){.quotes{grid-template-columns:1fr}}
+.quote{border-radius:var(--r-lg);padding:28px;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.01));
+  box-shadow:inset 0 0 0 1px var(--line-soft)}
+.quote .mark{font-family:'Newsreader',serif;font-size:60px;line-height:.4;color:var(--ink-faint);height:30px}
+.quote p{font-family:'Newsreader',serif;font-size:19px;line-height:1.5;color:var(--ink);margin:14px 0 22px;font-weight:400}
+.quote .who{display:flex;align-items:center;gap:11px;margin-top:auto}
+.quote .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0a0a0b;flex:none}
+.quote .who b{font-size:14px;font-weight:700;display:block}
+.quote .who .vb{font-size:11.5px;color:#9af0d8;display:inline-flex;align-items:center;gap:4px;margin-top:1px}
+
+/* ============================== FAQ ============================== */
+.faqwrap{max-width:760px;margin:56px auto 0}
+.faq{border-bottom:1px solid var(--line-soft)}
+.faq summary{list-style:none;cursor:pointer;padding:24px 8px;display:flex;align-items:center;justify-content:space-between;gap:20px;
+  font-size:18px;font-weight:600;letter-spacing:-.02em;transition:color .2s}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:hover{color:var(--halo-1)}
+.faq .pm{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--line-strong);color:var(--ink-soft);transition:transform .35s,color .25s}
+.faq[open] .pm{transform:rotate(45deg);color:var(--halo-1)}
+.faq .ans{padding:0 50px 26px 8px;color:var(--ink-dim);font-size:15.5px;line-height:1.65;
+  animation:fade .5s ease}
+@keyframes fade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* ============================== CTA ============================== */
+.cta{text-align:center;border-radius:var(--r-xl);padding:clamp(56px,9vw,96px) var(--gut);position:relative;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.012));
+  box-shadow:inset 0 0 0 1px var(--line-soft)}
+.cta::before{content:"";position:absolute;left:50%;top:-40%;transform:translateX(-50%);width:80%;height:120%;z-index:0;
+  background:radial-gradient(50% 50% at 50% 50%,rgba(124,156,255,.22),transparent 70%);filter:blur(20px)}
+.cta>*{position:relative;z-index:1}
+.cta h2{font-size:var(--t-h1);font-weight:800;letter-spacing:-.045em;line-height:1;max-width:16ch;margin:0 auto}
+.cta p{color:var(--ink-dim);font-size:var(--t-lead);margin:22px auto 0;max-width:46ch}
+.cta .acts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:38px}
+
+/* ============================== FOOTER ============================== */
+footer{padding:clamp(64px,9vw,100px) 0 40px;border-top:1px solid var(--line-soft);margin-top:var(--sec)}
+.fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px}
+@media(max-width:820px){.fgrid{grid-template-columns:1fr 1fr;gap:36px}}
+@media(max-width:480px){.fgrid{grid-template-columns:1fr 1fr}}
+.fcol h5{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:18px}
+.fcol a{display:block;font-size:14px;color:var(--ink-soft);padding:6px 0;transition:color .2s}
+.fcol a:hover{color:var(--ink)}
+.fbrand .brand{font-size:22px;margin-bottom:16px}
+.fbrand p{font-size:14px;color:var(--ink-dim);max-width:30ch;line-height:1.6}
+.fpay{display:flex;gap:9px;margin-top:20px;flex-wrap:wrap}
+.fpay span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft);
+  padding:8px 13px;border-radius:var(--r-pill);background:var(--bg-glass);box-shadow:inset 0 0 0 1px var(--line-soft)}
+.fpay span .ic-sm{color:var(--halo-3)}
+.fbar{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  margin-top:56px;padding-top:28px;border-top:1px solid var(--line-soft)}
+.fbar p{font-size:13px;color:var(--ink-faint)}
+.fsoc{display:flex;gap:10px}
+.fsoc a{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--ink-soft);
+  box-shadow:inset 0 0 0 1px var(--line-soft);transition:.25s}
+.fsoc a:hover{color:var(--ink);background:var(--bg-glass-2);transform:translateY(-2px)}
+
+/* avatar gradient palette (drawn, not photos) */
+.av-a{background:linear-gradient(135deg,#7c9cff,#9d7cff)}
+.av-b{background:linear-gradient(135deg,#5fe0c0,#7c9cff)}
+.av-c{background:linear-gradient(135deg,#ffce6b,#ff9a76)}
+.av-d{background:linear-gradient(135deg,#9d7cff,#ff8fd0)}
+</style>
+</head>
+<body>
+
+<div class="atmos" aria-hidden="true"></div>
+
+<!-- ============================== NAV ============================== -->
+<nav class="nav" id="nav">
+  <div class="wrap row">
+    <a class="brand" href="#" aria-label="GETX home">
+      <span class="mark" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <defs><linearGradient id="bm" x1="0" y1="0" x2="26" y2="26">
+            <stop stop-color="#7c9cff"/><stop offset=".55" stop-color="#9d7cff"/><stop offset="1" stop-color="#5fe0c0"/>
+          </linearGradient></defs>
+          <path d="M13 2 L23 7 V15 C23 20 18.5 23.5 13 25 C7.5 23.5 3 20 3 15 V7 Z" fill="url(#bm)" opacity=".18"/>
+          <path d="M13 2 L23 7 V15 C23 20 18.5 23.5 13 25 C7.5 23.5 3 20 3 15 V7 Z" stroke="url(#bm)" stroke-width="1.4"/>
+          <path d="M9.5 12.7 L12.2 15.4 L16.8 10.2" stroke="url(#bm)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span>GET<b class="grad-ink">X</b></span>
+    </a>
+    <div class="links">
+      <a href="#browse">Marketplace</a>
+      <a href="#safer">Why GETX</a>
+      <a href="#escrow">How escrow works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <span class="sp"></span>
+    <div class="act">
+      <a class="signin" href="#">Sign in</a>
+      <a class="btn btn-light btn-nav" href="#">Start selling</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================== HERO ============================== -->
+<header class="hero">
+  <div class="rings" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span class="orb"></span>
+  </div>
+  <div class="wrap">
+    <span class="kicker reveal"><span class="dotpulse"></span>&nbsp;Escrow-protected marketplace</span>
+    <h1 class="reveal" data-d="1">The safest place to<br><span class="grad-ink serif" style="font-style:italic;font-weight:500">buy &amp; sell</span> game accounts.</h1>
+    <p class="sub reveal" data-d="2">Every order held in <b>escrow</b> until you confirm. ID-verified sellers, instant delivery, and a <b>free money-back guarantee</b> on absolutely everything.</p>
+
+    <div class="searchwrap reveal" data-d="2">
+      <form class="search" onsubmit="return false" role="search">
+        <i data-lucide="search" class="ic"></i>
+        <input type="search" placeholder="Search accounts, items, currency or boosting…" aria-label="Search the marketplace" />
+        <button class="btn btn-light go" type="submit" aria-label="Search">
+          <i data-lucide="arrow-right" class="ic"></i><span>Search</span>
+        </button>
+      </form>
+      <div class="suggest" aria-label="Popular searches">
+        <a href="#">Pokémon GO</a><a href="#">Clash of Clans</a><a href="#">Valorant</a><a href="#">Free Fire</a><a href="#">PUBG Mobile</a>
+      </div>
+    </div>
+
+    <div class="assure reveal" data-d="3">
+      <span><i data-lucide="shield-check" class="ic-sm"></i> Escrow on every order</span>
+      <span><i data-lucide="badge-check" class="ic-sm"></i> ID-verified sellers</span>
+      <span><i data-lucide="zap" class="ic-sm"></i> Instant delivery</span>
+      <span><i data-lucide="rotate-ccw" class="ic-sm"></i> Free money-back</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================== STAT BAND ============================== -->
+<section class="band" style="padding-top:0;padding-bottom:0">
+  <div class="wrap" style="padding-top:clamp(40px,6vw,60px);padding-bottom:clamp(40px,6vw,60px)">
+    <div class="stats">
+      <div class="s reveal"><b class="tnum grad-ink">248K+</b><i>orders delivered</i></div>
+      <div class="s reveal" data-d="1"><b class="tnum grad-ink">$42M+</b><i>protected by escrow</i></div>
+      <div class="s reveal" data-d="2"><b class="tnum grad-ink">3,100+</b><i>ID-verified sellers</i></div>
+      <div class="s reveal" data-d="3"><b class="tnum grad-ink">99.4%</b><i>dispute-free orders</i></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== BROWSE BY GAME ============================== -->
+<section id="browse">
+  <div class="wrap">
+    <div class="toprow">
+      <div class="head">
+        <span class="kicker reveal">Browse by game</span>
+        <h2 class="reveal" data-d="1">Five worlds. <span class="em soft">One trusted</span> marketplace.</h2>
+      </div>
+      <a class="viewall reveal" data-d="1" href="#">All games <i data-lucide="arrow-up-right" class="ic-sm"></i></a>
+    </div>
+
+    <div class="games">
+      <a class="game reveal" href="#" style="--gx:rgba(95,224,192,.22);--gx-ink:#9af0d8">
+        <span class="gi"><i data-lucide="map-pin" class="ic-lg"></i></span>
+        <div>
+          <h4>Pokémon GO</h4>
+          <div class="meta"><span>1,240 listings</span><i data-lucide="arrow-up-right" class="ic-sm arrow"></i></div>
+        </div>
+      </a>
+      <a class="game reveal" data-d="1" href="#" style="--gx:rgba(255,200,90,.22);--gx-ink:#ffd98a">
+        <span class="gi"><i data-lucide="castle" class="ic-lg"></i></span>
+        <div>
+          <h4>Clash of Clans</h4>
+          <div class="meta"><span>860 listings</span><i data-lucide="arrow-up-right" class="ic-sm arrow"></i></div>
+        </div>
+      </a>
+      <a class="game reveal" data-d="2" href="#" style="--gx:rgba(255,120,140,.22);--gx-ink:#ffb3c0">
+        <span class="gi"><i data-lucide="crosshair" class="ic-lg"></i></span>
+        <div>
+          <h4>Valorant</h4>
+          <div class="meta"><span>730 listings</span><i data-lucide="arrow-up-right" class="ic-sm arrow"></i></div>
+        </div>
+      </a>
+      <a class="game reveal" data-d="3" href="#" style="--gx:rgba(124,156,255,.22);--gx-ink:#bcd0ff">
+        <span class="gi"><i data-lucide="flame" class="ic-lg"></i></span>
+        <div>
+          <h4>Free Fire</h4>
+          <div class="meta"><span>1,005 listings</span><i data-lucide="arrow-up-right" class="ic-sm arrow"></i></div>
+        </div>
+      </a>
+      <a class="game reveal" data-d="4" href="#" style="--gx:rgba(157,124,255,.22);--gx-ink:#cdb9ff">
+        <span class="gi"><i data-lucide="target" class="ic-lg"></i></span>
+        <div>
+          <h4>PUBG Mobile</h4>
+          <div class="meta"><span>910 listings</span><i data-lucide="arrow-up-right" class="ic-sm arrow"></i></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FRESH LISTINGS ============================== -->
+<section id="listings" style="padding-top:0">
+  <div class="wrap">
+    <div class="toprow">
+      <div class="head">
+        <span class="kicker reveal">Fresh on GETX</span>
+        <h2 class="reveal" data-d="1">Hand-checked. Held in escrow.</h2>
+      </div>
+      <a class="viewall reveal" data-d="1" href="#">View marketplace <i data-lucide="arrow-up-right" class="ic-sm"></i></a>
+    </div>
+
+    <div class="cards">
+      <!-- card 1 -->
+      <article class="lc reveal">
+        <div class="cover" style="background:radial-gradient(120% 120% at 20% 0%,#163a35,#0a1614)">
+          <div class="grid-lines"></div>
+          <div class="tags"><span class="tag tag-gold"><i data-lucide="crown" class="ic-sm"></i>Gold</span><span class="tag tag-instant"><i data-lucide="zap" class="ic-sm"></i>Instant</span></div>
+          <i data-lucide="map-pin" class="ic-lg glyph" style="width:40px;height:40px;color:#7fe9cf"></i>
+        </div>
+        <span class="cat">Account · Pokémon GO</span>
+        <h4>Lv.45 · 3 Shiny Legendaries</h4>
+        <div class="seller">
+          <span class="av av-b">P</span>
+          <div>
+            <span class="sname">PoGoLegends</span>
+            <span class="smeta"><span class="stars"><i data-lucide="star" class="ic-sm" style="fill:currentColor"></i></span> 4.9 · 47 sold</span>
+          </div>
+        </div>
+        <div class="foot">
+          <span class="price">$74.99</span>
+          <a class="buy" href="#" aria-label="Buy now"><i data-lucide="arrow-right" class="ic-sm"></i></a>
+        </div>
+      </article>
+
+      <!-- card 2 -->
+      <article class="lc reveal" data-d="1">
+        <div class="cover" style="background:radial-gradient(120% 120% at 20% 0%,#3a2f12,#181206)">
+          <div class="grid-lines"></div>
+          <div class="tags"><span class="tag tag-verify"><i data-lucide="badge-check" class="ic-sm"></i>Verified</span></div>
+          <i data-lucide="castle" class="ic-lg glyph" style="width:40px;height:40px;color:#ffd98a"></i>
+        </div>
+        <span class="cat">Account · Clash of Clans</span>
+        <h4>TH15 · Legend League</h4>
+        <div class="seller">
+          <span class="av av-c">C</span>
+          <div>
+            <span class="sname">ClashVault</span>
+            <span class="smeta"><span class="stars"><i data-lucide="star" class="ic-sm" style="fill:currentColor"></i></span> 5.0 · 112 sold</span>
+          </div>
+        </div>
+        <div class="foot">
+          <span class="price">$129.00</span>
+          <a class="buy" href="#" aria-label="Buy now"><i data-lucide="arrow-right" class="ic-sm"></i></a>
+        </div>
+      </article>
+
+      <!-- card 3 -->
+      <article class="lc reveal" data-d="2">
+        <div class="cover" style="background:radial-gradient(120% 120% at 20% 0%,#3a1626,#180810)">
+          <div class="grid-lines"></div>
+          <div class="tags"><span class="tag tag-instant"><i data-lucide="zap" class="ic-sm"></i>Instant</span></div>
+          <i data-lucide="crosshair" class="ic-lg glyph" style="width:40px;height:40px;color:#ffb3c0"></i>
+        </div>
+        <span class="cat">Account · Valorant</span>
+        <h4>Immortal 2 · 38 Skins</h4>
+        <div class="seller">
+          <span class="av av-d">V</span>
+          <div>
+            <span class="sname">AceArmory</span>
+            <span class="smeta"><span class="stars"><i data-lucide="star" class="ic-sm" style="fill:currentColor"></i></span> 4.8 · 73 sold</span>
+          </div>
+        </div>
+        <div class="foot">
+          <span class="price">$59.99</span>
+          <a class="buy" href="#" aria-label="Buy now"><i data-lucide="arrow-right" class="ic-sm"></i></a>
+        </div>
+      </article>
+
+      <!-- card 4 -->
+      <article class="lc reveal" data-d="3">
+        <div class="cover" style="background:radial-gradient(120% 120% at 20% 0%,#172347,#080d1c)">
+          <div class="grid-lines"></div>
+          <div class="tags"><span class="tag tag-instant"><i data-lucide="zap" class="ic-sm"></i>Instant</span><span class="tag tag-verify"><i data-lucide="badge-check" class="ic-sm"></i>Verified</span></div>
+          <i data-lucide="gem" class="ic-lg glyph" style="width:40px;height:40px;color:#bcd0ff"></i>
+        </div>
+        <span class="cat">Top-up · Free Fire</span>
+        <h4>1,060 Diamonds</h4>
+        <div class="seller">
+          <span class="av av-a">F</span>
+          <div>
+            <span class="sname">DiamondDrop</span>
+            <span class="smeta"><span class="stars"><i data-lucide="star" class="ic-sm" style="fill:currentColor"></i></span> 4.9 · 540 sold</span>
+          </div>
+        </div>
+        <div class="foot">
+          <span class="price">$9.49</span>
+          <a class="buy" href="#" aria-label="Buy now"><i data-lucide="arrow-right" class="ic-sm"></i></a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WHY SAFER ============================== -->
+<section id="safer">
+  <div class="wrap why">
+    <div class="head" style="margin-top:0">
+      <span class="kicker reveal">Why GETX is safer</span>
+      <h2 class="reveal" data-d="1">Trust isn't a badge.<br><span class="em soft">It's the architecture.</span></h2>
+      <p class="reveal" data-d="2">We don't ask you to take a leap of faith. Money is held, identity is checked, disputes are judged fairly — and if anything's wrong, you get every dollar back. Free.</p>
+      <div class="reveal" data-d="3" style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+        <span class="pill"><i data-lucide="lock" class="ic-sm"></i> Funds released only on your confirmation</span>
+      </div>
+    </div>
+
+    <div class="pillars">
+      <div class="pillar reveal">
+        <span class="pi"><i data-lucide="shield-check" class="ic"></i></span>
+        <div><h4>Escrow on every order</h4><p>Your payment is held safely and released to the seller only after you confirm delivery. No surprises, ever.</p></div>
+        <span class="pn">01</span>
+      </div>
+      <div class="pillar reveal" data-d="1">
+        <span class="pi"><i data-lucide="badge-check" class="ic"></i></span>
+        <div><h4>ID-verified sellers</h4><p>Every seller passes identity verification before they can list. Real people, accountable and traceable.</p></div>
+        <span class="pn">02</span>
+      </div>
+      <div class="pillar reveal" data-d="2">
+        <span class="pi"><i data-lucide="scale" class="ic"></i></span>
+        <div><h4>AI Dispute Judge</h4><p>If something goes wrong, our AI reviews the evidence in minutes and resolves it impartially — no waiting days.</p></div>
+        <span class="pn">03</span>
+      </div>
+      <div class="pillar reveal" data-d="3">
+        <span class="pi"><i data-lucide="rotate-ccw" class="ic"></i></span>
+        <div><h4>Free money-back guarantee</h4><p>Built into every single order at no extra cost. If it's not as described, you're refunded in full.</p></div>
+        <span class="pn">04</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ESCROW STEPS ============================== -->
+<section id="escrow" style="padding-top:0">
+  <div class="wrap">
+    <div class="head center">
+      <span class="kicker reveal" style="justify-content:center">How escrow works</span>
+      <h2 class="reveal" data-d="1">Protected in three quiet steps.</h2>
+      <p class="reveal" data-d="2">No accounts handed over in DMs. No "pay first and hope". Just a calm, guarded handover.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal">
+        <span class="num">1</span>
+        <i data-lucide="wallet" class="ic-lg si"></i>
+        <h4>You pay into escrow</h4>
+        <p>Your money is locked safely on GETX — the seller can't touch it yet.</p>
+      </div>
+      <div class="step reveal" data-d="1">
+        <span class="num">2</span>
+        <i data-lucide="package-check" class="ic-lg si"></i>
+        <h4>Seller delivers</h4>
+        <p>The account, item or currency is delivered — often instantly and automatically.</p>
+      </div>
+      <div class="step reveal" data-d="2">
+        <span class="num">3</span>
+        <i data-lucide="shield-check" class="ic-lg si"></i>
+        <h4>You confirm, funds release</h4>
+        <p>Happy? Confirm and the seller is paid. Not happy? Open a dispute — money stays protected.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== TESTIMONIALS ============================== -->
+<section id="loved" style="padding-top:0">
+  <div class="wrap">
+    <div class="head center">
+      <span class="kicker reveal" style="justify-content:center">Loved by traders</span>
+      <h2 class="reveal" data-d="1">Real buyers. <span class="em soft">Verified</span> orders.</h2>
+    </div>
+
+    <div class="quotes">
+      <figure class="quote reveal">
+        <span class="mark">&ldquo;</span>
+        <p>Bought a stacked Pokémon GO account at midnight, had it in five minutes. The escrow hold made me actually relax for once.</p>
+        <figcaption class="who">
+          <span class="av av-b">M</span>
+          <div><b>Marcus T.</b><span class="vb"><i data-lucide="badge-check" class="ic-sm"></i> Verified buyer · Pokémon GO</span></div>
+        </figcaption>
+      </figure>
+      <figure class="quote reveal" data-d="1">
+        <span class="mark">&ldquo;</span>
+        <p>A delivery didn't match the listing. The AI judge sorted my refund the same day. I've never had a marketplace just… handle it.</p>
+        <figcaption class="who">
+          <span class="av av-c">S</span>
+          <div><b>Sofia R.</b><span class="vb"><i data-lucide="badge-check" class="ic-sm"></i> Verified buyer · Valorant</span></div>
+        </figcaption>
+      </figure>
+      <figure class="quote reveal" data-d="2">
+        <span class="mark">&ldquo;</span>
+        <p>As a seller it feels premium — I get paid the moment buyers confirm, and the verified badge means people actually trust my listings.</p>
+        <figcaption class="who">
+          <span class="av av-d">J</span>
+          <div><b>Jay K.</b><span class="vb"><i data-lucide="badge-check" class="ic-sm"></i> Verified seller · Clash of Clans</span></div>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FAQ ============================== -->
+<section id="faq" style="padding-top:0">
+  <div class="wrap-narrow">
+    <div class="head center">
+      <span class="kicker reveal" style="justify-content:center">Questions</span>
+      <h2 class="reveal" data-d="1">Everything you might be wondering.</h2>
+    </div>
+
+    <div class="faqwrap reveal" data-d="1">
+      <details class="faq" open>
+        <summary>Is buying a game account on GETX actually safe?<span class="pm"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+        <div class="ans">Yes. Every order is held in escrow, so your money is never sent directly to a stranger. Funds only release once you confirm you've received what was promised — and if anything's wrong, the free money-back guarantee refunds you in full.</div>
+      </details>
+      <details class="faq">
+        <summary>What does the free money-back guarantee cover?<span class="pm"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+        <div class="ans">It's included on every single order at no extra charge. If the account, item or currency isn't as described — or it's never delivered — you get every dollar back. No paid add-on, no fine print.</div>
+      </details>
+      <details class="faq">
+        <summary>How are sellers verified?<span class="pm"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+        <div class="ans">Sellers must pass identity verification before they can list anything. We pair that with a reputation system and an AI trust score, so the people you trade with are real and accountable.</div>
+      </details>
+      <details class="faq">
+        <summary>How do I pay?<span class="pm"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+        <div class="ans">You can pay with UPI / Cards or with Crypto (USDT · BTC · ETH). Every checkout is encrypted and routed through escrow, so your payment is protected from the first click.</div>
+      </details>
+      <details class="faq">
+        <summary>What happens if there's a dispute?<span class="pm"><i data-lucide="plus" class="ic-sm"></i></span></summary>
+        <div class="ans">Open a dispute and your funds stay frozen in escrow. Our AI Dispute Judge reviews the evidence from both sides and resolves most cases within minutes — fairly, and without you chasing support for days.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CTA ============================== -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="cta reveal">
+      <span class="kicker" style="justify-content:center"><span class="dotpulse"></span>&nbsp;Start in under two minutes</span>
+      <h2 style="margin-top:18px">Trade like the stakes are zero.</h2>
+      <p>Join 3,100+ verified sellers and a quarter-million buyers who let escrow carry the risk — so they don't have to.</p>
+      <div class="acts">
+        <a class="btn btn-light btn-lg" href="#">Browse the marketplace <i data-lucide="arrow-right" class="ic"></i></a>
+        <a class="btn btn-glass btn-lg" href="#">Become a seller</a>
+      </div>
+      <div class="assure" style="margin-top:30px;justify-content:center">
+        <span style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-dim)"><i data-lucide="lock" class="ic-sm" style="color:var(--halo-3)"></i> Encrypted, escrow-backed checkout</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div class="fcol fbrand">
+        <a class="brand" href="#">
+          <span class="mark" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 26 26" fill="none">
+              <path d="M13 2 L23 7 V15 C23 20 18.5 23.5 13 25 C7.5 23.5 3 20 3 15 V7 Z" stroke="url(#bm)" stroke-width="1.4"/>
+              <path d="M9.5 12.7 L12.2 15.4 L16.8 10.2" stroke="url(#bm)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span>GET<b class="grad-ink">X</b></span>
+        </a>
+        <p>The safest place to buy &amp; sell game accounts, items, currency and boosting — protected by escrow on every order.</p>
+        <div class="fpay">
+          <span><i data-lucide="credit-card" class="ic-sm"></i> UPI / Cards</span>
+          <span><i data-lucide="bitcoin" class="ic-sm"></i> Crypto · USDT · BTC · ETH</span>
+        </div>
+        <div class="fpay" style="margin-top:10px">
+          <span><i data-lucide="lock" class="ic-sm"></i> SSL secure · escrow-backed checkout</span>
+        </div>
+      </div>
+
+      <div class="fcol">
+        <h5>Marketplace</h5>
+        <a href="#">Pokémon GO</a><a href="#">Clash of Clans</a><a href="#">Valorant</a><a href="#">Free Fire</a><a href="#">PUBG Mobile</a>
+      </div>
+      <div class="fcol">
+        <h5>Company</h5>
+        <a href="#">How escrow works</a><a href="#">Become a seller</a><a href="#">Trust &amp; safety</a><a href="#">AI Dispute Judge</a><a href="#">Careers</a>
+      </div>
+      <div class="fcol">
+        <h5>Support</h5>
+        <a href="#">Help center</a><a href="#">Money-back guarantee</a><a href="#">Buyer protection</a><a href="#">Contact</a><a href="#">Status</a>
+      </div>
+    </div>
+
+    <div class="fbar">
+      <p>© 2026 GETX. All rights reserved. · Terms · Privacy</p>
+      <div class="fsoc">
+        <a href="#" aria-label="X (Twitter)"><i data-lucide="twitter" class="ic-sm"></i></a>
+        <a href="#" aria-label="Discord"><i data-lucide="message-circle" class="ic-sm"></i></a>
+        <a href="#" aria-label="YouTube"><i data-lucide="youtube" class="ic-sm"></i></a>
+        <a href="#" aria-label="Instagram"><i data-lucide="instagram" class="ic-sm"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // icons
+  lucide.createIcons();
+
+  // nav background on scroll
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 12);
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+
+  // scroll-reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // FAQ accordion — keep it single-open for calm
+  document.querySelectorAll('.faq').forEach(d => {
+    d.addEventListener('toggle', () => {
+      if (d.open) document.querySelectorAll('.faq[open]').forEach(o => { if (o !== d) o.open = false; });
+    });
+  });
+</script>
+</body>
+</html>
