@@ -16,7 +16,7 @@
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-jetbrains-mono);
-  --font-heading: var(--font-display);
+  --font-heading: var(--font-sans);
 
   /* brand (v10: single blue accent + supporting tones) */
   --color-primary-hover: var(--primary-hover);

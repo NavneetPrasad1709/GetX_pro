@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Inter, Poppins, JetBrains_Mono } from "next/font/google";
+import { Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { DeferredToaster } from "@/components/layout/deferred-toaster";
 import { OrganizationJsonLd } from "@/components/seo/organization-jsonld";
@@ -11,10 +11,9 @@ import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { PostHogPageview } from "@/components/analytics/posthog-pageview";
 import { siteConfig } from "@/config/site";
 
-// v10 brand: Poppins for display/UI, Inter for body copy, JetBrains Mono for chips.
-const inter = Inter({ variable: "--font-sans", subsets: ["latin"] });
-const poppins = Poppins({
-  variable: "--font-display",
+// Brand (2026-06-12 redesign): Manrope for display + body, JetBrains Mono for chips.
+const manrope = Manrope({
+  variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
@@ -89,7 +88,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${poppins.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`dark ${manrope.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       {/* suppressHydrationWarning: browser extensions (ColorZilla, Grammarly...)
