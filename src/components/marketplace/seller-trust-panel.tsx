@@ -7,6 +7,7 @@ import { VerifiedBadge } from "@/components/shared/verified-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { SellerLevelBadge } from "@/components/shared/seller-level-badge";
 import type { ListingDetail } from "@/server/services/marketplace";
+import { siteConfig } from "@/config/site";
 
 const memberSinceFmt = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -46,7 +47,7 @@ export function SellerTrustPanel({
               {seller.displayName}
             </Link>
             {seller.kycVerified ? <VerifiedBadge size="sm" /> : null}
-            {seller.proMember ? (
+            {seller.proMember && siteConfig.features.sellerPro ? (
               <span
                 className="inline-flex items-center rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary"
                 title="GETX Pro seller"

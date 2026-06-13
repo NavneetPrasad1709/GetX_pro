@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { CheckIcon } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -12,6 +13,7 @@ const dateFmt = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
 /** GETX Pro pricing + subscribe (Prompt 15, Stream 4). */
 export default async function SubscriptionPage() {
+  if (!siteConfig.features.sellerPro) notFound(); // GETX Pro removed for now (owner)
   const session = await requireUser();
   const profile = await db.sellerProfile.findUnique({
     where: { userId: session.user.id },

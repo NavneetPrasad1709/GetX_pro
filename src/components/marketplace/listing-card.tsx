@@ -4,6 +4,7 @@ import { ZapIcon, PackageIcon, ShieldCheckIcon, BadgeCheckIcon } from "lucide-re
 import { cn } from "@/lib/utils";
 import { trustTone } from "@/lib/trust";
 import { LISTING_TYPE_LABEL } from "@/config/games";
+import { siteConfig } from "@/config/site";
 import { Price } from "@/components/shared/price";
 import { Rating } from "@/components/shared/rating";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -153,7 +154,7 @@ export function ListingCard({
               {seller.name}
             </span>
           )}
-          {seller.proMember ? (
+          {seller.proMember && siteConfig.features.sellerPro ? (
             <span
               className="inline-flex items-center rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary"
               title="GETX Pro seller"

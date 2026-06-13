@@ -103,6 +103,7 @@ export const siteConfig = {
   features: {
     referral: false, // refer-and-earn: /referrals page, sidebar link, signup referral-code field
     loyalty: false, // rewards/loyalty points: /loyalty + /seller/loyalty, sidebar links, checkout redeem
+    sellerPro: false, // GETX Pro subscription: /seller/subscription, sidebar link, upsell card, PRO badges
   },
 } as const;
 

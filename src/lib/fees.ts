@@ -114,7 +114,7 @@ export function computeSellerCommissionMinorForLevel(
   const base = siteConfig.fees.sellerCommissionPercent[kind];
   const afterLevel = effectiveSellerCommissionPct(base, sellerLevel);
   const proDiscount =
-    subscriptionTier === "PRO"
+    subscriptionTier === "PRO" && siteConfig.features.sellerPro
       ? siteConfig.fees.subscription.proCommissionDiscount
       : 0;
   const effective = Math.max(1, afterLevel - proDiscount); // floor 1% — never free

@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
+import { siteConfig } from "@/config/site";
 import {
   subscribePro,
   MonetizationServiceError,
@@ -20,6 +21,9 @@ export type MonetizationResult = { ok: true } | { ok: false; error: string };
 const GENERIC = "Something went wrong. Please try again.";
 
 export async function subscribeProAction(): Promise<MonetizationResult> {
+  if (!siteConfig.features.sellerPro) {
+    return { ok: false, error: "GETX Pro is not available." };
+  }
   const session = await requireUser();
   const user = { id: session.user.id, role: session.user.role };
   if (!rateLimit(`subscribe:${user.id}`, { limit: 5, windowMs: 60_000 }).ok) {

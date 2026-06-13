@@ -157,7 +157,8 @@ export default async function SellerOverviewPage() {
         ))}
       </div>
 
-      {/* GETX Pro (Prompt 15) — upsell for FREE sellers, status for PRO */}
+      {/* GETX Pro (Prompt 15) — hidden while the Pro tier is disabled (owner) */}
+      {siteConfig.features.sellerPro ? (
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
@@ -176,6 +177,7 @@ export default async function SellerOverviewPage() {
           </CardDescription>
         </CardHeader>
       </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

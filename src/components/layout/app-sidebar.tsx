@@ -91,7 +91,9 @@ function groupsFor(role: Role): SidebarGroup[] {
             ? [{ href: "/seller/loyalty", label: "Sale rewards", icon: SparklesIcon }]
             : []),
           { href: "/seller/guides", label: "Guides", icon: BookOpenIcon },
-          { href: "/seller/subscription", label: "GETX Pro", icon: RocketIcon },
+          ...(siteConfig.features.sellerPro
+            ? [{ href: "/seller/subscription", label: "GETX Pro", icon: RocketIcon }]
+            : []),
           { href: "/seller/verify", label: "Verify", icon: ShieldCheckIcon },
           { href: "/seller/analytics", label: "Analytics", icon: BarChart3Icon },
         ],
