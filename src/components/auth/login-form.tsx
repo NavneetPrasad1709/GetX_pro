@@ -63,8 +63,10 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     } catch {
       /* ignore */
     }
-    router.push(safeCallbackUrl(callbackUrl));
-    router.refresh(); // re-render server components (header) with the session
+    // Refresh FIRST (invalidate the logged-out RSC cache + header), THEN navigate
+    // once. Pushing then refreshing rendered the heavy dashboard twice (~2x slower).
+    router.refresh();
+    router.replace(safeCallbackUrl(callbackUrl));
   }
 
   return (
