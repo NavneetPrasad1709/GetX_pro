@@ -18,4 +18,4 @@ export function sumsubBaseUrl(): string {
   return process.env.SUMSUB_BASE_URL ?? "https://api.sumsub.com";
 }
 
-export const SUMSUB_LEVEL = "basic-kyc-level";
+export const SUMSUB_LEVEL = "id-and-liveness";
