@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Full UI Sample</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+.idx{max-width:1100px;margin:0 auto;padding:48px 20px}
+.idx h1{font-size:clamp(28px,4vw,40px)}.idx .sub{color:var(--muted);margin-top:10px;max-width:60ch}
+.idx .grp{margin-top:36px}.idx .grp h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:14px}
+.idx .links{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}@media(max-width:900px){.idx .links{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.idx .links{grid-template-columns:1fr}}
+.idx a.lk{display:flex;align-items:center;gap:11px;padding:15px;border-radius:var(--r-lg);background:var(--card);border:1px solid var(--line);box-shadow:var(--sh-card);transition:.15s}
+.idx a.lk:hover{border-color:var(--line-2);transform:translateY(-3px);box-shadow:var(--sh-pop)}
+.idx a.lk .ib{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue);flex:none}
+.idx a.lk b{font-size:13.5px;font-weight:700;display:block}.idx a.lk span{font-size:11.5px;color:var(--faint)}
+</style>
+</head><body>
+<div class="gx-util"><div class="wrap">
+  <span class="hide"><i data-lucide="layout-grid" class="ic g"></i> Design sample — for approval</span>
+  <span><i data-lucide="globe" class="ic"></i> English · USD $</span>
+  <button class="tgl" data-theme-toggle aria-label="Toggle theme"><i data-lucide="moon" class="ic t-dark"></i><i data-lucide="sun" class="ic t-light"></i><span class="t-dark">Dark</span><span class="t-light">Light</span></button>
+</div></div>
+<header class="gx-head"><div class="wrap">
+  <a href="index.html" aria-label="GETX home"><img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX"></a>
+  <div class="gx-hsearch"><i data-lucide="search" class="ic"></i><input placeholder="Search GETX…"></div>
+  <div class="right"><a class="btn btn-out btn-sm">Log in</a><a class="btn btn-blue btn-sm">Sell</a></div>
+</div></header>
+
+<main><div class="idx">
+  <h1>GETX — Full website UI sample</h1>
+  <p class="sub">Every major page on the approved design system (Manrope · dark chrome + light/dark toggle · blue&nbsp;+&nbsp;green trust · Lucide icons · USD · free money-back). Toggle theme top-right. Click any page.</p>
+
+  <div class="grp"><h2>Public</h2><div class="links">
+    <a class="lk" href="../full-sample.html"><span class="ib"><i data-lucide="home" class="ic"></i></span><span><b>Home</b><span>Popular lists · How-it-works · trust</span></span></a>
+    <a class="lk" href="mobile.html" style="border-color:var(--blue);background:var(--blue-soft)"><span class="ib"><i data-lucide="smartphone" class="ic"></i></span><span><b>Mobile app</b><span>App-like · bottom nav · 6 screens</span></span></a>
+    <a class="lk" href="marketplace.html"><span class="ib"><i data-lucide="layout-grid" class="ic"></i></span><span><b>Marketplace</b><span>Category browse + filters</span></span></a>
+    <a class="lk" href="search.html"><span class="ib"><i data-lucide="search" class="ic"></i></span><span><b>Search results</b><span>Query + facets</span></span></a>
+    <a class="lk" href="product.html"><span class="ib"><i data-lucide="package" class="ic"></i></span><span><b>Product detail</b><span>Gallery + buy box</span></span></a>
+  </div></div>
+
+  <div class="grp"><h2>User</h2><div class="links">
+    <a class="lk" href="login.html"><span class="ib"><i data-lucide="log-in" class="ic"></i></span><span><b>Login</b></span></a>
+    <a class="lk" href="register.html"><span class="ib"><i data-lucide="user-plus" class="ic"></i></span><span><b>Register</b></span></a>
+    <a class="lk" href="dashboard.html"><span class="ib"><i data-lucide="layout-dashboard" class="ic"></i></span><span><b>Dashboard</b></span></a>
+    <a class="lk" href="orders.html"><span class="ib"><i data-lucide="package" class="ic"></i></span><span><b>Orders</b></span></a>
+    <a class="lk" href="messages.html"><span class="ib"><i data-lucide="message-square" class="ic"></i></span><span><b>Messages</b></span></a>
+    <a class="lk" href="profile.html"><span class="ib"><i data-lucide="user" class="ic"></i></span><span><b>Profile</b></span></a>
+    <a class="lk" href="wallet.html"><span class="ib"><i data-lucide="wallet" class="ic"></i></span><span><b>Wallet</b></span></a>
+  </div></div>
+
+  <div class="grp"><h2>Seller</h2><div class="links">
+    <a class="lk" href="seller-dashboard.html"><span class="ib"><i data-lucide="store" class="ic"></i></span><span><b>Seller dashboard</b></span></a>
+    <a class="lk" href="create-listing.html"><span class="ib"><i data-lucide="plus" class="ic"></i></span><span><b>Create listing</b></span></a>
+    <a class="lk" href="manage-listings.html"><span class="ib"><i data-lucide="list" class="ic"></i></span><span><b>Manage listings</b></span></a>
+    <a class="lk" href="seller-orders.html"><span class="ib"><i data-lucide="clipboard-list" class="ic"></i></span><span><b>Orders management</b></span></a>
+    <a class="lk" href="earnings.html"><span class="ib"><i data-lucide="banknote" class="ic"></i></span><span><b>Earnings</b></span></a>
+  </div></div>
+
+  <div class="grp"><h2>Trust &amp; support</h2><div class="links">
+    <a class="lk" href="about.html"><span class="ib"><i data-lucide="info" class="ic"></i></span><span><b>About us</b></span></a>
+    <a class="lk" href="contact.html"><span class="ib"><i data-lucide="mail" class="ic"></i></span><span><b>Contact us</b></span></a>
+    <a class="lk" href="help.html"><span class="ib"><i data-lucide="life-buoy" class="ic"></i></span><span><b>Help center</b></span></a>
+    <a class="lk" href="buyer-protection.html"><span class="ib"><i data-lucide="shield-check" class="ic"></i></span><span><b>Buyer protection</b></span></a>
+    <a class="lk" href="seller-protection.html"><span class="ib"><i data-lucide="shield" class="ic"></i></span><span><b>Seller protection</b></span></a>
+  </div></div>
+</div></main>
+
+<div class="pvbadge"><b>GETX</b> · UI sample index</div>
+<script>lucide.createIcons()</script>
+<script src="getx-ds.js"></script>
+</body></html>

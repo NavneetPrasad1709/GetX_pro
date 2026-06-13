@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Messages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+.chat{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 200px);min-height:480px}
+@media(max-width:760px){.chat{grid-template-columns:1fr}.chat .clist{display:none}}
+.clist{border-right:1px solid var(--line);overflow:auto}
+.crow{display:flex;align-items:center;gap:11px;padding:13px 14px;border-bottom:1px solid var(--line);cursor:pointer}.crow:hover,.crow.on{background:var(--hover)}.crow .m{flex:1;min-width:0}.crow .m b{font-size:13.5px}.crow .m p{font-size:12px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.crow .t{font-size:11px;color:var(--faint)}.crow .un{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.thread{display:flex;flex-direction:column;min-width:0}
+.thead{display:flex;align-items:center;gap:11px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.tbody{flex:1;overflow:auto;padding:18px 16px;display:flex;flex-direction:column;gap:10px;background:var(--alt)}
+.bub{max-width:74%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.45}
+.bub.them{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px;align-self:flex-start}
+.bub.me{background:var(--blue);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.bub .tm{display:block;font-size:10px;opacity:.6;margin-top:3px}
+.composer{display:flex;gap:9px;padding:12px 14px;border-top:1px solid var(--line)}
+.sysnote{align-self:center;font-size:11px;color:var(--faint);background:var(--card);border:1px solid var(--line);padding:5px 11px;border-radius:var(--r-pill)}
+</style>
+</head><body>
+<div class="gx-util"><div class="wrap"><span class="hide"><i data-lucide="bell" class="ic g"></i> 24/7 Live Support</span><span><i data-lucide="globe" class="ic"></i> English · USD $</span><button class="tgl" data-theme-toggle aria-label="Toggle theme"><i data-lucide="moon" class="ic t-dark"></i><i data-lucide="sun" class="ic t-light"></i><span class="t-dark">Dark</span><span class="t-light">Light</span></button></div></div>
+<header class="gx-head"><div class="wrap"><a href="index.html"><img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX"></a><div class="gx-hsearch"><i data-lucide="search" class="ic"></i><input placeholder="Search GETX…"></div><div class="right"><a href="messages.html" class="gx-ibtn"><i data-lucide="message-square" class="ic"></i></a><a href="dashboard.html" class="gx-ibtn"><span class="dot"></span><i data-lucide="bell" class="ic"></i></a><span class="av" style="width:34px;height:34px">A</span></div></div></header>
+<div class="shell">
+  <aside class="side"><div class="grp">Account</div><a href="dashboard.html"><i data-lucide="layout-dashboard" class="ic"></i> Dashboard</a><a href="orders.html"><i data-lucide="package" class="ic"></i> Orders</a><a class="on" href="messages.html"><i data-lucide="message-square" class="ic"></i> Messages</a><a href="profile.html"><i data-lucide="user" class="ic"></i> Profile</a><a href="wallet.html"><i data-lucide="wallet" class="ic"></i> Wallet</a></aside>
+  <main class="dash" style="padding:0">
+    <div class="card chat" style="border-radius:0;border:0;border-top:1px solid var(--line)">
+      <div class="clist">
+        <div class="crow on"><span class="av av-lg" style="width:40px;height:40px">P</span><div class="m"><b>PoGoLegends</b><p>Sent the login + recovery — try it…</p></div><div style="text-align:right"><div class="t">2m</div><div class="un" style="margin-left:auto;margin-top:5px"></div></div></div>
+        <div class="crow"><span class="av av-lg" style="width:40px;height:40px">S</span><div class="m"><b>SkinVault</b><p>Will deliver in ~30 min 👍</p></div><div class="t">1h</div></div>
+        <div class="crow"><span class="av av-lg" style="width:40px;height:40px">T</span><div class="m"><b>TopUpPro</b><p>Diamonds credited, enjoy!</p></div><div class="t">Jun 10</div></div>
+        <div class="crow"><span class="av av-lg" style="width:40px;height:40px">G</span><div class="m"><b>GETX Support</b><p>Your dispute has been resolved…</p></div><div class="t">Jun 6</div></div>
+      </div>
+      <div class="thread">
+        <div class="thead"><span class="av av-lg" style="width:38px;height:38px">P</span><div style="flex:1"><div class="row" style="gap:7px;align-items:center"><b style="font-size:14px">PoGoLegends</b><span class="lvl lvl-gold">GOLD</span><span class="verif"><i data-lucide="badge-check" class="ic-sm"></i></span></div><div class="faint" style="font-size:11.5px">Order #GTX-08471 · Lv.45 Shiny Account</div></div><a class="btn btn-out btn-sm" href="product.html">View listing</a></div>
+        <div class="tbody">
+          <div class="sysnote"><i data-lucide="lock" class="ic-xs"></i> Payment secured in escrow · $74.99</div>
+          <div class="bub them">Hey! Thanks for the order. Sending your login &amp; recovery email now.<span class="tm">12:01</span></div>
+          <div class="bub me">Awesome, ready when you are.<span class="tm">12:02</span></div>
+          <div class="bub them">Login: trainer_valor47@… · temp PIN inside. Please change the password + recovery once you're in.<span class="tm">12:03</span></div>
+          <div class="bub me">Logged in, everything checks out. Confirming now — thank you!<span class="tm">12:06</span></div>
+          <div class="sysnote"><i data-lucide="check" class="ic-xs"></i> Buyer confirmed · funds released to seller</div>
+        </div>
+        <div class="composer"><input class="input" placeholder="Type a message…"><button class="btn btn-blue btn-md"><i data-lucide="send" class="ic-sm"></i></button></div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="pvbadge"><b>GETX</b> · Messages · sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>

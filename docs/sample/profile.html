@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head><body>
+<div class="gx-util"><div class="wrap"><span class="hide"><i data-lucide="bell" class="ic g"></i> 24/7 Live Support</span><span><i data-lucide="globe" class="ic"></i> English · USD $</span><button class="tgl" data-theme-toggle aria-label="Toggle theme"><i data-lucide="moon" class="ic t-dark"></i><i data-lucide="sun" class="ic t-light"></i><span class="t-dark">Dark</span><span class="t-light">Light</span></button></div></div>
+<header class="gx-head"><div class="wrap"><a href="index.html"><img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX"></a><div class="gx-hsearch"><i data-lucide="search" class="ic"></i><input placeholder="Search GETX…"></div><div class="right"><a href="messages.html" class="gx-ibtn"><i data-lucide="message-square" class="ic"></i></a><a href="dashboard.html" class="gx-ibtn"><span class="dot"></span><i data-lucide="bell" class="ic"></i></a><span class="av" style="width:34px;height:34px">A</span></div></div></header>
+<div class="shell">
+  <aside class="side"><div class="grp">Account</div><a href="dashboard.html"><i data-lucide="layout-dashboard" class="ic"></i> Dashboard</a><a href="orders.html"><i data-lucide="package" class="ic"></i> Orders</a><a href="messages.html"><i data-lucide="message-square" class="ic"></i> Messages</a><a class="on" href="profile.html"><i data-lucide="user" class="ic"></i> Profile</a><a href="wallet.html"><i data-lucide="wallet" class="ic"></i> Wallet</a><a href="#"><i data-lucide="settings" class="ic"></i> Settings</a></aside>
+  <main class="dash" style="max-width:720px">
+    <h1 style="font-size:24px;margin-bottom:16px">Profile</h1>
+    <div class="card card-pad" style="display:flex;align-items:center;gap:16px;margin-bottom:16px"><span class="av av-lg" style="width:64px;height:64px;font-size:24px">A</span><div style="flex:1"><b style="font-size:17px">Aarav S.</b><div class="muted" style="font-size:13px">Member since 2026 · 6 orders</div></div><a class="btn btn-out btn-sm"><i data-lucide="image" class="ic-sm"></i> Change photo</a></div>
+
+    <div class="card card-pad" style="margin-bottom:16px">
+      <h2 style="font-size:16px;margin-bottom:14px">Public profile</h2>
+      <div class="field"><label>Display name</label><input class="input" value="Aarav S."></div>
+      <div class="field"><label>Bio</label><textarea class="textarea" placeholder="Tell buyers/sellers a bit about you…">Casual collector. Mostly Pokémon GO & Valorant.</textarea></div>
+      <div class="field"><label>Country</label><select class="select"><option>United States</option><option>United Kingdom</option><option>India</option><option>Germany</option><option>Brazil</option></select></div>
+      <button class="btn btn-blue">Save changes</button>
+    </div>
+
+    <div class="card card-pad" style="margin-bottom:16px">
+      <h2 style="font-size:16px;margin-bottom:14px">Account security</h2>
+      <div class="field"><label>Email</label><div class="row" style="gap:9px"><input class="input" value="aarav@email.com" style="flex:1"><a class="btn btn-out btn-md">Change</a></div></div>
+      <div class="field"><label>Password</label><div class="row" style="gap:9px"><input class="input" type="password" value="********" style="flex:1"><a class="btn btn-out btn-md">Change</a></div><span class="hint">Changing your password signs out other devices.</span></div>
+    </div>
+
+    <div class="card card-pad" style="border-color:rgba(255,93,108,.3)">
+      <h2 style="font-size:16px;margin-bottom:6px;color:var(--rose)">Danger zone</h2>
+      <p class="muted" style="font-size:13px;margin-bottom:12px">Permanently delete your account and data. This can't be undone.</p>
+      <button class="btn btn-danger">Delete account</button>
+    </div>
+  </main>
+</div>
+<div class="gx-footer"><div class="wrap"><div class="gx-copy" style="border:0">© 2026 GETX — built for gamers, secured by escrow.</div></div></div>
+<div class="pvbadge"><b>GETX</b> · Profile · sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>

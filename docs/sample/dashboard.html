@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head><body>
+<div class="gx-util"><div class="wrap"><span class="hide"><i data-lucide="bell" class="ic g"></i> 24/7 Live Support</span><span><i data-lucide="globe" class="ic"></i> English · USD $</span><button class="tgl" data-theme-toggle aria-label="Toggle theme"><i data-lucide="moon" class="ic t-dark"></i><i data-lucide="sun" class="ic t-light"></i><span class="t-dark">Dark</span><span class="t-light">Light</span></button></div></div>
+<header class="gx-head"><div class="wrap"><a href="index.html"><img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX"></a><div class="gx-hsearch"><i data-lucide="search" class="ic"></i><input placeholder="Search GETX…"></div><div class="right"><a href="messages.html" class="gx-ibtn"><i data-lucide="message-square" class="ic"></i></a><a href="dashboard.html" class="gx-ibtn"><span class="dot"></span><i data-lucide="bell" class="ic"></i></a><span class="av" style="width:34px;height:34px">A</span></div></div></header>
+
+<div class="shell">
+  <aside class="side">
+    <div class="grp">Account</div>
+    <a class="on" href="dashboard.html"><i data-lucide="layout-dashboard" class="ic"></i> Dashboard</a>
+    <a href="orders.html"><i data-lucide="package" class="ic"></i> Orders</a>
+    <a href="messages.html"><i data-lucide="message-square" class="ic"></i> Messages</a>
+    <a href="#"><i data-lucide="heart" class="ic"></i> Wishlist</a>
+    <a href="profile.html"><i data-lucide="user" class="ic"></i> Profile</a>
+    <a href="wallet.html"><i data-lucide="wallet" class="ic"></i> Wallet</a>
+    <a href="#"><i data-lucide="settings" class="ic"></i> Settings</a>
+    <div class="grp">Selling</div>
+    <a href="seller-dashboard.html" style="color:var(--blue)"><i data-lucide="store" class="ic"></i> Become a seller</a>
+  </aside>
+  <main class="dash">
+    <h1 style="font-size:24px">Welcome back, Aarav</h1>
+    <p class="muted" style="margin-top:4px;margin-bottom:18px">Here's what's happening with your orders.</p>
+    <div class="card card-pad" style="display:flex;align-items:center;gap:12px;border-color:var(--blue-soft);background:var(--blue-soft);margin-bottom:18px"><i data-lucide="mail" class="ic blue-t"></i><span style="font-size:13.5px">Verify your email to secure your account.</span><a class="btn btn-blue btn-sm" style="margin-left:auto">Verify now</a></div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="lab"><i data-lucide="package" class="ic"></i> Active orders</div><div class="val">2</div><div class="d">1 needs action</div></div>
+      <div class="kpi"><div class="lab"><i data-lucide="heart" class="ic"></i> Wishlist</div><div class="val">7</div><div class="d muted" style="color:var(--faint)">items saved</div></div>
+      <div class="kpi"><div class="lab"><i data-lucide="sparkles" class="ic"></i> Reward points</div><div class="val">120</div><div class="d">= $1.20 off</div></div>
+      <div class="kpi"><div class="lab"><i data-lucide="wallet" class="ic"></i> Wallet</div><div class="val">$24.00</div><div class="d muted" style="color:var(--faint)">available</div></div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:20px">
+      <div class="sec-h" style="margin-bottom:12px"><h2 style="font-size:17px">Recent orders</h2><a class="btn btn-ghost btn-sm" href="orders.html">View all <i data-lucide="arrow-right" class="ic-sm"></i></a></div>
+      <table class="tbl"><thead><tr><th>Listing</th><th>Status</th><th>Total</th><th>Date</th><th></th></tr></thead><tbody>
+        <tr><td><div class="r"><span class="gi pogo" style="width:26px;height:26px;border-radius:6px"><i data-lucide="gamepad-2" class="ic-xs"></i></span> Lv.45 · 3 Shiny Legendaries</div></td><td><span class="status st-pending">Confirm delivery</span></td><td>$78.74</td><td class="muted">Jun 13</td><td><a class="btn btn-green btn-sm">Confirm</a></td></tr>
+        <tr><td><div class="r"><span class="gi val" style="width:26px;height:26px;border-radius:6px"><i data-lucide="crosshair" class="ic-xs"></i></span> Valorant Points 5,350</div></td><td><span class="status st-paid">Awaiting delivery</span></td><td>$47.24</td><td class="muted">Jun 13</td><td><a class="btn btn-out btn-sm" href="orders.html">View</a></td></tr>
+        <tr><td><div class="r"><span class="gi ff" style="width:26px;height:26px;border-radius:6px"><i data-lucide="flame" class="ic-xs"></i></span> Free Fire 1,060 Diamonds</div></td><td><span class="status st-done">Completed</span></td><td>$9.96</td><td class="muted">Jun 10</td><td><a class="btn btn-out btn-sm">Buy again</a></td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="sec-h" style="margin:24px 0 12px"><h2 style="font-size:17px">Continue shopping</h2></div>
+    <div class="pgrid">
+      <article class="card card-h pcard"><div class="cover cv-pogo"><span class="gtag">Pokémon GO</span></div><div class="bd"><div class="ttl">Shiny Starter Bundle</div><div class="foot"><div class="price green">$24.99</div><span class="proof"><i data-lucide="star" class="ic-xs" fill="currentColor"></i> 4.9</span></div></div></article>
+      <article class="card card-h pcard"><div class="cover cv-val"><span class="gtag">Valorant</span></div><div class="bd"><div class="ttl">Reaver Skin Bundle</div><div class="foot"><div class="price green">$34.99</div><span class="proof"><i data-lucide="star" class="ic-xs" fill="currentColor"></i> 4.8</span></div></div></article>
+      <article class="card card-h pcard"><div class="cover cv-clash"><span class="gtag">Clash of Clans</span></div><div class="bd"><div class="ttl">TH15 Max Base</div><div class="foot"><div class="price green">$129.00</div><span class="proof"><i data-lucide="star" class="ic-xs" fill="currentColor"></i> 5.0</span></div></div></article>
+      <article class="card card-h pcard"><div class="cover cv-pubg"><span class="gtag">PUBG Mobile</span></div><div class="bd"><div class="ttl">660 UC Top-up</div><div class="foot"><div class="price green">$9.99</div><span class="proof"><i data-lucide="star" class="ic-xs" fill="currentColor"></i> 4.8</span></div></div></article>
+    </div>
+  </main>
+</div>
+
+<div class="gx-footer"><div class="wrap"><div class="gx-copy" style="border:0">© 2026 GETX — built for gamers, secured by escrow.</div></div></div>
+<div class="pvbadge"><b>GETX</b> · Buyer dashboard · sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>

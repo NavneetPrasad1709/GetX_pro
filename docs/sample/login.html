@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Log in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>.divider{display:flex;align-items:center;gap:12px;color:var(--faint);font-size:12px;margin:16px 0}.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}.atrust{display:flex;align-items:center;gap:11px;margin-top:18px;color:rgba(255,255,255,.85);font-size:14px}.atrust .ib{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.08);color:#fff;flex:none}</style>
+</head><body>
+<div class="auth">
+  <aside class="aside">
+    <img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX" style="height:30px;margin-bottom:26px">
+    <h1 style="font-size:clamp(26px,3vw,36px);color:#fff;max-width:14ch">Welcome back. Trade safely.</h1>
+    <p style="color:rgba(255,255,255,.7);margin-top:12px;max-width:38ch">Pick up where you left off — your escrow-protected orders and messages are waiting.</p>
+    <div class="atrust"><span class="ib"><i data-lucide="lock" class="ic"></i></span> Escrow on every order</div>
+    <div class="atrust"><span class="ib"><i data-lucide="badge-check" class="ic"></i></span> ID-verified sellers only</div>
+    <div class="atrust"><span class="ib"><i data-lucide="refresh-ccw" class="ic"></i></span> Free money-back guarantee</div>
+  </aside>
+  <div class="form-wrap"><div class="form">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;margin-bottom:18px"><i data-lucide="arrow-left" class="ic-sm"></i> Back to GETX</a>
+    <h2 style="font-size:24px;margin-bottom:6px">Log in</h2>
+    <p class="muted" style="font-size:13.5px;margin-bottom:22px">New to GETX? <a href="register.html" class="blue-t" style="font-weight:600">Create an account</a></p>
+    <div class="field"><label>Email</label><input class="input" type="email" placeholder="you@email.com"></div>
+    <div class="field"><label>Password</label><input class="input" type="password" placeholder="••••••••"><a href="#" class="hint blue-t" style="align-self:flex-end">Forgot password?</a></div>
+    <button class="btn btn-blue btn-lg btn-block">Log in</button>
+    <div class="divider">or continue with</div>
+    <div class="col" style="gap:9px"><a class="btn btn-out btn-md btn-block"><i data-lucide="chrome" class="ic-sm"></i> Continue with Google</a><a class="btn btn-out btn-md btn-block"><i data-lucide="message-circle" class="ic-sm"></i> Continue with Discord</a></div>
+    <p class="muted" style="font-size:11.5px;text-align:center;margin-top:18px"><i data-lucide="shield-check" class="ic-xs green-t"></i> Protected by bot verification · your data is encrypted</p>
+  </div></div>
+</div>
+<div class="pvbadge"><b>GETX</b> · Login · sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>

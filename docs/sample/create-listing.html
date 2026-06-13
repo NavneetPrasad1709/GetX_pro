@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Create listing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>.cl{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}@media(max-width:880px){.cl{grid-template-columns:1fr}}.dtile{border:1px solid var(--field-line);border-radius:var(--r);padding:14px;cursor:pointer;display:flex;gap:11px;align-items:flex-start;font-size:13px}.dtile.on{border-color:var(--blue);background:var(--blue-soft)}.dtile .ic{color:var(--blue);margin-top:1px}.drop{border:1.5px dashed var(--field-line);border-radius:var(--r);aspect-ratio:16/10;display:grid;place-items:center;color:var(--faint);text-align:center;font-size:12px;background:var(--alt)}</style>
+</head><body>
+<div class="gx-util"><div class="wrap"><span class="hide"><i data-lucide="bell" class="ic g"></i> 24/7 Live Support</span><span><i data-lucide="globe" class="ic"></i> English · USD $</span><button class="tgl" data-theme-toggle aria-label="Toggle theme"><i data-lucide="moon" class="ic t-dark"></i><i data-lucide="sun" class="ic t-light"></i><span class="t-dark">Dark</span><span class="t-light">Light</span></button></div></div>
+<header class="gx-head"><div class="wrap"><a href="index.html"><img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX"></a><div class="gx-hsearch"><i data-lucide="search" class="ic"></i><input placeholder="Search GETX…"></div><div class="right"><a href="messages.html" class="gx-ibtn"><i data-lucide="message-square" class="ic"></i></a><a href="seller-dashboard.html" class="gx-ibtn"><span class="dot"></span><i data-lucide="bell" class="ic"></i></a><span class="av" style="width:34px;height:34px">P</span></div></div></header>
+<div class="shell">
+  <aside class="side"><div class="grp">Seller hub</div><a href="seller-dashboard.html"><i data-lucide="store" class="ic"></i> Overview</a><a href="manage-listings.html"><i data-lucide="list" class="ic"></i> Listings</a><a class="on" href="create-listing.html"><i data-lucide="plus" class="ic"></i> New listing</a><a href="seller-orders.html"><i data-lucide="clipboard-list" class="ic"></i> Orders</a><a href="earnings.html"><i data-lucide="banknote" class="ic"></i> Earnings</a><a href="wallet.html"><i data-lucide="wallet" class="ic"></i> Wallet</a><a href="#"><i data-lucide="shield-check" class="ic"></i> Verify</a></aside>
+  <main class="dash">
+    <h1 style="font-size:24px;margin-bottom:16px">Create a listing</h1>
+    <div class="cl">
+      <div class="card card-pad">
+        <div class="row" style="gap:14px"><div class="field" style="flex:1"><label>Game</label><select class="select"><option>Pokémon GO</option><option>Valorant</option><option>Clash of Clans</option><option>Free Fire</option><option>PUBG Mobile</option></select></div><div class="field" style="flex:1"><label>Category</label><select class="select"><option>Account</option><option>Top-up</option><option>Item</option><option>Boosting</option></select></div></div>
+        <div class="field"><label>Title</label><input class="input" placeholder="e.g. Lv.45 · 3 Shiny Legendaries · 250k Stardust"></div>
+        <div class="field"><label>Description <a href="#" class="hint blue-t" style="margin-left:6px">Use template</a></label><textarea class="textarea" placeholder="What's included, account history, why buyers can trust you…"></textarea></div>
+        <div class="row" style="gap:14px"><div class="field" style="flex:1"><label>Price (USD $)</label><input class="input" placeholder="74.99"><span class="hint">Similar Lv.40+ accounts sell for $40–$90</span></div><div class="field" style="flex:1"><label>Stock</label><input class="input" value="1"><span class="hint">Accounts are unique — usually 1</span></div></div>
+        <div class="field"><label>Delivery</label><div class="row" style="gap:11px"><div class="dtile" style="flex:1"><i data-lucide="package" class="ic"></i><div><b>Manual</b><div class="faint" style="font-size:11.5px">Deliver via chat after payment</div></div></div><div class="dtile on" style="flex:1"><i data-lucide="zap" class="ic"></i><div><b>Instant</b><div class="faint" style="font-size:11.5px">Auto-delivered codes &amp; top-ups</div></div></div></div></div>
+        <div class="card card-pad" style="background:var(--alt)"><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--faint);margin-bottom:10px">Account details (optional)</div><div class="row" style="gap:11px"><input class="input" placeholder="Level"><input class="input" placeholder="Rank / team"><input class="input" placeholder="Region"></div></div>
+      </div>
+
+      <div style="position:sticky;top:78px;display:flex;flex-direction:column;gap:14px">
+        <div class="card card-pad"><div style="font-size:12px;font-weight:700;color:var(--faint);text-transform:uppercase;margin-bottom:10px">Preview</div>
+          <article class="pcard" style="border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden"><div class="cover cv-pogo"><div class="badges"><span class="tag tag-info"><i data-lucide="zap" class="ic-xs"></i> Instant</span></div><span class="gtag">Pokémon GO</span></div><div class="bd"><div class="ttl">Your listing title…</div><div class="seller"><span class="av">P</span> PoGoLegends <span class="lvl lvl-gold">GOLD</span></div><div class="foot"><div class="price green">$74.99</div></div></div></article>
+        </div>
+        <div class="card card-pad"><div style="font-size:12px;font-weight:700;color:var(--faint);text-transform:uppercase;margin-bottom:10px">Images</div><div class="drop"><div><i data-lucide="image-plus" class="ic-lg" style="color:var(--faint)"></i><div style="margin-top:6px">Add image</div></div></div><p class="hint" style="margin-top:8px">Up to 8 · first image is the cover buyers see.</p></div>
+        <div class="card card-pad" style="border-color:rgba(245,183,61,.3);background:var(--gold-soft)"><p style="font-size:12.5px"><i data-lucide="shield-alert" class="ic-sm" style="color:#d99a1f;vertical-align:-2px"></i> Your listing goes live, but <b>payouts are blocked until KYC is approved.</b> <a href="#" class="blue-t">Verify now</a></p></div>
+        <button class="btn btn-blue btn-block">Publish listing</button>
+        <button class="btn btn-out btn-block">Save draft</button>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="gx-footer"><div class="wrap"><div class="gx-copy" style="border:0">© 2026 GETX — built for gamers, secured by escrow.</div></div></div>
+<div class="pvbadge"><b>GETX</b> · Create listing · sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>

@@ -74,21 +74,21 @@
 /* --- GETX v10 dark palette (single source; mirrored to .dark for safety) -- */
 :root,
 .dark {
-  --radius: 0.875rem; /* 14px */
+  --radius: 1rem; /* 16px — softer/premium */
 
-  /* surfaces (v10: bg / bg-2 / surface / surface-2) */
-  --background: #0a0b0d;
-  --bg-2: #0e0f12;
+  /* surfaces — Obsidian (neutral near-black, no blue tint) */
+  --background: #0a0a0c;
+  --bg-2: #060607;
   --foreground: #f3f4f6;
-  --card: #14161b;
+  --card: #141417;
   --card-foreground: #f3f4f6;
-  --popover: #14161b;
+  --popover: #16161a;
   --popover-foreground: #f3f4f6;
-  --secondary: #1b1e25;
+  --secondary: #1b1b1f;
   --secondary-foreground: #f3f4f6;
-  --muted: #1b1e25;
-  --muted-foreground: #9ca1ab;
-  --accent: #1b1e25;
+  --muted: #1b1b1f;
+  --muted-foreground: #9aa1ad;
+  --accent: #1b1b1f;
   --accent-foreground: #f3f4f6;
   /* #8a8f9a (was v10's #6a6f7a): owner-approved 2026-06-07 — the original
      failed WCAG AA at 12-13px (3.65:1 on card, 3.96:1 on bg); this passes
@@ -103,38 +103,38 @@
      · --primary-strong (#4169e8): SOLID fills behind white text (CTAs,
        buttons, active pagination). White on it = 4.76:1 ✓. Its hover
        darkens (#3a5fd9, 5.5:1 ✓) instead of lightening. */
-  --primary: #4d7cfe;
+  --primary: #4f8cff;
   --primary-foreground: #ffffff;
-  --primary-hover: #5e89ff;
-  --primary-strong: #4169e8;
-  --primary-strong-hover: #3a5fd9;
-  --success: #45b483;
-  --warning: #f0b429;
-  --star: #f0b429;
+  --primary-hover: #7aa2ff;
+  --primary-strong: #3a66e4;
+  --primary-strong-hover: #2f56cf;
+  --success: #19c37d;
+  --warning: #f5b83d;
+  --star: #f5b83d;
 
   --destructive: #ff5a76;
 
   /* lines + focus */
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.16);
-  --ring: #4d7cfe;
+  --ring: #4f8cff;
 
-  /* charts (CEO dashboard later) */
-  --chart-1: #4d7cfe;
-  --chart-2: #45b483;
-  --chart-3: #f0b429;
-  --chart-4: #5e89ff;
+  /* charts (CEO dashboard) */
+  --chart-1: #4f8cff;
+  --chart-2: #19c37d;
+  --chart-3: #f5b83d;
+  --chart-4: #7aa2ff;
   --chart-5: #ff5a76;
 
   /* sidebar (admin/dashboard) */
-  --sidebar: #0e0f12;
+  --sidebar: #060607;
   --sidebar-foreground: #f3f4f6;
-  --sidebar-primary: #4d7cfe;
+  --sidebar-primary: #4f8cff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1b1e25;
+  --sidebar-accent: #1b1b1f;
   --sidebar-accent-foreground: #f3f4f6;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #4d7cfe;
+  --sidebar-ring: #4f8cff;
 }
 
 @layer base {

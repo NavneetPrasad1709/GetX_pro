@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Create account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>.divider{display:flex;align-items:center;gap:12px;color:var(--faint);font-size:12px;margin:16px 0}.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}.atrust{display:flex;align-items:center;gap:11px;margin-top:18px;color:rgba(255,255,255,.85);font-size:14px}.atrust .ib{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.08);color:#fff;flex:none}.pw-meter{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}.pw-meter i{display:block;height:100%;width:62%;background:linear-gradient(90deg,var(--amber),var(--green))}</style>
+</head><body>
+<div class="auth">
+  <aside class="aside">
+    <img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX" style="height:30px;margin-bottom:26px">
+    <h1 style="font-size:clamp(26px,3vw,36px);color:#fff;max-width:15ch">Join the safest way to trade game accounts.</h1>
+    <p style="color:rgba(255,255,255,.7);margin-top:12px;max-width:38ch">Create a free account to buy with escrow protection — or start selling and get paid fast.</p>
+    <div class="atrust"><span class="ib"><i data-lucide="lock" class="ic"></i></span> Escrow holds your money until you confirm</div>
+    <div class="atrust"><span class="ib"><i data-lucide="badge-check" class="ic"></i></span> Every seller is ID-verified</div>
+    <div class="atrust"><span class="ib"><i data-lucide="zap" class="ic"></i></span> Instant delivery on many listings</div>
+  </aside>
+  <div class="form-wrap"><div class="form">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;margin-bottom:18px"><i data-lucide="arrow-left" class="ic-sm"></i> Back to GETX</a>
+    <h2 style="font-size:24px;margin-bottom:6px">Create your account</h2>
+    <p class="muted" style="font-size:13.5px;margin-bottom:22px">Already have one? <a href="login.html" class="blue-t" style="font-weight:600">Log in</a></p>
+    <div class="field"><label>Username</label><input class="input" placeholder="e.g. shadow_trader"></div>
+    <div class="field"><label>Email</label><input class="input" type="email" placeholder="you@email.com"></div>
+    <div class="field"><label>Password</label><input class="input" type="password" placeholder="••••••••"><div class="pw-meter"><i></i></div><span class="hint">Strong — 8+ chars with a number &amp; symbol</span></div>
+    <label class="checkbox" style="margin-bottom:16px"><input type="checkbox"> I agree to the <a href="help.html" class="blue-t">Terms</a> &amp; <a href="help.html" class="blue-t">Privacy Policy</a>, and to GETX's escrow model.</label>
+    <button class="btn btn-blue btn-lg btn-block">Create account</button>
+    <div class="divider">or sign up with</div>
+    <div class="col" style="gap:9px"><a class="btn btn-out btn-md btn-block"><i data-lucide="chrome" class="ic-sm"></i> Continue with Google</a><a class="btn btn-out btn-md btn-block"><i data-lucide="message-circle" class="ic-sm"></i> Continue with Discord</a></div>
+  </div></div>
+</div>
+<div class="pvbadge"><b>GETX</b> · Register · sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>

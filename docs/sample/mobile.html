@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Mobile app experience (sample)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+body{background:#07090c}
+.mtop{max-width:1200px;margin:0 auto;padding:36px 20px 8px;text-align:center}
+.mtop h1{font-size:clamp(26px,4vw,38px)}.mtop p{color:var(--d-muted);margin-top:10px;max-width:60ch;margin-left:auto;margin-right:auto}
+.mtop a.back{display:inline-flex;align-items:center;gap:6px;color:var(--d-muted);font-size:13px;margin-bottom:14px}
+.rack{max-width:1200px;margin:0 auto;padding:24px 20px 70px;display:flex;flex-wrap:wrap;gap:38px 30px;justify-content:center}
+.dev-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.dev-cap{font-size:12.5px;color:var(--d-muted);font-weight:600}
+/* device frame */
+.dev{position:relative;width:328px;height:710px;border-radius:46px;background:#0a0d14;padding:10px;box-shadow:inset 0 0 0 2px #2a2f3a,inset 0 0 0 8px #04060a,0 40px 80px -30px rgba(0,0,0,.9)}
+.scr{position:relative;width:100%;height:100%;border-radius:38px;overflow:hidden;background:#0d0f14;display:flex;flex-direction:column;color:var(--ink);font-size:13.5px}
+.notch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:104px;height:26px;background:#000;border-radius:14px;z-index:60}
+/* app bar */
+.abar{display:flex;align-items:center;gap:10px;padding:30px 14px 10px;border-bottom:1px solid var(--line);background:var(--alt)}
+.abar img{height:22px}.abar .sp{flex:1}
+.aib{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;color:var(--muted);position:relative}.aib .dot{position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--green);border:2px solid var(--alt)}
+.asearch{display:flex;align-items:center;gap:8px;margin:10px 12px 0;background:var(--card-2);border:1px solid var(--line);border-radius:var(--r-pill);padding:9px 13px;color:var(--faint);font-size:13px}
+.body{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
+.body::-webkit-scrollbar{width:0}
+/* bottom tab bar */
+.tabs{display:flex;border-top:1px solid var(--line);background:var(--alt);padding:7px 6px 9px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--faint);font-weight:600}
+.tab.on{color:var(--blue)}.tab .ic{width:21px;height:21px}
+.tab.sell{margin-top:-22px}.tab.sell .b{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-hi));display:grid;place-items:center;color:#fff;box-shadow:0 10px 22px -8px rgba(77,124,254,.7);margin-bottom:2px}
+/* chips row */
+.chiprow{display:flex;gap:8px;overflow:auto;padding-bottom:2px}.chiprow::-webkit-scrollbar{height:0}
+.gchip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:var(--r-pill);background:var(--card);border:1px solid var(--line);font-size:12px;font-weight:600;white-space:nowrap}
+.gdot{width:18px;height:18px;border-radius:6px;display:grid;place-items:center;color:#fff}
+.sectitle{display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:14px;margin-top:2px}.sectitle a{font-size:11.5px;color:var(--blue-hi);font-weight:600}
+/* mobile product card */
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.mcard .cv{aspect-ratio:16/9;position:relative;display:flex;align-items:flex-end;padding:9px}
+.mcard .cv .gt{font-size:10.5px;font-weight:700;color:#fff;text-shadow:0 1px 8px #000}
+.mcard .cv .bd{position:absolute;top:8px;left:8px}
+.mcard .bd2{padding:10px 11px;display:flex;flex-direction:column;gap:7px}
+.mcard .t{font-size:12.5px;font-weight:700;line-height:1.3}
+.mcard .se{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted)}
+.mcard .fo{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px}
+.mcard .pr{font-weight:800;font-size:15px;color:var(--green-hi)}
+.av-s{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--green));display:grid;place-items:center;font-size:8px;font-weight:800;color:#fff}
+/* popular list mobile */
+.plist{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.plist .ph{display:flex;justify-content:space-between;align-items:center;padding:11px 12px 8px;font-weight:800;font-size:13px}.plist .ph a{font-size:11px;color:var(--blue-hi)}
+.pr2{display:flex;align-items:center;gap:10px;padding:8px 12px}.pr2 .nm{flex:1;font-size:12.5px;font-weight:600}.pr2 .nm small{display:block;color:var(--faint);font-size:10.5px}.pr2 .px{font-size:12px;font-weight:800;color:var(--green-hi)}
+.gi-s{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:#fff;flex:none}
+/* order/list rows */
+.orow{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:11px}
+.orow .m{flex:1;min-width:0}.orow .m b{font-size:12.5px}.orow .m .s{font-size:10.5px;color:var(--faint)}
+/* product detail mobile */
+.pd-gal{aspect-ratio:4/3;border-radius:var(--r-lg);position:relative;display:flex;align-items:flex-end;padding:12px;border:1px solid var(--line)}
+.buybar{display:flex;align-items:center;gap:10px;padding:11px 13px;border-top:1px solid var(--line);background:var(--alt)}
+.buybar .pp{font-weight:800;font-size:17px;color:var(--green-hi)}
+/* account list */
+.acc-h{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px}
+.menu{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.mi{display:flex;align-items:center;gap:11px;padding:13px 13px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600}.mi:last-child{border-bottom:0}.mi .ic{color:var(--muted)}.mi .ch{margin-left:auto;color:var(--faint)}
+.seal-m{display:flex;gap:10px;align-items:center;padding:11px;border-radius:11px;background:var(--green-soft);border:1px dashed var(--green-bd)}
+.seal-m .b{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;border:1px solid var(--green-bd);color:var(--green);flex:none}
+.estep{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);padding:4px 0}.estep .n{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font-size:10px;font-weight:800;background:var(--green-soft);color:var(--green);flex:none}
+</style></head><body>
+
+<div class="mtop">
+  <a class="back" href="index.html"><i data-lucide="arrow-left" class="ic-sm"></i> Back to UI sample</a>
+  <h1>GETX — Mobile app experience</h1>
+  <p>App-like mobile UI: compact app bar, swipeable game chips, bottom tab navigation, sticky buy bar, full-screen flows. Scroll inside each phone. (PWA / native-feel — same approved design language.)</p>
+</div>
+
+<div class="rack">
+
+  <!-- HOME -->
+  <div class="dev-wrap"><div class="dev"><div class="notch"></div><div class="scr">
+    <div class="abar"><img src="../../public/getx-logo.webp" alt="GETX"><div class="sp"></div><div class="aib"><i data-lucide="search" class="ic"></i></div><div class="aib"><span class="dot"></span><i data-lucide="bell" class="ic"></i></div></div>
+    <div class="body">
+      <div class="chiprow">
+        <span class="gchip"><span class="gdot" style="background:var(--c-pogo)"><i data-lucide="gamepad-2" class="ic-xs"></i></span>Pokémon GO</span>
+        <span class="gchip"><span class="gdot" style="background:var(--c-val)"><i data-lucide="crosshair" class="ic-xs"></i></span>Valorant</span>
+        <span class="gchip"><span class="gdot" style="background:var(--c-clash)"><i data-lucide="swords" class="ic-xs"></i></span>Clash</span>
+        <span class="gchip"><span class="gdot" style="background:var(--c-ff)"><i data-lucide="flame" class="ic-xs"></i></span>Free Fire</span>
+      </div>
+      <div class="card" style="border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line-2);position:relative"><div style="padding:18px 15px;background:linear-gradient(120deg,#141418,#0a0a0c);position:relative;overflow:hidden"><div class="aurora-bg"></div><div style="position:relative;z-index:1"><span class="tag tag-green" style="background:var(--green-soft);border:1px solid var(--green-bd)"><i data-lucide="shield-check" class="ic-xs"></i> Escrow on every order</span><div style="font-size:19px;font-weight:800;color:#fff;margin:9px 0 6px;line-height:1.2">Buy &amp; sell accounts, <span class="grad-t">safely</span>.</div><a class="btn btn-blue btn-sm shine" style="margin-top:6px"><i data-lucide="search" class="ic-sm"></i> Browse listings</a></div></div></div>
+      <div class="plist"><div class="ph">Popular Pokémon GO <a>See all</a></div>
+        <div class="pr2"><span class="gi-s" style="background:var(--c-pogo)"><i data-lucide="user" class="ic-xs"></i></span><span class="nm">Lv.45 · 3 Shiny Legendaries<small>PoGoLegends · Gold</small></span><span class="px">$74.99</span></div>
+        <div class="pr2"><span class="gi-s" style="background:var(--c-pogo)"><i data-lucide="coins" class="ic-xs"></i></span><span class="nm">14,500 PokéCoins<small>Instant</small></span><span class="px">$19.99</span></div>
+        <div class="pr2"><span class="gi-s" style="background:var(--c-pogo)"><i data-lucide="sparkles" class="ic-xs"></i></span><span class="nm">Shiny Starter Bundle<small>Instant</small></span><span class="px">$24.99</span></div>
+      </div>
+      <div class="sectitle">Fresh drops <a>See all</a></div>
+      <div class="mcard"><div class="cv cv-val"><div class="bd"><span class="tag tag-amber">Selling fast</span></div><span class="gt">Valorant</span></div><div class="bd2"><div class="t">Immortal 2 · 38 Premium Skins</div><div class="se"><span class="av-s">S</span> SkinVault <span class="lvl lvl-silver">SILVER</span></div><div class="fo"><span class="pr">$59.99</span><span class="proof"><i data-lucide="star" class="ic-xs" fill="currentColor"></i> 4.7</span></div></div></div>
+    </div>
+    <div class="tabs"><div class="tab on"><i data-lucide="home" class="ic"></i>Home</div><div class="tab"><i data-lucide="layout-grid" class="ic"></i>Browse</div><div class="tab sell"><span class="b"><i data-lucide="plus" class="ic"></i></span>Sell</div><div class="tab"><i data-lucide="package" class="ic"></i>Orders</div><div class="tab"><i data-lucide="user" class="ic"></i>Account</div></div>
+  </div></div><div class="dev-cap">Home</div></div>
+
+  <!-- BROWSE -->
+  <div class="dev-wrap"><div class="dev"><div class="notch"></div><div class="scr">
+    <div class="abar"><i data-lucide="arrow-left" class="ic" style="color:var(--muted)"></i><b style="font-size:15px">Marketplace</b><div class="sp"></div><div class="aib"><i data-lucide="sliders-horizontal" class="ic"></i></div></div>
+    <div class="asearch"><i data-lucide="search" class="ic-sm"></i> Search accounts, top-ups…</div>
+    <div class="body">
+      <div class="chiprow"><span class="gchip" style="background:var(--blue);color:#fff;border-color:var(--blue)">All</span><span class="gchip">Accounts</span><span class="gchip">Top-ups</span><span class="gchip">Boosting</span><span class="gchip">Instant</span></div>
+      <div class="mcard"><div class="cv cv-pogo"><div class="bd"><span class="tag tag-info"><i data-lucide="zap" class="ic-xs"></i> Instant</span></div><span class="gt">Pokémon GO</span></div><div class="bd2"><div class="t">Lv.45 · 3 Shiny Legendaries</div><div class="se"><span class="av-s">P</span> PoGoLegends <span class="lvl lvl-gold">GOLD</span> <span class="verif"><i data-lucide="badge-check" class="ic-xs"></i></span></div><div class="fo"><span class="pr">$74.99</span><span class="proof"><i data-lucide="star" class="ic-xs" fill="currentColor"></i> 4.9</span></div></div></div>
+      <div class="mcard"><div class="cv cv-clash"><div class="bd"><span class="tag tag-green"><i data-lucide="badge-check" class="ic-xs"></i> Verified</span></div><span class="gt">Clash of Clans</span></div><div class="bd2"><div class="t">TH15 Max · Legend League</div><div class="se"><span class="av-s">C</span> ClashKings <span class="lvl lvl-plat">PLAT</span></div><div class="fo"><span class="pr">$129.00</span><span class="proof"><i data-lucide="star" class="ic-xs" fill="currentColor"></i> 5.0</span></div></div></div>
+      <div class="mcard"><div class="cv cv-ff"><div class="bd"><span class="tag tag-info"><i data-lucide="zap" class="ic-xs"></i> Instant</span></div><span class="gt">Free Fire</span></div><div class="bd2"><div class="t">1,060 Diamonds top-up</div><div class="se"><span class="av-s">T</span> TopUpPro <span class="lvl lvl-bronze">BRONZE</span></div><div class="fo"><span class="pr">$9.49</span><span class="proof"><i data-lucide="star" class="ic-xs" fill="currentColor"></i> 4.6</span></div></div></div>
+    </div>
+    <div class="tabs"><div class="tab"><i data-lucide="home" class="ic"></i>Home</div><div class="tab on"><i data-lucide="layout-grid" class="ic"></i>Browse</div><div class="tab sell"><span class="b"><i data-lucide="plus" class="ic"></i></span>Sell</div><div class="tab"><i data-lucide="package" class="ic"></i>Orders</div><div class="tab"><i data-lucide="user" class="ic"></i>Account</div></div>
+  </div></div><div class="dev-cap">Marketplace / Browse</div></div>
+
+  <!-- PRODUCT (full-screen + sticky buy bar) -->
+  <div class="dev-wrap"><div class="dev"><div class="notch"></div><div class="scr">
+    <div class="abar"><i data-lucide="arrow-left" class="ic" style="color:var(--muted)"></i><div class="sp"></div><div class="aib"><i data-lucide="heart" class="ic"></i></div><div class="aib"><i data-lucide="share-2" class="ic"></i></div></div>
+    <div class="body">
+      <div class="pd-gal cv-pogo"><span class="tag tag-amber" style="position:absolute;top:10px;left:10px">Legendary · 1 of 1</span><span class="mcard" style="display:none"></span><span style="font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 10px #000">Pokémon GO</span></div>
+      <div class="row" style="gap:7px"><span class="tag tag-info"><i data-lucide="zap" class="ic-xs"></i> Instant</span><span class="proof"><i data-lucide="eye" class="ic-xs"></i> 12 viewing</span></div>
+      <div style="font-size:16px;font-weight:800;line-height:1.3">Lv.45 · 3 Shiny Legendaries · 250k Stardust</div>
+      <div class="seal-m"><span class="b"><i data-lucide="shield-check" class="ic"></i></span><div><b style="color:var(--green-hi);font-size:12.5px">100% Money-Back Guarantee</b><div class="faint" style="font-size:10.5px">Full refund if not as described — free.</div></div></div>
+      <div class="card" style="border-radius:11px;padding:12px"><div class="estep"><span class="n">1</span> You pay — funds locked in escrow</div><div class="estep"><span class="n">2</span> Seller delivers instantly</div><div class="estep"><span class="n">3</span> You confirm — seller gets paid</div></div>
+      <div class="orow"><span class="av-s" style="width:30px;height:30px;font-size:11px">P</span><div class="m"><b>PoGoLegends</b><div class="s">★ 4.9 (212) · 340 sales · Trust 92</div></div><span class="lvl lvl-gold">GOLD</span></div>
+    </div>
+    <div class="buybar"><div><div class="pp">$74.99</div><div class="faint" style="font-size:10px">+5% protection</div></div><a class="btn btn-blue" style="flex:1;height:46px">Buy now</a><a class="btn btn-out" style="width:46px;height:46px;padding:0"><i data-lucide="message-square" class="ic"></i></a></div>
+  </div></div><div class="dev-cap">Product detail (sticky buy bar)</div></div>
+
+  <!-- ORDERS -->
+  <div class="dev-wrap"><div class="dev"><div class="notch"></div><div class="scr">
+    <div class="abar"><b style="font-size:15px;padding-left:4px">Orders</b><div class="sp"></div><div class="aib"><i data-lucide="search" class="ic"></i></div></div>
+    <div class="body">
+      <div class="chiprow"><span class="gchip" style="background:var(--blue);color:#fff;border-color:var(--blue)">All</span><span class="gchip">Needs action</span><span class="gchip">Active</span><span class="gchip">Completed</span></div>
+      <div class="orow" style="border-color:var(--green-bd)"><span class="gi-s gi-lg" style="width:38px;height:38px;background:var(--c-pogo)"><i data-lucide="gamepad-2" class="ic"></i></span><div class="m"><b>Lv.45 · 3 Shiny Legendaries</b><div class="s">#GTX-08471 · Jun 13</div></div><div style="text-align:right"><div style="font-weight:800;font-size:13px">$78.74</div></div></div>
+      <a class="btn btn-green btn-sm btn-block">Confirm delivery</a>
+      <div class="orow"><span class="gi-s" style="width:38px;height:38px;background:var(--c-val)"><i data-lucide="crosshair" class="ic"></i></span><div class="m"><b>Valorant Points 5,350</b><div class="s">Awaiting delivery</div></div><span class="status st-paid">Paid</span></div>
+      <div class="orow"><span class="gi-s" style="width:38px;height:38px;background:var(--c-ff)"><i data-lucide="flame" class="ic"></i></span><div class="m"><b>Free Fire 1,060 Diamonds</b><div class="s">Completed · Jun 10</div></div><span class="status st-done">Done</span></div>
+    </div>
+    <div class="tabs"><div class="tab"><i data-lucide="home" class="ic"></i>Home</div><div class="tab"><i data-lucide="layout-grid" class="ic"></i>Browse</div><div class="tab sell"><span class="b"><i data-lucide="plus" class="ic"></i></span>Sell</div><div class="tab on"><i data-lucide="package" class="ic"></i>Orders</div><div class="tab"><i data-lucide="user" class="ic"></i>Account</div></div>
+  </div></div><div class="dev-cap">Orders</div></div>
+
+  <!-- MESSAGES -->
+  <div class="dev-wrap"><div class="dev"><div class="notch"></div><div class="scr">
+    <div class="abar"><i data-lucide="arrow-left" class="ic" style="color:var(--muted)"></i><span class="av-s" style="width:30px;height:30px;font-size:12px">P</span><div><div style="font-size:13px;font-weight:700">PoGoLegends</div><div class="faint" style="font-size:10px">Gold · online</div></div><div class="sp"></div><div class="aib"><i data-lucide="package" class="ic"></i></div></div>
+    <div class="body" style="background:var(--alt);gap:9px">
+      <div style="align-self:center;font-size:10px;color:var(--faint);background:var(--card);border:1px solid var(--line);padding:5px 11px;border-radius:var(--r-pill)"><i data-lucide="lock" class="ic-xs"></i> Escrow secured · $74.99</div>
+      <div style="max-width:78%;align-self:flex-start;background:var(--card);border:1px solid var(--line);padding:8px 12px;border-radius:13px;border-bottom-left-radius:4px;font-size:12.5px">Hey! Sending your login &amp; recovery now.</div>
+      <div style="max-width:78%;align-self:flex-end;background:var(--blue);color:#fff;padding:8px 12px;border-radius:13px;border-bottom-right-radius:4px;font-size:12.5px">Ready when you are 👍</div>
+      <div style="max-width:78%;align-self:flex-start;background:var(--card);border:1px solid var(--line);padding:8px 12px;border-radius:13px;border-bottom-left-radius:4px;font-size:12.5px">Login sent — please change the password once you're in.</div>
+      <div style="max-width:78%;align-self:flex-end;background:var(--blue);color:#fff;padding:8px 12px;border-radius:13px;border-bottom-right-radius:4px;font-size:12.5px">Logged in, all good. Confirming now!</div>
+    </div>
+    <div class="buybar"><div class="asearch" style="margin:0;flex:1"><i data-lucide="plus" class="ic-sm"></i> Message…</div><a class="btn btn-blue" style="width:46px;height:44px;padding:0"><i data-lucide="send" class="ic"></i></a></div>
+  </div></div><div class="dev-cap">Messages / chat</div></div>
+
+  <!-- ACCOUNT -->
+  <div class="dev-wrap"><div class="dev"><div class="notch"></div><div class="scr">
+    <div class="abar"><b style="font-size:15px;padding-left:4px">Account</b><div class="sp"></div><div class="aib"><i data-lucide="settings" class="ic"></i></div></div>
+    <div class="body">
+      <div class="acc-h"><span class="av-s" style="width:48px;height:48px;font-size:18px">A</span><div style="flex:1"><b style="font-size:15px">Aarav S.</b><div class="faint" style="font-size:11.5px">Member since 2026 · 6 orders</div></div><i data-lucide="chevron-right" class="ic faint"></i></div>
+      <div class="card" style="border-radius:11px;padding:13px;display:flex;align-items:center;gap:12px"><i data-lucide="wallet" class="ic blue-t"></i><div style="flex:1"><div class="faint" style="font-size:11px">Wallet balance</div><div style="font-weight:800;font-size:17px">$24.00</div></div><a class="btn btn-blue btn-sm">Top up</a></div>
+      <div class="menu">
+        <div class="mi"><i data-lucide="package" class="ic"></i> Orders <i data-lucide="chevron-right" class="ic ch"></i></div>
+        <div class="mi"><i data-lucide="heart" class="ic"></i> Wishlist <i data-lucide="chevron-right" class="ic ch"></i></div>
+        <div class="mi"><i data-lucide="message-square" class="ic"></i> Messages <i data-lucide="chevron-right" class="ic ch"></i></div>
+        <div class="mi"><i data-lucide="store" class="ic"></i> Become a seller <i data-lucide="chevron-right" class="ic ch"></i></div>
+        <div class="mi"><i data-lucide="shield-check" class="ic"></i> Buyer protection <i data-lucide="chevron-right" class="ic ch"></i></div>
+        <div class="mi"><i data-lucide="life-buoy" class="ic"></i> Help &amp; support <i data-lucide="chevron-right" class="ic ch"></i></div>
+        <div class="mi"><i data-lucide="moon" class="ic"></i> Appearance <span class="ch" style="font-size:11px">Dark</span></div>
+        <div class="mi" style="color:var(--rose)"><i data-lucide="log-out" class="ic" style="color:var(--rose)"></i> Log out</div>
+      </div>
+    </div>
+    <div class="tabs"><div class="tab"><i data-lucide="home" class="ic"></i>Home</div><div class="tab"><i data-lucide="layout-grid" class="ic"></i>Browse</div><div class="tab sell"><span class="b"><i data-lucide="plus" class="ic"></i></span>Sell</div><div class="tab"><i data-lucide="package" class="ic"></i>Orders</div><div class="tab on"><i data-lucide="user" class="ic"></i>Account</div></div>
+  </div></div><div class="dev-cap">Account</div></div>
+
+</div>
+
+<div class="pvbadge"><b>GETX</b> · Mobile app sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>

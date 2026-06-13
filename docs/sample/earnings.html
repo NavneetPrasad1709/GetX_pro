@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Earnings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>.chart{display:flex;align-items:flex-end;gap:14px;height:180px;padding:10px 4px 0}.chart .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}.chart .bar i{width:100%;max-width:34px;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--blue-hi),var(--blue));display:block}.chart .bar span{font-size:11px;color:var(--faint)}</style>
+</head><body>
+<div class="gx-util"><div class="wrap"><span class="hide"><i data-lucide="bell" class="ic g"></i> 24/7 Live Support</span><span><i data-lucide="globe" class="ic"></i> English · USD $</span><button class="tgl" data-theme-toggle aria-label="Toggle theme"><i data-lucide="moon" class="ic t-dark"></i><i data-lucide="sun" class="ic t-light"></i><span class="t-dark">Dark</span><span class="t-light">Light</span></button></div></div>
+<header class="gx-head"><div class="wrap"><a href="index.html"><img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX"></a><div class="gx-hsearch"><i data-lucide="search" class="ic"></i><input placeholder="Search GETX…"></div><div class="right"><a href="messages.html" class="gx-ibtn"><i data-lucide="message-square" class="ic"></i></a><a href="seller-dashboard.html" class="gx-ibtn"><span class="dot"></span><i data-lucide="bell" class="ic"></i></a><span class="av" style="width:34px;height:34px">P</span></div></div></header>
+<div class="shell">
+  <aside class="side"><div class="grp">Seller hub</div><a href="seller-dashboard.html"><i data-lucide="store" class="ic"></i> Overview</a><a href="manage-listings.html"><i data-lucide="list" class="ic"></i> Listings</a><a href="create-listing.html"><i data-lucide="plus" class="ic"></i> New listing</a><a href="seller-orders.html"><i data-lucide="clipboard-list" class="ic"></i> Orders</a><a class="on" href="earnings.html"><i data-lucide="banknote" class="ic"></i> Earnings</a><a href="wallet.html"><i data-lucide="wallet" class="ic"></i> Wallet</a></aside>
+  <main class="dash">
+    <h1 style="font-size:24px;margin-bottom:16px">Earnings</h1>
+    <div class="kpis">
+      <div class="kpi"><div class="lab"><i data-lucide="calendar" class="ic"></i> This month</div><div class="val">$1,284</div><div class="d">+18% vs last</div></div>
+      <div class="kpi"><div class="lab"><i data-lucide="clock" class="ic"></i> Pending payout</div><div class="val">$486</div></div>
+      <div class="kpi"><div class="lab"><i data-lucide="trending-up" class="ic"></i> Lifetime</div><div class="val">$3,240</div></div>
+      <div class="kpi"><div class="lab"><i data-lucide="receipt" class="ic"></i> Avg order</div><div class="val">$52</div></div>
+    </div>
+    <div class="card card-pad" style="margin-top:18px">
+      <div class="sec-h" style="margin-bottom:6px"><h2 style="font-size:16px">Revenue · last 7 days</h2><span class="muted" style="font-size:12.5px">USD, net of fees</span></div>
+      <div class="chart"><div class="bar"><i style="height:38%"></i><span>Mon</span></div><div class="bar"><i style="height:55%"></i><span>Tue</span></div><div class="bar"><i style="height:42%"></i><span>Wed</span></div><div class="bar"><i style="height:70%"></i><span>Thu</span></div><div class="bar"><i style="height:60%"></i><span>Fri</span></div><div class="bar"><i style="height:88%"></i><span>Sat</span></div><div class="bar"><i style="height:74%"></i><span>Sun</span></div></div>
+    </div>
+    <div class="row" style="margin-top:18px;align-items:stretch;flex-wrap:nowrap">
+      <div class="card card-pad" style="flex:1"><h2 style="font-size:16px;margin-bottom:10px">Top listings</h2><table class="tbl"><thead><tr><th>Listing</th><th>Sold</th><th>Revenue</th></tr></thead><tbody><tr><td>Lv.45 Shiny Account</td><td>12</td><td class="green-t">$842</td></tr><tr><td>14,500 PokéCoins</td><td>31</td><td class="green-t">$521</td></tr><tr><td>Lv.40 Legendary</td><td>9</td><td class="green-t">$398</td></tr></tbody></table></div>
+      <div class="card card-pad" style="flex:1"><h2 style="font-size:16px;margin-bottom:10px">Payouts</h2><table class="tbl"><thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead><tbody><tr><td class="muted">Jun 12</td><td>USDT</td><td>$200</td><td><span class="status st-done">Paid</span></td></tr><tr><td class="muted">Jun 5</td><td>USDT</td><td>$350</td><td><span class="status st-done">Paid</span></td></tr><tr><td class="muted">Jun 14</td><td>USDT</td><td>$486</td><td><span class="status st-pending">Processing</span></td></tr></tbody></table></div>
+    </div>
+  </main>
+</div>
+<div class="gx-footer"><div class="wrap"><div class="gx-copy" style="border:0">© 2026 GETX — built for gamers, secured by escrow.</div></div></div>
+<div class="pvbadge"><b>GETX</b> · Earnings · sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GETX — Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="getx-ds.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head><body>
+<div class="gx-util"><div class="wrap"><span class="hide"><i data-lucide="bell" class="ic g"></i> 24/7 Live Support</span><span><i data-lucide="globe" class="ic"></i> English · USD $</span><button class="tgl" data-theme-toggle aria-label="Toggle theme"><i data-lucide="moon" class="ic t-dark"></i><i data-lucide="sun" class="ic t-light"></i><span class="t-dark">Dark</span><span class="t-light">Light</span></button></div></div>
+<header class="gx-head"><div class="wrap"><a href="index.html"><img class="gx-logo" src="../../public/getx-logo.webp" alt="GETX"></a><div class="gx-hsearch"><i data-lucide="search" class="ic"></i><input placeholder="Search GETX…"></div><div class="right"><a href="messages.html" class="gx-ibtn"><i data-lucide="message-square" class="ic"></i></a><a href="dashboard.html" class="gx-ibtn"><span class="dot"></span><i data-lucide="bell" class="ic"></i></a><span class="av" style="width:34px;height:34px">A</span></div></div></header>
+<div class="shell">
+  <aside class="side"><div class="grp">Account</div><a href="dashboard.html"><i data-lucide="layout-dashboard" class="ic"></i> Dashboard</a><a href="orders.html"><i data-lucide="package" class="ic"></i> Orders</a><a href="messages.html"><i data-lucide="message-square" class="ic"></i> Messages</a><a href="#"><i data-lucide="heart" class="ic"></i> Wishlist</a><a href="profile.html"><i data-lucide="user" class="ic"></i> Profile</a><a class="on" href="wallet.html"><i data-lucide="wallet" class="ic"></i> Wallet</a><a href="#"><i data-lucide="settings" class="ic"></i> Settings</a></aside>
+  <main class="dash">
+    <h1 style="font-size:24px;margin-bottom:16px">Wallet</h1>
+    <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi"><div class="lab"><i data-lucide="wallet" class="ic"></i> Available</div><div class="val green-t">$486.20</div><div class="d muted" style="color:var(--faint)">ready to withdraw</div></div>
+      <div class="kpi"><div class="lab"><i data-lucide="lock" class="ic"></i> In escrow</div><div class="val">$74.99</div><div class="d muted" style="color:var(--faint)">releases on confirm</div></div>
+      <div class="kpi"><div class="lab"><i data-lucide="trending-up" class="ic"></i> Lifetime earned</div><div class="val">$3,240</div></div>
+    </div>
+    <div class="row" style="margin-top:18px;align-items:stretch;flex-wrap:nowrap">
+      <div class="card card-pad" style="flex:1">
+        <h2 style="font-size:16px;margin-bottom:12px">Withdraw funds</h2>
+        <div class="field"><label>Amount (USD)</label><input class="input" placeholder="$0.00"></div>
+        <div class="field"><label>Payout method</label><select class="select"><option>Crypto — USDT (TRC-20)</option><option>Bank transfer / SWIFT</option><option>UPI (India)</option></select></div>
+        <div class="field"><label>Destination</label><input class="input" value="USDT · T••••••••••9f3a" readonly><span class="hint">Saved &amp; encrypted · <a href="#" class="blue-t">Edit</a></span></div>
+        <button class="btn btn-blue btn-block">Request withdrawal</button>
+        <p class="muted" style="font-size:11.5px;margin-top:10px"><i data-lucide="shield-check" class="ic-xs green-t"></i> Escrow-held funds are never withdrawable until released.</p>
+      </div>
+      <div class="card card-pad" style="flex:1.4">
+        <h2 style="font-size:16px;margin-bottom:6px">Transactions</h2>
+        <table class="tbl"><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th></tr></thead><tbody>
+          <tr><td class="muted">Jun 13</td><td><span class="tag tag-green">Sale credit</span></td><td class="green-t">+$70.49</td><td>$486.20</td></tr>
+          <tr><td class="muted">Jun 12</td><td><span class="tag tag-rose">Payout</span></td><td>−$200.00</td><td>$415.71</td></tr>
+          <tr><td class="muted">Jun 11</td><td><span class="tag tag-green">Sale credit</span></td><td class="green-t">+$121.30</td><td>$615.71</td></tr>
+          <tr><td class="muted">Jun 9</td><td><span class="tag tag-mute">Boost fee</span></td><td>−$2.49</td><td>$494.41</td></tr>
+          <tr><td class="muted">Jun 8</td><td><span class="tag tag-green">Sale credit</span></td><td class="green-t">+$44.99</td><td>$496.90</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="gx-footer"><div class="wrap"><div class="gx-copy" style="border:0">© 2026 GETX — built for gamers, secured by escrow.</div></div></div>
+<div class="pvbadge"><b>GETX</b> · Wallet · sample</div>
+<script>lucide.createIcons()</script><script src="getx-ds.js"></script>
+</body></html>
