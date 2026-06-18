@@ -2,12 +2,53 @@
  * Central site config + constants for GETX.
  * Fees follow docs/FEES.md (single source of truth). Keep values here, not hardcoded in components.
  */
+
+/**
+ * Resolve the canonical app origin. `NEXT_PUBLIC_APP_URL` is the single source
+ * for every ABSOLUTE link the app generates — email verification, password
+ * reset, and crypto payment callbacks — so a wrong/missing value silently
+ * breaks those flows in production (and is baked into the bundle at build time,
+ * since NEXT_PUBLIC_* is inlined). We therefore FAIL LOUD at build/boot in
+ * production instead of falling back to localhost. Dev keeps the localhost
+ * default for zero-config local runs.
+ */
+function resolveAppUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL;
+  // Enforce ONLY on a real Vercel build/runtime (VERCEL=1) — not a local
+  // `next build` (which also sets NODE_ENV=production but legitimately uses the
+  // localhost value from .env). This still fails a Vercel preview/production
+  // deploy loudly if the canonical URL is missing/http/localhost, which is the
+  // actual footgun (links baked at build time pointing at localhost).
+  const isVercel = process.env.VERCEL === "1";
+  if (typeof window === "undefined" && process.env.NODE_ENV === "production" && isVercel) {
+    if (!fromEnv) {
+      throw new Error(
+        "[config] NEXT_PUBLIC_APP_URL is not set. It MUST equal the canonical origin " +
+          "(e.g. https://www.getx.live). Email-verification, password-reset and payment-callback " +
+          "links are built from it, and it is inlined at BUILD time — set it before `next build`.",
+      );
+    }
+    let parsed: URL;
+    try {
+      parsed = new URL(fromEnv);
+    } catch {
+      throw new Error(`[config] NEXT_PUBLIC_APP_URL is not a valid URL: "${fromEnv}"`);
+    }
+    if (parsed.protocol !== "https:" || /^(localhost|127\.0\.0\.1)/.test(parsed.hostname)) {
+      throw new Error(
+        `[config] NEXT_PUBLIC_APP_URL must be an https:// non-localhost origin in production (got "${fromEnv}").`,
+      );
+    }
+  }
+  return fromEnv ?? "http://localhost:3000";
+}
+
 export const siteConfig = {
   name: "GETX",
   domain: "getx.live",
   description:
     "GETX — the fast, AI-powered, trust-first gaming marketplace. Buy & sell game accounts, items, in-game currency and boosting safely with escrow protection.",
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  url: resolveAppUrl(),
 
   // Supported currencies (fiat + crypto)
   currencies: ["USD", "USDT", "BTC", "ETH"] as const,

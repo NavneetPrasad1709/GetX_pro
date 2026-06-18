@@ -2,6 +2,7 @@
 
 import { AuthError } from "next-auth";
 import { auth, signIn, signOut, updateSession } from "@/lib/auth";
+import { authLog } from "@/lib/auth-log";
 import { getClientIp, rateLimit, rateLimitDistributed } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import {
@@ -11,6 +12,7 @@ import {
   registerSchema,
   resendVerificationSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
 } from "@/lib/validators/auth";
 import {
   becomeSeller,
@@ -19,6 +21,7 @@ import {
   requestPasswordReset,
   resendVerification,
   resetPassword,
+  verifyEmail,
   UserServiceError,
 } from "@/server/services/users";
 import { attributeReferralAtSignup } from "@/server/services/referral";
@@ -38,6 +41,8 @@ export type ActionResult = {
   ok: boolean;
   error?: string;
   devLink?: string | null;
+  /** false → the account/token was created but the email could not be delivered. */
+  emailQueued?: boolean;
 };
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -62,6 +67,7 @@ export async function registerAction(raw: unknown): Promise<ActionResult> {
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
 
   const ip = await getClientIp();
+  authLog("signup.started", { ip, email: parsed.data.email });
   // Distributed (Upstash) limiter on this brute-force surface — global across
   // every serverless instance. Falls back to in-memory when Upstash is unset.
   const rl = await rateLimitDistributed(`register:${ip}`, {
@@ -79,15 +85,17 @@ export async function registerAction(raw: unknown): Promise<ActionResult> {
   if (!bot.ok) return { ok: false, error: bot.error };
 
   try {
-    const { userId, verifyUrl } = await registerUser(parsed.data);
+    const { userId, verifyUrl, emailSent } = await registerUser(parsed.data);
     // Prompt 22: attribute the signup to a referrer (never throws; best-effort).
     // Gated: refer-and-earn hidden for now (owner) — see siteConfig.features.referral.
     if (siteConfig.features.referral) await attributeReferralAtSignup(userId, parsed.data.ref);
     // Step 21: 50-point welcome bonus (idempotent; never throws).
     // Gated: rewards/loyalty hidden for now (owner) — see siteConfig.features.loyalty.
     if (siteConfig.features.loyalty) await awardSignupBonus(userId);
-    return { ok: true, devLink: isDev ? verifyUrl : null };
+    authLog("signup.success", { ip, userId, email: parsed.data.email });
+    return { ok: true, devLink: isDev ? verifyUrl : null, emailQueued: emailSent };
   } catch (err) {
+    authLog("signup.fail", { ip, email: parsed.data.email });
     return toSafeError(err, "registerAction");
   }
 }
@@ -102,6 +110,7 @@ export async function loginAction(raw: unknown): Promise<ActionResult> {
 
   const email = normalizeEmail(parsed.data.email);
   const ip = await getClientIp();
+  authLog("login.started", { ip, email });
 
   // Two windows: per IP (botnet-ish bursts) + per IP+account (targeted guessing).
   // Distributed (Upstash) so the cap holds across all serverless instances;
@@ -151,6 +160,8 @@ export async function loginAction(raw: unknown): Promise<ActionResult> {
 // ---------------------------------------------------------------------------
 
 export async function signOutAction(): Promise<void> {
+  const session = await auth();
+  authLog("logout.success", { userId: session?.user?.id });
   await signOut({ redirectTo: "/" });
 }
 
@@ -166,21 +177,36 @@ export async function resendVerificationAction(
 
   const ip = await getClientIp();
   const email = normalizeEmail(parsed.data.email);
-  const rl = rateLimit(`resend-verify:${ip}:${email}`, {
-    limit: 3,
-    windowMs: 10 * 60_000,
-  });
-  if (!rl.ok) {
-    return {
-      ok: false,
-      error: `Too many requests. Try again in ${rl.retryAfterSec}s.`,
-    };
+
+  // This action FANS OUT email, so protect it like the other email-sending auth
+  // flows: a global (distributed) per-(IP,email) cap PLUS a coarse per-IP cap so
+  // one source can't bomb many targets, and the same Turnstile bot gate as
+  // register/login/forgot (previously the only email action with neither).
+  const [perTarget, perIp] = await Promise.all([
+    rateLimitDistributed(`resend-verify:${ip}:${email}`, {
+      limit: 3,
+      windowMs: 10 * 60_000,
+    }),
+    rateLimitDistributed(`resend-verify-ip:${ip}`, {
+      limit: 5,
+      windowMs: 10 * 60_000,
+    }),
+  ]);
+  if (!perTarget.ok || !perIp.ok) {
+    const retry = Math.max(
+      perTarget.ok ? 0 : perTarget.retryAfterSec,
+      perIp.ok ? 0 : perIp.retryAfterSec,
+    );
+    return { ok: false, error: `Too many requests. Try again in ${retry}s.` };
   }
 
+  const bot = await verifyTurnstile(parsed.data.turnstileToken, ip);
+  if (!bot.ok) return { ok: false, error: bot.error };
+
   try {
-    const { verifyUrl } = await resendVerification(email);
+    const { verifyUrl, emailSent } = await resendVerification(email);
     // Same response whether or not the account exists (anti-enumeration).
-    return { ok: true, devLink: isDev ? verifyUrl : null };
+    return { ok: true, devLink: isDev ? verifyUrl : null, emailQueued: emailSent };
   } catch (err) {
     return toSafeError(err, "resendVerificationAction");
   }
@@ -210,9 +236,10 @@ export async function forgotPasswordAction(raw: unknown): Promise<ActionResult> 
   if (!bot.ok) return { ok: false, error: bot.error };
 
   try {
-    const { resetUrl } = await requestPasswordReset(parsed.data.email);
+    const { resetUrl, emailSent } = await requestPasswordReset(parsed.data.email);
+    authLog("password.forgot", { ip, email: parsed.data.email });
     // Same response whether or not the account exists (anti-enumeration).
-    return { ok: true, devLink: isDev ? resetUrl : null };
+    return { ok: true, devLink: isDev ? resetUrl : null, emailQueued: emailSent };
   } catch (err) {
     return toSafeError(err, "forgotPasswordAction");
   }
@@ -236,9 +263,40 @@ export async function resetPasswordAction(raw: unknown): Promise<ActionResult> {
 
   try {
     await resetPassword(parsed.data);
+    authLog("password.reset", { ip, email: parsed.data.email });
     return { ok: true };
   } catch (err) {
     return toSafeError(err, "resetPasswordAction");
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Email verification (consume token) — POST-only so link pre-fetchers / email
+// security scanners can't burn the single-use token on an unattended GET.
+// ---------------------------------------------------------------------------
+
+export async function verifyEmailAction(raw: unknown): Promise<ActionResult> {
+  const parsed = verifyEmailSchema.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+
+  const ip = await getClientIp();
+  const email = normalizeEmail(parsed.data.email);
+  // Bound brute-forcing of the 32-byte token (cheap defense-in-depth).
+  const rl = await rateLimitDistributed(`verify-email:${ip}`, {
+    limit: 10,
+    windowMs: 10 * 60_000,
+  });
+  if (!rl.ok) {
+    return { ok: false, error: `Too many attempts. Try again in ${rl.retryAfterSec}s.` };
+  }
+
+  try {
+    await verifyEmail(email, parsed.data.token);
+    authLog("email.verify.success", { ip, email });
+    return { ok: true };
+  } catch (err) {
+    authLog("email.verify.fail", { ip, email });
+    return toSafeError(err, "verifyEmailAction");
   }
 }
 
@@ -271,6 +329,7 @@ export async function becomeSellerAction(raw: unknown): Promise<ActionResult> {
     await becomeSeller(session.user.id, parsed.data);
     // Refresh the JWT so the new SELLER role is live immediately.
     await updateSession({});
+    authLog("seller.onboarded", { userId: session.user.id });
     return { ok: true };
   } catch (err) {
     return toSafeError(err, "becomeSellerAction");

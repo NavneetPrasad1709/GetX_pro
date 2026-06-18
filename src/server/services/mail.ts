@@ -9,6 +9,14 @@ import { captureException } from "@sentry/nextjs";
 import { getResend, RESEND_FROM_EMAIL } from "@/lib/resend";
 import { buildEmailHtml } from "@/lib/email-templates/layout";
 
+/** Thrown when delivery genuinely failed, so callers can degrade UX copy. */
+export class MailSendError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MailSendError";
+  }
+}
+
 async function sendAuthEmail(opts: {
   email: string;
   subject: string;
@@ -25,8 +33,13 @@ async function sendAuthEmail(opts: {
     );
     return;
   }
+
+  // CRITICAL: resend.emails.send() does NOT throw on outage / unverified-domain /
+  // bad-key / rate-limit — it RESOLVES with { error }. A bare try/catch would
+  // never see those failures, so we must inspect the return value.
+  let result: Awaited<ReturnType<typeof resend.emails.send>>;
   try {
-    await resend.emails.send({
+    result = await resend.emails.send({
       from: RESEND_FROM_EMAIL,
       to: opts.email,
       subject: opts.subject,
@@ -38,11 +51,24 @@ async function sendAuthEmail(opts: {
       }),
     });
   } catch (err) {
+    // Only synchronous/throwing failures (e.g. malformed options) land here.
     captureException(err);
-    // Never lose the link on a transient send failure — fall back to the log.
+    console.log(
+      `\n[mail] send threw — ${opts.subject} link for ${opts.email}:\n${opts.url}\n`,
+    );
+    throw new MailSendError("EMAIL_SEND_FAILED");
+  }
+
+  if (result.error) {
+    // PII-safe: report only the provider error name/message, never the address.
+    captureException(
+      new Error(`[mail] Resend failed: ${result.error.name} — ${result.error.message}`),
+    );
+    // Never lose the link on a failed send — fall back to the server log.
     console.log(
       `\n[mail] send failed — ${opts.subject} link for ${opts.email}:\n${opts.url}\n`,
     );
+    throw new MailSendError("EMAIL_SEND_FAILED");
   }
 }
 

@@ -46,7 +46,9 @@ for (const provider of Object.keys(ENV_KEY) as WebhookProvider[]) {
  * allowlist — so prefer `CF-Connecting-IP` (Cloudflare's authoritative client IP)
  * when present, then the first x-forwarded-for hop, then x-real-ip.
  */
-export function clientIpFromHeaders(headers: Headers): string {
+export function clientIpFromHeaders(headers: {
+  get(name: string): string | null;
+}): string {
   return (
     headers.get("cf-connecting-ip")?.trim() ||
     headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||

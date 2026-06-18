@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
+import { clientIpFromHeaders } from "@/config/webhooks";
 
 /**
  * Rate limiting — two surfaces, one return shape.
@@ -125,12 +126,14 @@ export async function rateLimitDistributed(
   }
 }
 
-/** Best-effort client IP (Vercel/Railway set x-forwarded-for). */
+/**
+ * Best-effort client IP for rate-limit keys. Uses the SAME trusted-header order
+ * as the webhook path (cf-connecting-ip → x-forwarded-for[0] → x-real-ip): behind
+ * Cloudflare, `cf-connecting-ip` is set by the proxy and cannot be spoofed by the
+ * client, whereas a client-supplied leftmost `x-forwarded-for` can. Centralising
+ * on one extractor keeps the trust model consistent across auth + webhooks.
+ */
 export async function getClientIp(): Promise<string> {
   const h = await headers();
-  return (
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "unknown"
-  );
+  return clientIpFromHeaders(h);
 }

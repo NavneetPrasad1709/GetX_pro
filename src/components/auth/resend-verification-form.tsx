@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Loader2Icon } from "lucide-react";
 import {
   resendVerificationSchema,
@@ -12,7 +13,10 @@ import { resendVerificationAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TurnstileField } from "@/components/auth/turnstile-field";
 import { DevLinkNotice } from "@/components/auth/dev-link-notice";
+
+const HAS_TURNSTILE = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 
 /**
  * "Didn't get the email?" form — used on the verify-email page and the
@@ -26,10 +30,13 @@ export function ResendVerificationForm({
   const [serverError, setServerError] = useState<string | null>(null);
   const [devLink, setDevLink] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ResendVerificationInput>({
     resolver: zodResolver(resendVerificationSchema),
@@ -42,6 +49,9 @@ export function ResendVerificationForm({
     const res = await resendVerificationAction(values);
     if (!res.ok) {
       setServerError(res.error ?? "Something went wrong. Please try again.");
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
+      setValue("turnstileToken", undefined);
       return;
     }
     setDevLink(res.devLink ?? null);
@@ -63,7 +73,7 @@ export function ResendVerificationForm({
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={(e) => void handleSubmit(onSubmit)(e)}
       className="flex flex-col gap-3"
       noValidate
     >
@@ -77,15 +87,24 @@ export function ResendVerificationForm({
           placeholder="you@example.com"
           className="h-11"
           aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "resend-email-error" : undefined}
           disabled={isSubmitting}
           {...register("email")}
         />
         {errors.email && (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="resend-email-error" role="alert" className="text-sm text-destructive">
             {errors.email.message}
           </p>
         )}
       </div>
+
+      <TurnstileField
+        ref={turnstileRef}
+        onToken={(token) => {
+          setTurnstileToken(token);
+          setValue("turnstileToken", token ?? undefined);
+        }}
+      />
 
       {serverError && (
         <p role="alert" className="text-sm text-destructive">
@@ -96,7 +115,7 @@ export function ResendVerificationForm({
       <Button
         type="submit"
         variant="outline"
-        disabled={isSubmitting}
+        disabled={isSubmitting || (HAS_TURNSTILE && !turnstileToken)}
         className="h-11 w-full"
       >
         {isSubmitting ? (

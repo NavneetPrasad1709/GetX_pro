@@ -17,10 +17,13 @@ import { Label } from "@/components/ui/label";
 import { TurnstileField } from "@/components/auth/turnstile-field";
 import { DevLinkNotice } from "@/components/auth/dev-link-notice";
 
+const HAS_TURNSTILE = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+
 export function ForgotPasswordForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [devLink, setDevLink] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   const {
@@ -40,6 +43,7 @@ export function ForgotPasswordForm() {
     if (!res.ok) {
       setServerError(res.error ?? "Something went wrong. Please try again.");
       turnstileRef.current?.reset();
+      setTurnstileToken(null);
       setValue("turnstileToken", undefined);
       return;
     }
@@ -86,11 +90,12 @@ export function ForgotPasswordForm() {
           placeholder="you@example.com"
           className="h-11"
           aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "forgot-email-error" : undefined}
           disabled={isSubmitting}
           {...register("email")}
         />
         {errors.email && (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="forgot-email-error" role="alert" className="text-sm text-destructive">
             {errors.email.message}
           </p>
         )}
@@ -98,7 +103,10 @@ export function ForgotPasswordForm() {
 
       <TurnstileField
         ref={turnstileRef}
-        onToken={(token) => setValue("turnstileToken", token ?? undefined)}
+        onToken={(token) => {
+          setTurnstileToken(token);
+          setValue("turnstileToken", token ?? undefined);
+        }}
       />
 
       {serverError && (
@@ -110,7 +118,11 @@ export function ForgotPasswordForm() {
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting} className="h-11 w-full">
+      <Button
+        type="submit"
+        disabled={isSubmitting || (HAS_TURNSTILE && !turnstileToken)}
+        className="h-11 w-full"
+      >
         {isSubmitting ? (
           <>
             <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />

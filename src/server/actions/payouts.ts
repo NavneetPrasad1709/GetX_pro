@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import * as Sentry from "@sentry/nextjs";
-import { auth } from "@/lib/auth";
+import { auth, getActiveAdminId } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import {
   markFailedSchema,
@@ -87,8 +87,8 @@ export async function loadLedgerAction(
 }
 
 async function requireAdmin(): Promise<string | null> {
-  const session = await auth();
-  return session?.user?.id && session.user.role === "ADMIN" ? session.user.id : null;
+  // Fresh DB re-check (live role + ban) — never trust the possibly-stale token.
+  return await getActiveAdminId();
 }
 
 export async function markPayoutPaidAction(

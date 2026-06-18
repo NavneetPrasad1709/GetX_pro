@@ -5,6 +5,7 @@ import { generateToken, hashToken } from "@/lib/tokens";
 import { captureServerEvent } from "@/lib/posthog";
 import { siteConfig } from "@/config/site";
 import {
+  MailSendError,
   sendPasswordResetEmail,
   sendVerificationEmail,
 } from "@/server/services/mail";
@@ -42,15 +43,29 @@ export async function registerUser(input: {
   name: string;
   email: string;
   password: string;
-}): Promise<{ userId: string; verifyUrl: string }> {
+}): Promise<{ userId: string; verifyUrl: string; emailSent: boolean }> {
   const email = normalizeEmail(input.email);
   const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
+  const token = generateToken();
 
   let userId: string;
   try {
-    const user = await db.user.create({
-      data: { name: input.name, email, passwordHash }, // role defaults to BUYER
-      select: { id: true },
+    // ATOMIC: the user row and its verification token commit together or not at
+    // all — a blip after the user insert can no longer orphan an account that has
+    // no way to verify (every other multi-write flow in this file is also a tx).
+    const user = await db.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: { name: input.name, email, passwordHash }, // role defaults to BUYER
+        select: { id: true },
+      });
+      await tx.verificationToken.create({
+        data: {
+          identifier: email,
+          token: hashToken(token), // only the hash is stored
+          expires: new Date(Date.now() + VERIFY_TOKEN_TTL_MS),
+        },
+      });
+      return created;
     });
     userId = user.id;
   } catch (err) {
@@ -59,6 +74,17 @@ export async function registerUser(input: {
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2002"
     ) {
+      // Self-heal: if the existing account is UNVERIFIED, re-issue a fresh link
+      // and treat it as success instead of dead-ending the user (also recovers
+      // any pre-existing half-provisioned account from before this flow was atomic).
+      const existing = await db.user.findUnique({
+        where: { email },
+        select: { id: true, emailVerified: true },
+      });
+      if (existing && !existing.emailVerified) {
+        const { verifyUrl, emailSent } = await issueVerificationLink(email);
+        return { userId: existing.id, verifyUrl, emailSent };
+      }
       throw new UserServiceError(
         "An account with this email already exists. Try logging in instead.",
       );
@@ -66,12 +92,24 @@ export async function registerUser(input: {
     throw err;
   }
 
-  const verifyUrl = await issueVerificationLink(email);
-  return { userId, verifyUrl };
+  // Email is sent AFTER the commit (best-effort) — a mail-provider outage must
+  // never roll back a successfully created account. Delivery failure is captured
+  // to Sentry in the mail layer and surfaced to the caller via `emailSent`.
+  const verifyUrl = `${siteConfig.url}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+  let emailSent = true;
+  try {
+    await sendVerificationEmail(email, verifyUrl);
+  } catch (err) {
+    if (err instanceof MailSendError) emailSent = false;
+    else throw err;
+  }
+  return { userId, verifyUrl, emailSent };
 }
 
 /** Creates a fresh single-use verification token (invalidates older ones). */
-async function issueVerificationLink(email: string): Promise<string> {
+async function issueVerificationLink(
+  email: string,
+): Promise<{ verifyUrl: string; emailSent: boolean }> {
   const token = generateToken();
   await db.$transaction([
     db.verificationToken.deleteMany({ where: { identifier: email } }),
@@ -85,8 +123,14 @@ async function issueVerificationLink(email: string): Promise<string> {
   ]);
 
   const verifyUrl = `${siteConfig.url}/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
-  await sendVerificationEmail(email, verifyUrl);
-  return verifyUrl;
+  let emailSent = true;
+  try {
+    await sendVerificationEmail(email, verifyUrl);
+  } catch (err) {
+    if (err instanceof MailSendError) emailSent = false;
+    else throw err;
+  }
+  return { verifyUrl, emailSent };
 }
 
 export type VerifyEmailResult = "verified" | "already-verified";
@@ -152,16 +196,16 @@ export async function verifyEmail(
  */
 export async function resendVerification(
   rawEmail: string,
-): Promise<{ verifyUrl: string | null }> {
+): Promise<{ verifyUrl: string | null; emailSent: boolean }> {
   const email = normalizeEmail(rawEmail);
   const user = await db.user.findUnique({
     where: { email },
     select: { emailVerified: true },
   });
-  if (!user || user.emailVerified) return { verifyUrl: null };
+  if (!user || user.emailVerified) return { verifyUrl: null, emailSent: true };
 
-  const verifyUrl = await issueVerificationLink(email);
-  return { verifyUrl };
+  const { verifyUrl, emailSent } = await issueVerificationLink(email);
+  return { verifyUrl, emailSent };
 }
 
 // ---------------------------------------------------------------------------
@@ -174,13 +218,13 @@ export async function resendVerification(
  */
 export async function requestPasswordReset(
   rawEmail: string,
-): Promise<{ resetUrl: string | null }> {
+): Promise<{ resetUrl: string | null; emailSent: boolean }> {
   const email = normalizeEmail(rawEmail);
   const user = await db.user.findUnique({
     where: { email },
     select: { passwordHash: true },
   });
-  if (!user?.passwordHash) return { resetUrl: null };
+  if (!user?.passwordHash) return { resetUrl: null, emailSent: true };
 
   const identifier = RESET_IDENTIFIER_PREFIX + email;
   const token = generateToken();
@@ -196,8 +240,16 @@ export async function requestPasswordReset(
   ]);
 
   const resetUrl = `${siteConfig.url}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
-  await sendPasswordResetEmail(email, resetUrl);
-  return { resetUrl };
+  // A mail-provider blip must not 500 the request after the token is created —
+  // the token is valid and the user can retry; surface delivery state instead.
+  let emailSent = true;
+  try {
+    await sendPasswordResetEmail(email, resetUrl);
+  } catch (err) {
+    if (err instanceof MailSendError) emailSent = false;
+    else throw err;
+  }
+  return { resetUrl, emailSent };
 }
 
 export async function resetPassword(input: {

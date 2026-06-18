@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import * as Sentry from "@sentry/nextjs";
-import { auth } from "@/lib/auth";
+import { getActiveAdminId } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import {
   acceptAiVerdictSchema,
@@ -37,10 +37,10 @@ export type AdminActionResult = { ok: true } | { ok: false; error: string };
 const GENERIC = "Something went wrong. Please try again.";
 
 async function requireAdmin(): Promise<{ id: string; role: "ADMIN" } | null> {
-  const session = await auth();
-  return session?.user?.id && session.user.role === "ADMIN"
-    ? { id: session.user.id, role: "ADMIN" }
-    : null;
+  // Fresh DB re-check (live role + ban) — never trust the possibly-stale token
+  // role, which can lag a demotion/ban by up to the 60s revocation window.
+  const id = await getActiveAdminId();
+  return id ? { id, role: "ADMIN" } : null;
 }
 
 function limited(adminId: string): boolean {

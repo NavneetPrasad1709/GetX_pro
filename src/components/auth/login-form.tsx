@@ -17,11 +17,18 @@ import { PasswordInput } from "@/components/auth/password-input";
 import { TurnstileField } from "@/components/auth/turnstile-field";
 
 const REMEMBER_KEY = "getx-remember-email";
+const HAS_TURNSTILE = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [remember, setRemember] = useState(true);
+  // Gate submit on a ready Turnstile token so a click during the widget's
+  // ~0.5–2s auto-solve doesn't send an empty token and fail correct credentials.
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // Terminal "redirecting" state: keep the form locked from the moment login
+  // succeeds until /dashboard paints, so a double-click can't re-fire login.
+  const [redirecting, setRedirecting] = useState(false);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   const {
@@ -36,13 +43,11 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   });
 
   // Prefill a remembered email (device-local convenience — never a secret).
+  // `remember` already defaults to true, so we only need to set the email here.
   useEffect(() => {
     try {
       const saved = localStorage.getItem(REMEMBER_KEY);
-      if (saved) {
-        setValue("email", saved);
-        setRemember(true);
-      }
+      if (saved) setValue("email", saved);
     } catch {
       /* localStorage blocked — ignore */
     }
@@ -53,7 +58,9 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     const res = await loginAction(values);
     if (!res.ok) {
       setServerError(res.error ?? "Login failed. Please try again.");
+      // Turnstile tokens are single-use — re-arm for the retry.
       turnstileRef.current?.reset();
+      setTurnstileToken(null);
       setValue("turnstileToken", undefined);
       return;
     }
@@ -63,11 +70,16 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     } catch {
       /* ignore */
     }
+    // Lock the form for the rest of the navigation (component unmounts on nav).
+    setRedirecting(true);
     // Refresh FIRST (invalidate the logged-out RSC cache + header), THEN navigate
     // once. Pushing then refreshing rendered the heavy dashboard twice (~2x slower).
     router.refresh();
     router.replace(safeCallbackUrl(callbackUrl));
   }
+
+  const busy = isSubmitting || redirecting;
+  const submitDisabled = busy || (HAS_TURNSTILE && !turnstileToken);
 
   return (
     <form
@@ -85,11 +97,12 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           placeholder="you@example.com"
           className="h-11"
           aria-invalid={!!errors.email}
-          disabled={isSubmitting}
+          aria-describedby={errors.email ? "login-email-error" : undefined}
+          disabled={busy}
           {...register("email")}
         />
         {errors.email && (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="login-email-error" role="alert" className="text-sm text-destructive">
             {errors.email.message}
           </p>
         )}
@@ -110,11 +123,12 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           autoComplete="current-password"
           placeholder="Your password"
           aria-invalid={!!errors.password}
-          disabled={isSubmitting}
+          aria-describedby={errors.password ? "login-password-error" : undefined}
+          disabled={busy}
           {...register("password")}
         />
         {errors.password && (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="login-password-error" role="alert" className="text-sm text-destructive">
             {errors.password.message}
           </p>
         )}
@@ -132,7 +146,10 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
 
       <TurnstileField
         ref={turnstileRef}
-        onToken={(token) => setValue("turnstileToken", token ?? undefined)}
+        onToken={(token) => {
+          setTurnstileToken(token);
+          setValue("turnstileToken", token ?? undefined);
+        }}
       />
 
       {serverError && (
@@ -144,16 +161,21 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting} className="h-11 w-full">
-        {isSubmitting ? (
+      <Button type="submit" disabled={submitDisabled} className="h-11 w-full">
+        {busy ? (
           <>
             <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
-            Logging in…
+            {redirecting ? "Signing you in…" : "Logging in…"}
           </>
         ) : (
           "Log in"
         )}
       </Button>
+      {HAS_TURNSTILE && !turnstileToken && !busy && (
+        <p className="text-center text-xs text-muted-foreground">
+          Verifying you’re human…
+        </p>
+      )}
 
       <p className="text-center text-sm text-muted-foreground">
         New to GETX?{" "}

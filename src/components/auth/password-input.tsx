@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /**
- * Password field with a show/hide toggle (44px touch target, never focus-trapped
- * via tabIndex=-1 so keyboard users tab straight to the next field). Forwards the
- * react-hook-form ref through to the underlying input (React 19 ref-as-prop).
+ * Password field with a show/hide toggle (44px touch target). The toggle is a
+ * real interactive control, so it stays in the keyboard tab order (input →
+ * toggle → next field) and shows a visible focus ring — WCAG 2.1.1 (Keyboard).
+ * Forwards the react-hook-form ref through to the underlying input (React 19
+ * ref-as-prop).
  */
 export function PasswordInput({
   className,
@@ -26,11 +28,10 @@ export function PasswordInput({
       />
       <button
         type="button"
-        tabIndex={-1}
         onClick={() => setShow((s) => !s)}
         aria-label={show ? "Hide password" : "Show password"}
         aria-pressed={show}
-        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {show ? (
           <EyeOffIcon className="size-[18px]" aria-hidden="true" />

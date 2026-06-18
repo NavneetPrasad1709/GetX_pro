@@ -6,10 +6,13 @@ import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import type { Role } from "@prisma/client";
 import { db } from "@/lib/db";
 import { rateLimitDistributed } from "@/lib/rate-limit";
+import { clientIpFromHeaders } from "@/config/webhooks";
 import { credentialsSchema } from "@/lib/validators/auth";
+import { authLog } from "@/lib/auth-log";
 
 /**
  * Auth.js (NextAuth v5) setup — see docs/ENGINEERING-GUARDRAILS.md §7.
@@ -46,20 +49,36 @@ const providers: NextAuthConfig["providers"] = [
     async authorize(credentials, request) {
       // Rate limit HERE too (not only in loginAction): NextAuth also exposes
       // POST /api/auth/callback/credentials, which would otherwise bypass the
-      // action-level limiter + Turnstile. Defense in depth.
-      const ip =
-        request.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        "unknown";
-      const rl = await rateLimitDistributed(`authorize:${ip}`, {
-        limit: 10,
-        windowMs: 60_000,
-      });
-      if (!rl.ok) return null; // surfaces as a generic login failure
+      // action-level limiter + Turnstile. Defense in depth. Use the SAME trusted
+      // client-IP order as the rest of the app (cf-connecting-ip first) so the
+      // key can't be rotated via a spoofed leftmost x-forwarded-for.
+      const ip = request.headers
+        ? clientIpFromHeaders(request.headers)
+        : "unknown";
 
+      // Parse FIRST so the per-account window can key on the email. Mirrors
+      // loginAction's two-window model (per-IP burst + per-IP+account targeted)
+      // and shares the SAME `login:` key prefix, so the direct callback path and
+      // the UI action draw from one budget instead of two independent allowances.
       const parsed = credentialsSchema.safeParse(credentials);
-      if (!parsed.success) return null;
-
+      if (!parsed.success) {
+        authLog("login.fail", { ip, reason: "invalid-input" });
+        return null;
+      }
       const email = parsed.data.email.toLowerCase();
+
+      const [perIp, perAccount] = await Promise.all([
+        rateLimitDistributed(`login:${ip}`, { limit: 10, windowMs: 60_000 }),
+        rateLimitDistributed(`login:${ip}:${email}`, {
+          limit: 5,
+          windowMs: 5 * 60_000,
+        }),
+      ]);
+      if (!perIp.ok || !perAccount.ok) {
+        authLog("login.fail", { ip, email, reason: "rate-limited" });
+        return null; // surfaces as a generic login failure
+      }
+
       const user = await db.user.findUnique({ where: { email } });
 
       const passwordOk = await bcrypt.compare(
@@ -67,9 +86,15 @@ const providers: NextAuthConfig["providers"] = [
         user?.passwordHash ?? getDummyHash(),
       );
       // Generic failure — never reveal whether the email or the password was wrong.
-      if (!user?.passwordHash || !passwordOk) return null;
+      if (!user?.passwordHash || !passwordOk) {
+        authLog("login.fail", { ip, email, reason: "bad-credentials" });
+        return null;
+      }
       // Banned users can never sign in (Step 15). Generic failure — no hint why.
-      if (user.bannedAt) return null;
+      if (user.bannedAt) {
+        authLog("login.fail", { ip, email, userId: user.id, reason: "banned" });
+        return null;
+      }
 
       return {
         id: user.id,
@@ -162,6 +187,7 @@ export const {
     // OAuth sign-ins are only accepted from provider-VERIFIED emails. This is
     // what makes allowDangerousEmailAccountLinking safe (no email squatting).
     async signIn({ account, profile }) {
+      const provider = account?.provider;
       // Banned users can never sign in via OAuth either (Step 15). Credentials
       // are blocked inside authorize(); this covers the Google/Discord paths.
       const email = profile?.email?.toLowerCase();
@@ -170,17 +196,32 @@ export const {
           where: { email },
           select: { bannedAt: true },
         });
-        if (existing?.bannedAt) return false;
+        if (existing?.bannedAt) {
+          authLog("oauth.denied", { provider, email, reason: "banned" });
+          return false;
+        }
       }
-      if (account?.provider === "google") {
-        return profile?.email_verified === true;
+      if (provider === "google") {
+        const ok = profile?.email_verified === true;
+        authLog(ok ? "oauth.callback" : "oauth.denied", {
+          provider,
+          email,
+          reason: ok ? undefined : "email-unverified",
+        });
+        return ok;
       }
-      if (account?.provider === "discord") {
-        return (profile as DiscordProfile | undefined)?.verified === true;
+      if (provider === "discord") {
+        const ok = (profile as DiscordProfile | undefined)?.verified === true;
+        authLog(ok ? "oauth.callback" : "oauth.denied", {
+          provider,
+          email,
+          reason: ok ? undefined : "email-unverified",
+        });
+        return ok;
       }
       return true; // credentials are fully checked in authorize()
     },
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger, account }) {
       const now = Date.now();
 
       // Initial sign-in: copy our domain fields onto the token + stamp the
@@ -195,6 +236,14 @@ export const {
         });
         token.sessionVersion = fresh?.sessionVersion ?? 0;
         token.svCheckedAt = now;
+        // Authoritative "logged in" signal — covers BOTH the credentials action
+        // and the direct /api/auth/callback/credentials path, plus OAuth.
+        authLog("login.success", {
+          userId: user.id,
+          email: user.email,
+          provider: account?.provider ?? "credentials",
+        });
+        authLog("session.created", { userId: user.id });
         return token;
       }
 
@@ -235,6 +284,10 @@ export const {
             select: { sessionVersion: true },
           });
           if (!fresh || fresh.sessionVersion !== (token.sessionVersion ?? 0)) {
+            authLog("session.revoked", {
+              userId: token.id,
+              reason: fresh ? "version-bumped" : "user-gone",
+            });
             return null; // user gone or session revoked → kill it
           }
           token.svCheckedAt = now;
@@ -263,10 +316,30 @@ export const {
 // (a) logged in?  (b) correct role?  (c) owns the resource?
 // ---------------------------------------------------------------------------
 
+/**
+ * True when a session cookie is physically present. A revoked/expired/deleted
+ * session can still leave a (now-invalid) cookie that the optimistic proxy
+ * decodes as "logged in". When `auth()` yields no session but a cookie exists,
+ * we must route through the cookie-CLEARING /logout route rather than /login —
+ * otherwise the proxy bounces the stale cookie back and we loop forever.
+ */
+async function hasSessionCookie(): Promise<boolean> {
+  const jar = await cookies();
+  return Boolean(
+    jar.get("__Secure-authjs.session-token") ??
+      jar.get("authjs.session-token") ??
+      // chunked variants for large tokens
+      jar.get("__Secure-authjs.session-token.0") ??
+      jar.get("authjs.session-token.0"),
+  );
+}
+
 /** Returns the session or redirects to /login. Use in pages/layouts/actions. */
 export async function requireUser(): Promise<Session> {
   const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  if (!session?.user?.id) {
+    redirect((await hasSessionCookie()) ? "/logout" : "/login");
+  }
   return session;
 }
 
@@ -278,6 +351,23 @@ export async function requireRole(...roles: Role[]): Promise<Session> {
   const session = await requireUser();
   if (!roles.includes(session.user.role)) redirect("/dashboard");
   return session;
+}
+
+/**
+ * Returns the userId of the CURRENT admin only if they are STILL an admin and
+ * not banned per the LIVE database — closing the ≤60s JWT staleness window on
+ * the highest-stakes surface (admin + money mutations). Use in privileged
+ * server actions instead of trusting `session.user.role` from the token.
+ */
+export async function getActiveAdminId(): Promise<string | null> {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+  const fresh = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true, bannedAt: true },
+  });
+  if (!fresh || fresh.role !== "ADMIN" || fresh.bannedAt) return null;
+  return session.user.id;
 }
 
 /** Thrown by assertOwner — map to a 403/error UI, never expose internals. */

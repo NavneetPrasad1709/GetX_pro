@@ -11,11 +11,18 @@ export const emailField = z
   .email("Enter a valid email address")
   .max(254, "Email is too long");
 
-// bcrypt only uses the first 72 bytes — cap input so no silent truncation.
+// bcrypt truncates at 72 UTF-8 BYTES (not characters). A plain .max(72) caps
+// UTF-16 code units, so a multibyte passphrase (accents/CJK/emoji) could pass
+// while exceeding 72 bytes and be silently truncated — weakening it without the
+// user knowing. Reject (don't truncate) anything over 72 bytes. TextEncoder is
+// isomorphic (client + server in Next 16) so the same gate runs in both layers.
+const within72Bytes = (v: string) => new TextEncoder().encode(v).length <= 72;
+
 export const passwordField = z
   .string()
   .min(8, "Password must be at least 8 characters")
   .max(72, "Password must be at most 72 characters")
+  .refine(within72Bytes, "Password must be at most 72 bytes")
   .regex(/[A-Za-z]/, "Password must contain at least one letter")
   .regex(/[0-9]/, "Password must contain at least one number");
 
@@ -34,7 +41,11 @@ export const registerSchema = z.object({
 
 export const loginSchema = z.object({
   email: emailField,
-  password: z.string().min(1, "Enter your password").max(72, "Password is too long"),
+  password: z
+    .string()
+    .min(1, "Enter your password")
+    .max(72, "Password is too long")
+    .refine(within72Bytes, "Password is too long"),
   turnstileToken: z.string().optional(),
 });
 
@@ -51,6 +62,14 @@ export const resetPasswordSchema = z.object({
 
 export const resendVerificationSchema = z.object({
   email: emailField,
+  turnstileToken: z.string().optional(),
+});
+
+// Email verification is consumed via a POST action (not a GET render) so link
+// pre-fetchers / email scanners can't burn the single-use token.
+export const verifyEmailSchema = z.object({
+  email: emailField,
+  token: z.string().min(1, "Missing verification token"),
 });
 
 export const becomeSellerSchema = z.object({
@@ -78,11 +97,12 @@ export const becomeSellerSchema = z.object({
 // Used inside NextAuth's Credentials authorize() — never trust raw credentials.
 export const credentialsSchema = z.object({
   email: emailField,
-  password: z.string().min(1).max(72),
+  password: z.string().min(1).max(72).refine(within72Bytes),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;

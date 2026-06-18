@@ -3,7 +3,7 @@
 import { z } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { getActiveAdminId } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { db } from "@/lib/db";
 
@@ -18,10 +18,9 @@ export type FraudActionResult = { ok: true } | { ok: false; error: string };
 const GENERIC = "Something went wrong. Please try again.";
 
 async function requireAdmin(): Promise<{ id: string } | null> {
-  const session = await auth();
-  return session?.user?.id && session.user.role === "ADMIN"
-    ? { id: session.user.id }
-    : null;
+  // Fresh DB re-check (live role + ban) — never trust the possibly-stale token.
+  const id = await getActiveAdminId();
+  return id ? { id } : null;
 }
 
 function limited(adminId: string): boolean {

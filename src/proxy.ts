@@ -73,8 +73,13 @@ export async function proxy(req: NextRequest) {
     if (isLoggedIn && pathname.startsWith("/admin") && token.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
     }
-    // Logged-in users don't need login/register pages.
-    if (isLoggedIn && isGuestOnly(pathname)) {
+    // Logged-in users don't need login/register pages — EXCEPT right after a
+    // sign-out: the /logout route clears the cookie then redirects to
+    // /login?signedout=1, and if a stale cookie hasn't propagated its deletion
+    // within the same nav we must NOT bounce them back to /dashboard (that's the
+    // revocation redirect-loop). The `signedout` marker lets them reach /login.
+    const justSignedOut = req.nextUrl.searchParams.get("signedout") === "1";
+    if (isLoggedIn && isGuestOnly(pathname) && !justSignedOut) {
       return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
     }
   }

@@ -18,11 +18,15 @@ import {
 import { TurnstileField } from "@/components/auth/turnstile-field";
 import { DevLinkNotice } from "@/components/auth/dev-link-notice";
 
+const HAS_TURNSTILE = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+
 export function RegisterForm({ referralCode }: { referralCode?: string }) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [devLink, setDevLink] = useState<string | null>(null);
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [emailQueued, setEmailQueued] = useState(true);
   const [agreed, setAgreed] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   const {
@@ -46,10 +50,12 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
       setServerError(res.error ?? "Something went wrong. Please try again.");
       // Turnstile tokens are single-use — get a fresh one for the retry.
       turnstileRef.current?.reset();
+      setTurnstileToken(null);
       setValue("turnstileToken", undefined);
       return;
     }
     setSubmittedEmail(values.email);
+    setEmailQueued(res.emailQueued !== false);
     setDevLink(res.devLink ?? null);
   }
 
@@ -60,11 +66,25 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
         <span className="mx-auto grid size-14 animate-in place-items-center rounded-2xl bg-primary/10 text-primary duration-500 zoom-in-50 fade-in">
           <MailCheckIcon className="size-7" aria-hidden="true" />
         </span>
-        <h2 className="font-heading text-lg font-semibold">Check your email</h2>
+        <h2 className="font-heading text-lg font-semibold">
+          {emailQueued ? "Check your email" : "Account created"}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          We sent a verification link to{" "}
-          <span className="font-medium text-foreground">{submittedEmail}</span>.
-          You can log in right away — verifying unlocks selling.
+          {emailQueued ? (
+            <>
+              We sent a verification link to{" "}
+              <span className="font-medium text-foreground">{submittedEmail}</span>
+              . You can log in right away — verifying unlocks selling.
+            </>
+          ) : (
+            <>
+              Your account for{" "}
+              <span className="font-medium text-foreground">{submittedEmail}</span>{" "}
+              is ready — you can log in now. We couldn’t send the verification
+              email just yet; use “Resend verification” from your dashboard in a
+              few minutes to unlock selling.
+            </>
+          )}
         </p>
         {devLink && (
           <DevLinkNotice url={devLink} label="Your verification link:" />
@@ -90,11 +110,12 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
           placeholder="Ash Ketchum"
           className="h-11"
           aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? "register-name-error" : undefined}
           disabled={isSubmitting}
           {...register("name")}
         />
         {errors.name && (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="register-name-error" role="alert" className="text-sm text-destructive">
             {errors.name.message}
           </p>
         )}
@@ -110,11 +131,12 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
           placeholder="you@example.com"
           className="h-11"
           aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "register-email-error" : undefined}
           disabled={isSubmitting}
           {...register("email")}
         />
         {errors.email && (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="register-email-error" role="alert" className="text-sm text-destructive">
             {errors.email.message}
           </p>
         )}
@@ -127,11 +149,12 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
           autoComplete="new-password"
           placeholder="At least 8 characters, 1 letter + 1 number"
           aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? "register-password-error" : undefined}
           disabled={isSubmitting}
           {...register("password")}
         />
         {errors.password ? (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="register-password-error" role="alert" className="text-sm text-destructive">
             {errors.password.message}
           </p>
         ) : (
@@ -162,7 +185,10 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
 
       <TurnstileField
         ref={turnstileRef}
-        onToken={(token) => setValue("turnstileToken", token ?? undefined)}
+        onToken={(token) => {
+          setTurnstileToken(token);
+          setValue("turnstileToken", token ?? undefined);
+        }}
       />
 
       {serverError && (
@@ -176,7 +202,7 @@ export function RegisterForm({ referralCode }: { referralCode?: string }) {
 
       <Button
         type="submit"
-        disabled={isSubmitting || !agreed}
+        disabled={isSubmitting || !agreed || (HAS_TURNSTILE && !turnstileToken)}
         className="h-11 w-full"
       >
         {isSubmitting ? (

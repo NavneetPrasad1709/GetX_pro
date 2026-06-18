@@ -1,4 +1,5 @@
 import { signIn } from "@/lib/auth";
+import { authLog } from "@/lib/auth-log";
 import { safeCallbackUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -68,6 +69,7 @@ export function OAuthButtons({ callbackUrl }: { callbackUrl?: string }) {
           <form
             action={async () => {
               "use server";
+              authLog("oauth.started", { provider: "google" });
               await signIn("google", { redirectTo });
             }}
           >
@@ -80,6 +82,7 @@ export function OAuthButtons({ callbackUrl }: { callbackUrl?: string }) {
           <form
             action={async () => {
               "use server";
+              authLog("oauth.started", { provider: "discord" });
               await signIn("discord", { redirectTo });
             }}
           >

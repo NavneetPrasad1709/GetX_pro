@@ -64,11 +64,12 @@ export function ResetPasswordForm({
           autoComplete="new-password"
           placeholder="At least 8 characters, 1 letter + 1 number"
           aria-invalid={!!errors.password}
+          aria-describedby={errors.password ? "reset-password-error" : undefined}
           disabled={isSubmitting}
           {...register("password")}
         />
         {errors.password ? (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="reset-password-error" role="alert" className="text-sm text-destructive">
             {errors.password.message}
           </p>
         ) : (
