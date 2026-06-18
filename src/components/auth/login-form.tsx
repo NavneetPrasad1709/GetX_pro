@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
@@ -20,12 +19,14 @@ const REMEMBER_KEY = "getx-remember-email";
 const HAS_TURNSTILE = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
-  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [remember, setRemember] = useState(true);
   // Gate submit on a ready Turnstile token so a click during the widget's
   // ~0.5–2s auto-solve doesn't send an empty token and fail correct credentials.
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // …but NEVER trap the user: if the widget is slow/blocked (e.g. Safari + iCloud
+  // Private Relay), allow submit after a grace period and let the server decide.
+  const [turnstileTimedOut, setTurnstileTimedOut] = useState(false);
   // Terminal "redirecting" state: keep the form locked from the moment login
   // succeeds until /dashboard paints, so a double-click can't re-fire login.
   const [redirecting, setRedirecting] = useState(false);
@@ -53,6 +54,16 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     }
   }, [setValue]);
 
+  // Safety net: if Turnstile hasn't produced a token within the grace window
+  // (slow network, or the challenge iframe is blocked on Safari/Private Relay),
+  // stop disabling the button so the user is never locked out — the server still
+  // verifies the token fail-closed, so security is unchanged.
+  useEffect(() => {
+    if (!HAS_TURNSTILE || turnstileToken) return;
+    const t = setTimeout(() => setTurnstileTimedOut(true), 6000);
+    return () => clearTimeout(t);
+  }, [turnstileToken]);
+
   async function onSubmit(values: LoginInput) {
     setServerError(null);
     const res = await loginAction(values);
@@ -72,14 +83,20 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     }
     // Lock the form for the rest of the navigation (component unmounts on nav).
     setRedirecting(true);
-    // Refresh FIRST (invalidate the logged-out RSC cache + header), THEN navigate
-    // once. Pushing then refreshing rendered the heavy dashboard twice (~2x slower).
-    router.refresh();
-    router.replace(safeCallbackUrl(callbackUrl));
+    // FULL top-level navigation (not a client RSC transition). Two reasons:
+    //  1. Reliability: the session cookie was just set on the loginAction
+    //     response; a hard navigation guarantees the browser has committed it
+    //     before loading the destination. The old router.refresh()+replace()
+    //     fired RSC fetches that, on Safari/WebKit, raced the cookie commit and
+    //     landed logged-OUT → bounced back to /login ("login doesn't work on Mac").
+    //  2. Speed: it renders the heavy dashboard exactly ONCE — refresh()+replace()
+    //     rendered it twice (the refresh of /login proxy-redirects to /dashboard).
+    window.location.replace(safeCallbackUrl(callbackUrl));
   }
 
   const busy = isSubmitting || redirecting;
-  const submitDisabled = busy || (HAS_TURNSTILE && !turnstileToken);
+  const submitDisabled =
+    busy || (HAS_TURNSTILE && !turnstileToken && !turnstileTimedOut);
 
   return (
     <form
