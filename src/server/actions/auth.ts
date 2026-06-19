@@ -26,6 +26,7 @@ import {
 } from "@/server/services/users";
 import { attributeReferralAtSignup } from "@/server/services/referral";
 import { awardSignupBonus } from "@/server/services/loyalty";
+import { safeCallbackUrl } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 
 /**
@@ -104,7 +105,10 @@ export async function registerAction(raw: unknown): Promise<ActionResult> {
 // Login (Credentials)
 // ---------------------------------------------------------------------------
 
-export async function loginAction(raw: unknown): Promise<ActionResult> {
+export async function loginAction(
+  raw: unknown,
+  callbackUrl?: string,
+): Promise<ActionResult> {
   const parsed = loginSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
 
@@ -137,11 +141,19 @@ export async function loginAction(raw: unknown): Promise<ActionResult> {
   if (!bot.ok) return { ok: false, error: bot.error };
 
   try {
+    // SERVER-SIDE redirect on success. Auth.js sets the session cookie AND
+    // issues the redirect in ONE response, so the browser lands on the
+    // destination with the cookie already applied — the same flow that works
+    // reliably end-to-end (verified via the credentials callback). The previous
+    // `redirect:false` + client navigation could land logged-OUT on Safari/WebKit
+    // (cookie from the action response not yet committed when the client routed),
+    // bouncing the user back to /login. callbackUrl is sanitized server-side.
     await signIn("credentials", {
       email,
       password: parsed.data.password,
-      redirect: false, // the client routes after success
+      redirectTo: safeCallbackUrl(callbackUrl),
     });
+    // Unreachable on success (signIn throws a redirect) — keeps the type honest.
     return { ok: true };
   } catch (err) {
     if (err instanceof AuthError) {
@@ -151,7 +163,11 @@ export async function loginAction(raw: unknown): Promise<ActionResult> {
       console.error("[loginAction] AuthError:", err.type, err);
       return { ok: false, error: "Login failed. Please try again." };
     }
-    return toSafeError(err, "loginAction");
+    // CRITICAL: re-throw everything else — most importantly the NEXT_REDIRECT
+    // that signIn throws on success. Swallowing it (e.g. via toSafeError) would
+    // cancel the redirect and leave the user stuck on /login. This is the bug
+    // class we are fixing, so never funnel redirects into a generic handler.
+    throw err;
   }
 }
 

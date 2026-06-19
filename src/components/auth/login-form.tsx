@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Loader2Icon } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validators/auth";
-import { safeCallbackUrl } from "@/lib/utils";
 import { loginAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,15 +65,8 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
 
   async function onSubmit(values: LoginInput) {
     setServerError(null);
-    const res = await loginAction(values);
-    if (!res.ok) {
-      setServerError(res.error ?? "Login failed. Please try again.");
-      // Turnstile tokens are single-use — re-arm for the retry.
-      turnstileRef.current?.reset();
-      setTurnstileToken(null);
-      setValue("turnstileToken", undefined);
-      return;
-    }
+    // Persist remember-email BEFORE the action: a successful login redirects
+    // server-side, so any code after the await may never run.
     try {
       if (remember) localStorage.setItem(REMEMBER_KEY, values.email);
       else localStorage.removeItem(REMEMBER_KEY);
@@ -83,15 +75,16 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     }
     // Lock the form for the rest of the navigation (component unmounts on nav).
     setRedirecting(true);
-    // FULL top-level navigation (not a client RSC transition). Two reasons:
-    //  1. Reliability: the session cookie was just set on the loginAction
-    //     response; a hard navigation guarantees the browser has committed it
-    //     before loading the destination. The old router.refresh()+replace()
-    //     fired RSC fetches that, on Safari/WebKit, raced the cookie commit and
-    //     landed logged-OUT → bounced back to /login ("login doesn't work on Mac").
-    //  2. Speed: it renders the heavy dashboard exactly ONCE — refresh()+replace()
-    //     rendered it twice (the refresh of /login proxy-redirects to /dashboard).
-    window.location.replace(safeCallbackUrl(callbackUrl));
+    // The action performs a SERVER-SIDE redirect on success (cookie + redirect in
+    // one response → reliable on Safari/WebKit; no client cookie-commit race).
+    // So we only get here when login FAILED.
+    const res = await loginAction(values, callbackUrl);
+    setRedirecting(false);
+    setServerError(res?.error ?? "Login failed. Please try again.");
+    // Turnstile tokens are single-use — re-arm for the retry.
+    turnstileRef.current?.reset();
+    setTurnstileToken(null);
+    setValue("turnstileToken", undefined);
   }
 
   const busy = isSubmitting || redirecting;
